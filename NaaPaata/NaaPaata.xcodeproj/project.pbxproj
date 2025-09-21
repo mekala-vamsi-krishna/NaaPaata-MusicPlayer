@@ -8,33 +8,39 @@
 
 /* Begin PBXBuildFile section */
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
+		AC6F41792E7FD05F00B5BE35 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */; };
+		AC6F417A2E7FD05F00B5BE35 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */; };
+		AC6F417C2E7FD05F00B5BE35 /* AlbumsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */; };
+		AC6F417D2E7FD05F00B5BE35 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */; };
+		AC6F417E2E7FD05F00B5BE35 /* DocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */; };
+		AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */; };
+		AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41732E7FD05F00B5BE35 /* MP3FileCell.swift */; };
+		AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */; };
+		AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41752E7FD05F00B5BE35 /* NaaPaataApp.swift */; };
+		AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */; };
+		AC6F41842E7FD05F00B5BE35 /* SongsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41772E7FD05F00B5BE35 /* SongsView.swift */; };
+		AC6F41872E7FD26300B5BE35 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */; };
+		AC6F41892E7FD29A00B5BE35 /* MusicPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumsView.swift; sourceTree = "<group>"; };
+		AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPicker.swift; sourceTree = "<group>"; };
+		AC6F41712E7FD05F00B5BE35 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AC6F41732E7FD05F00B5BE35 /* MP3FileCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MP3FileCell.swift; sourceTree = "<group>"; };
+		AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPlayerView.swift; sourceTree = "<group>"; };
+		AC6F41752E7FD05F00B5BE35 /* NaaPaataApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaaPaataApp.swift; sourceTree = "<group>"; };
+		AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListsView.swift; sourceTree = "<group>"; };
+		AC6F41772E7FD05F00B5BE35 /* SongsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongsView.swift; sourceTree = "<group>"; };
+		AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
+		AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPlayerManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AC3A0F6A2E761A1F000CFC19 /* Exceptions for "NaaPaata" folder in "NaaPaata" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = AC3A0F2E2E7538B9000CFC19 /* NaaPaata */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AC3A0F312E7538B9000CFC19 /* NaaPaata */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				AC3A0F6A2E761A1F000CFC19 /* Exceptions for "NaaPaata" folder in "NaaPaata" target */,
-			);
-			path = NaaPaata;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AC3A0F2C2E7538B9000CFC19 /* Frameworks */ = {
@@ -51,7 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */,
-				AC3A0F312E7538B9000CFC19 /* NaaPaata */,
+				AC6F41782E7FD05F00B5BE35 /* NaaPaata */,
 				AC3A0F302E7538B9000CFC19 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +68,43 @@
 				AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AC6F416C2E7FD05F00B5BE35 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		AC6F41782E7FD05F00B5BE35 /* NaaPaata */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41752E7FD05F00B5BE35 /* NaaPaataApp.swift */,
+				AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */,
+				AC6F41852E7FD13D00B5BE35 /* Songs */,
+				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
+				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
+				AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */,
+				AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */,
+				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
+				AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */,
+				AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */,
+				AC6F41712E7FD05F00B5BE35 /* Info.plist */,
+				AC6F416C2E7FD05F00B5BE35 /* Preview Content */,
+			);
+			path = NaaPaata;
+			sourceTree = "<group>";
+		};
+		AC6F41852E7FD13D00B5BE35 /* Songs */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41772E7FD05F00B5BE35 /* SongsView.swift */,
+				AC6F41732E7FD05F00B5BE35 /* MP3FileCell.swift */,
+				AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */,
+			);
+			path = Songs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -78,9 +121,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				AC3A0F312E7538B9000CFC19 /* NaaPaata */,
 			);
 			name = NaaPaata;
 			packageProductDependencies = (
@@ -128,6 +168,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC6F41792E7FD05F00B5BE35 /* Preview Assets.xcassets in Resources */,
+				AC6F417A2E7FD05F00B5BE35 /* Assets.xcassets in Resources */,
 				AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -139,6 +181,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC6F417C2E7FD05F00B5BE35 /* AlbumsView.swift in Sources */,
+				AC6F417D2E7FD05F00B5BE35 /* AppColors.swift in Sources */,
+				AC6F417E2E7FD05F00B5BE35 /* DocumentPicker.swift in Sources */,
+				AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */,
+				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
+				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
+				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
+				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
+				AC6F41872E7FD26300B5BE35 /* MiniPlayerView.swift in Sources */,
+				AC6F41892E7FD29A00B5BE35 /* MusicPlayerManager.swift in Sources */,
+				AC6F41842E7FD05F00B5BE35 /* SongsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

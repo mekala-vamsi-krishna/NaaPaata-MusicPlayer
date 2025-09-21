@@ -14,7 +14,7 @@ struct MP3FileCell: View {
     @State private var artistName: String = "Unknown Artist"
     
     var body: some View {
-        NavigationLink(destination: MusicPlayerView(fileURL: fileURL)) {
+        NavigationLink(destination: MusicPlayerView()) {
             HStack(spacing: 15) {
                 Image(uiImage: artworkImage ?? UIImage(systemName: "music.note")!)
                     .resizable()
