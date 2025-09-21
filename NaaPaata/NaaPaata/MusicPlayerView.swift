@@ -9,23 +9,23 @@ import SwiftUI
 import AVFoundation
 
 struct MusicPlayerView: View {
-    let fileURL: URL
-    @State private var player: AVAudioPlayer?
-    @State private var isPlaying = false
-    @State private var currentTime: TimeInterval = 0
-    @State private var duration: TimeInterval = 0
-    @State private var artworkImage: UIImage? = nil
-    @State private var songTitle: String = "Unknown Title"
-    @State private var isFavorite = false
-    
-    private let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
+    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(spacing: 40) {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.down")
+                        .font(.title2)
+                        .padding()
+                }
+                Spacer()
+            }
+            
             Spacer()
             
-            // Album Artwork Image
-            Image(uiImage: artworkImage ?? UIImage(systemName: "opticaldisc")!)
+            Image(uiImage: musicPlayerManager.artworkImage ?? UIImage(systemName: "opticaldisc")!)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250, height: 250)
@@ -33,91 +33,68 @@ struct MusicPlayerView: View {
                 .shadow(radius: 10)
                 .padding()
             
-            // 🎵 Song Title and Action Buttons
-            HStack {
-                Text(songTitle)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                
-                Spacer()
-                
-                Button(action: {
-                    isFavorite.toggle()
-                }) {
-                    Image(systemName: isFavorite ? "heart.fill" : "heart")
-                        .foregroundColor(AppColors.primary)
-                        .frame(width: 24, height: 24)
-                        .padding(16)
-                        .background(AppColors.cardBackground)
-                        .clipShape(Circle())
-                }
-                
-                Button(action: {
-                    print("More options tapped")
-                }) {
-                    Image(systemName: "ellipsis")
-                        .rotationEffect(.degrees(90))
-                        .foregroundColor(AppColors.primary)
-                        .frame(width: 24, height: 24)
-                        .padding(16)
-                        .background(AppColors.cardBackground)
-                        .clipShape(Circle())
-                }
-            }
-            .padding(.horizontal)
+            Text(musicPlayerManager.currentTitle ?? "Unknown Title")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .truncationMode(.tail)
             
-            // Progress View with Time Labels
+            // Custom Progress Bar
             VStack {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
+                        // Background bar
                         Capsule()
                             .fill(AppColors.cardBackground)
-                            .frame(height: 8)
-                        
+                            .frame(height: 6)
+
+                        // Filled progress
                         Capsule()
                             .fill(AppColors.primary)
-                            .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
-                        
+                            .frame(width: progressWidth(totalWidth: geometry.size.width),
+                                   height: 6)
+
+                        // Draggable knob
                         Circle()
                             .fill(AppColors.primary)
-                            .frame(width: 16, height: 16)
-                            .offset(x: progressWidth(totalWidth: geometry.size.width) - 8)
+                            .frame(width: 14, height: 14)
+                            .offset(x: progressWidth(totalWidth: geometry.size.width) - 7)
                     }
                 }
                 .frame(height: 20)
                 .padding(.horizontal)
-                
+
+                // Time labels
                 HStack {
-                    Text(formatTime(currentTime))
+                    Text(formatTime(musicPlayerManager.currentTime))
                         .font(.caption)
                         .foregroundColor(AppColors.textSecondary)
-                    
+
                     Spacer()
-                    
-                    Text(formatTime(duration))
+
+                    Text(formatTime(musicPlayerManager.duration))
                         .font(.caption)
                         .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.horizontal, 20)
             }
             
-            // Playback Controls
             HStack(spacing: 60) {
-                Button(action: previousTrack) {
+                Button(action: { /* prev */ }) {
                     Image(systemName: "backward.fill")
                         .font(.largeTitle)
                         .foregroundColor(AppColors.primary)
                 }
                 
-                Button(action: playPauseToggle) {
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                Button(action: {
+                    musicPlayerManager.togglePlayPause()
+                }) {
+                    Image(systemName: musicPlayerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 60))
                         .foregroundColor(AppColors.primary)
                 }
                 
-                Button(action: nextTrack) {
+                Button(action: { /* next */ }) {
                     Image(systemName: "forward.fill")
                         .font(.largeTitle)
                         .foregroundColor(AppColors.primary)
@@ -126,66 +103,12 @@ struct MusicPlayerView: View {
             
             Spacer()
         }
-        .onAppear {
-            setupAudioPlayer()
-            extractMetadata()
-        }
-        .onReceive(timer) { _ in
-            if let player = player, isPlaying {
-                currentTime = player.currentTime
-                duration = player.duration
-            }
-        }
     }
     
     private func progressWidth(totalWidth: CGFloat) -> CGFloat {
-        guard duration > 0 else { return 0 }
-        let progress = CGFloat(currentTime / duration)
+        guard musicPlayerManager.duration > 0 else { return 0 }
+        let progress = CGFloat(musicPlayerManager.currentTime / musicPlayerManager.duration)
         return totalWidth * progress
-    }
-    
-    private func setupAudioPlayer() {
-        do {
-            player = try AVAudioPlayer(contentsOf: fileURL)
-            player?.prepareToPlay()
-            duration = player?.duration ?? 0
-        } catch {
-            print("Failed to load audio: \(error.localizedDescription)")
-        }
-    }
-    
-    private func playPauseToggle() {
-        guard let player = player else { return }
-        if isPlaying {
-            player.pause()
-        } else {
-            player.play()
-        }
-        isPlaying.toggle()
-    }
-    
-    private func previousTrack() {
-        print("Previous Track Action")
-    }
-    
-    private func nextTrack() {
-        print("Next Track Action")
-    }
-    
-    private func extractMetadata() {
-        let asset = AVAsset(url: fileURL)
-        for meta in asset.commonMetadata {
-            if meta.commonKey?.rawValue == "artwork",
-               let data = meta.value as? Data,
-               let img = UIImage(data: data) {
-                artworkImage = img
-            }
-            
-            if meta.commonKey?.rawValue == "title",
-               let title = meta.stringValue {
-                songTitle = title
-            }
-        }
     }
     
     private func formatTime(_ time: TimeInterval) -> String {
@@ -193,10 +116,9 @@ struct MusicPlayerView: View {
         let secs = Int(time) % 60
         return String(format: "%02d:%02d", mins, secs)
     }
+
 }
 
-
-
 #Preview {
-    MusicPlayerView(fileURL: URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)
+    MusicPlayerView()
 }
