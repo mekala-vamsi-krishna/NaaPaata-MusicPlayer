@@ -16,7 +16,7 @@ struct SongsView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            NavigationView {
+            NavigationStack {
                 VStack {
                     if mp3Files.isEmpty {
                         Spacer()
@@ -48,12 +48,16 @@ struct SongsView: View {
                 }
                 .navigationTitle("My Music")
                 .navigationBarItems(trailing: smallUploadIconButton)
+                .onAppear {
+                    loadSongsFromDocuments()
+                }
                 .sheet(isPresented: $showDocumentPicker) {
                     DocumentPicker { urls in
                         for url in urls {
                             saveFileToAppDirectory(from: url)
                         }
-                        mp3Files.append(contentsOf: urls)
+//                        mp3Files.append(contentsOf: urls)
+                        loadSongsFromDocuments()
                         showDocumentPicker = false
                     }
                 }
@@ -94,6 +98,19 @@ struct SongsView: View {
             print("Saved: \(destURL.lastPathComponent)")
         } catch {
             print("Error copying file: \(error)")
+        }
+    }
+    
+    private func loadSongsFromDocuments() {
+        let fileManager = FileManager.default
+        guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        
+        do {
+            let files = try fileManager.contentsOfDirectory(at: docsURL, includingPropertiesForKeys: nil)
+                .filter { $0.pathExtension.lowercased() == "mp3" }
+            self.mp3Files = files
+        } catch {
+            print("Error reading mp3 files: \(error)")
         }
     }
 }

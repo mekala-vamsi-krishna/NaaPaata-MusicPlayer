@@ -21,28 +21,52 @@ struct AlbumsView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 24) {
                     ForEach(albums) { album in
-                        VStack {
-                            Image(uiImage: album.artworkImage ?? UIImage(systemName: "opticaldisc")!)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 150, height: 150)
-                                .cornerRadius(12)
-                                .shadow(radius: 5)
-                            
-                            Text(album.name)
-                                .font(.headline)
-                                .foregroundColor(AppColors.textPrimary)
-                                .lineLimit(1)
-                                .padding(.top, 8)
+                        NavigationLink {
+                            AlbumDetailsView(
+                                title: album.name,
+                                artwork: album.artworkImage,
+                                songs: album.files.map { $0.lastPathComponent }
+                            )
+                        } label: {
+                            VStack(spacing: 10) {
+                                ZStack {
+                                    if let artwork = album.artworkImage {
+                                        Image(uiImage: artwork)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 160, height: 160)
+                                            .cornerRadius(16)
+                                            .shadow(radius: 10)
+                                    } else {
+                                        Image(systemName: "opticaldisc")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 120, height: 120)
+                                            .padding()
+                                            .foregroundColor(.gray.opacity(0.6))
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .fill(Color(.systemGray6))
+                                            )
+                                    }
+                                }
+                                
+                                Text(album.name)
+                                    .font(.headline)
+                                    .foregroundColor(AppColors.textPrimary)
+                                    .lineLimit(1)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 6)
+                            }
                         }
                     }
                 }
                 .padding()
             }
             .navigationTitle("Albums")
-            .background(AppColors.background.edgesIgnoringSafeArea(.all))
+            .background(AppColors.background.ignoresSafeArea())
             .onAppear {
                 loadAlbumsFromMusicFiles()
             }
@@ -50,13 +74,12 @@ struct AlbumsView: View {
     }
     
     private func loadAlbumsFromMusicFiles() {
-        // Load all mp3 files from Documents directory
         let fileManager = FileManager.default
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         
         do {
             let files = try fileManager.contentsOfDirectory(at: docsURL, includingPropertiesForKeys: nil)
-                .filter { $0.pathExtension == "mp3" }
+                .filter { $0.pathExtension.lowercased() == "mp3" }
             
             var albumMap: [String: Album] = [:]
             
@@ -85,13 +108,14 @@ struct AlbumsView: View {
                 }
             }
             
-            self.albums = Array(albumMap.values)
+            self.albums = Array(albumMap.values).sorted { $0.name < $1.name }
             
         } catch {
             print("Error reading files: \(error)")
         }
     }
 }
+
 
 #Preview {
     AlbumsView()
