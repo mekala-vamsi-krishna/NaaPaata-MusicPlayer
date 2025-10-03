@@ -55,6 +55,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AC279E7F2E90322F00E33715 /* PlayLists */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */,
+			);
+			path = PlayLists;
+			sourceTree = "<group>";
+		};
+		AC279E802E90325000E33715 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41752E7FD05F00B5BE35 /* NaaPaataApp.swift */,
+				AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AC279E812E9032A400E33715 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		AC279E822E9032B300E33715 /* Color+Ext */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */,
+			);
+			path = "Color+Ext";
+			sourceTree = "<group>";
+		};
 		AC3A0F262E7538B9000CFC19 = {
 			isa = PBXGroup;
 			children = (
@@ -83,17 +116,12 @@
 		AC6F41782E7FD05F00B5BE35 /* NaaPaata */ = {
 			isa = PBXGroup;
 			children = (
-				AC6F41752E7FD05F00B5BE35 /* NaaPaataApp.swift */,
-				AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */,
+				AC279E802E90325000E33715 /* App */,
 				AC6F41852E7FD13D00B5BE35 /* Songs */,
 				AC6F418C2E80421C00B5BE35 /* Albums */,
-				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
-				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
-				AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */,
-				AC6F418A2E7FE03700B5BE35 /* AlbumDetailsView.swift */,
-				AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */,
-				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
-				AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */,
+				AC279E7F2E90322F00E33715 /* PlayLists */,
+				AC279E812E9032A400E33715 /* Shared */,
+				AC279E822E9032B300E33715 /* Color+Ext */,
 				AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */,
 				AC6F41712E7FD05F00B5BE35 /* Info.plist */,
 				AC6F416C2E7FD05F00B5BE35 /* Preview Content */,
@@ -107,6 +135,8 @@
 				AC6F41772E7FD05F00B5BE35 /* SongsView.swift */,
 				AC6F41732E7FD05F00B5BE35 /* MP3FileCell.swift */,
 				AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */,
+				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
+				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
 			);
 			path = Songs;
 			sourceTree = "<group>";
@@ -114,6 +144,8 @@
 		AC6F418C2E80421C00B5BE35 /* Albums */ = {
 			isa = PBXGroup;
 			children = (
+				AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */,
+				AC6F418A2E7FE03700B5BE35 /* AlbumDetailsView.swift */,
 			);
 			path = Albums;
 			sourceTree = "<group>";
@@ -341,11 +373,13 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NaaPaata/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -371,11 +405,13 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NaaPaata/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

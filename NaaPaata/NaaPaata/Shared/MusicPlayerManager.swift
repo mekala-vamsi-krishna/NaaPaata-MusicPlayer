@@ -12,6 +12,7 @@ class MusicPlayerManager: ObservableObject {
     @Published var currentTrack: URL?
     @Published var artworkImage: UIImage?
     @Published var currentTitle: String?
+    @Published var artistName: String?
     @Published var isPlaying: Bool = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
@@ -50,6 +51,7 @@ class MusicPlayerManager: ObservableObject {
         currentTrack = nil
         artworkImage = nil
         currentTitle = nil
+        artistName = nil
         stopTimer()
     }
     
@@ -69,6 +71,7 @@ class MusicPlayerManager: ObservableObject {
     }
     
     private func extractMetadata(from url: URL) {
+        artistName = nil
         let asset = AVAsset(url: url)
         for meta in asset.commonMetadata {
             if meta.commonKey?.rawValue == "artwork",
@@ -78,6 +81,9 @@ class MusicPlayerManager: ObservableObject {
             }
             if meta.commonKey?.rawValue == "title" {
                 currentTitle = meta.stringValue
+            }
+            if meta.commonKey?.rawValue == "artist" {
+                artistName = meta.stringValue
             }
         }
         if currentTitle == nil {
