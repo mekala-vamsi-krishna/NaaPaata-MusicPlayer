@@ -8,92 +8,271 @@
 import SwiftUI
 
 struct AlbumDetailsView: View {
+    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+
     var title: String
     var artwork: UIImage?
-    var songs: [String]
+    var songs: [URL]
+    
+    @State private var scrollOffset: CGFloat = 0
+    @State private var selectedSong: URL?
+    @State private var showFullPlayer = false
 
+    @Namespace private var animation
+    
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                ZStack(alignment: .bottomLeading) {
-                    // Big Artwork (Parallax style)
-                    GeometryReader { geometry in
-                        (artwork.map { Image(uiImage: $0) } ?? Image("Magadheera"))
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width,
-                                   height: max(400, 400 - geometry.frame(in: .global).minY))
-                            .clipped()
-                            .overlay(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.8)]),
-                                    startPoint: .center,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .offset(y: geometry.frame(in: .global).minY > 0 ? -geometry.frame(in: .global).minY : 0)
-                            .ignoresSafeArea(edges: .top) // This makes big image go into safe area
-                    }
-                    .frame(height: 400)
-
-                    // Small image overlayed on big one
-                    HStack(spacing: 15) {
-                        (artwork.map { Image(uiImage: $0) } ?? Image("Magadheera"))
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 150, height: 150)
-                            .cornerRadius(12)
-                            .shadow(radius: 8)
-                            .offset(y: 40) // ✅ moves it down into content, half in/half out of big img
-
-                        VStack(alignment: .leading) {
-                            Text(title)
-                                .font(.title).fontWeight(.bold)
-                                .lineLimit(2)
-
-                            Text("Album by Unknown Artist")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.bottom, 60) // add bottom padding so songs list doesn’t overlap
-
-                // Song list
+        ZStack {
+            LinearGradient(
+                colors: [Color.purple.opacity(0.6), Color.pink.opacity(0.4), Color.orange.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    ForEach(songs, id: \.self) { song in
-                        HStack {
-                            Image(systemName: "music.note")
-                                .foregroundColor(.purple)
-                            Text(song)
-                            Spacer()
+                    // Header with parallax artwork
+                    GeometryReader { geo in
+                        let offset = geo.frame(in: .global).minY
+                        let height: CGFloat = 400
+                        let width = geo.size.width
+                        
+                        ZStack(alignment: .bottom) {
+                            // Main artwork with parallax
+                            if let artwork = artwork {
+                                Image(uiImage: artwork)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: width, height: height + (offset > 0 ? offset : 0))
+                                    .clipped()
+                                    .offset(y: offset > 0 ? -offset : 0)
+                                    .blur(radius: max(0, -offset / 50))
+                            } else {
+                                Rectangle()
+                                    .fill(LinearGradient(
+                                        colors: [.purple, .pink],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ))
+                                    .frame(width: width, height: height + (offset > 0 ? offset : 0))
+                                    .offset(y: offset > 0 ? -offset : 0)
+                            }
+                            
+                            // Gradient overlay for smooth transition
+                            LinearGradient(
+                                colors: [.clear, .clear, .black.opacity(0.3), .black.opacity(0.7)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(width: width)
+                            
+                            // Floating album card
+                            VStack(spacing: 0) {
+                                Spacer()
+                                
+                                albumCard
+                                    .offset(y: 80)
+                                    .scaleEffect(max(0.8, 1 - (-offset / 1000)))
+                            }
+                            .frame(width: width)
+                        }
+                        .frame(width: width, height: height)
+                    }
+                    .frame(height: 500)
+                    
+                    // Content section
+                    VStack(spacing: 24) {
+                        // Album info
+                        VStack(spacing: 12) {
+                            Text(title)
+                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.primary)
+                                .padding(.top, 20)
+                                .padding(.horizontal, 20)
+                            
+                            HStack(spacing: 16) {
+                                Label(songs.count == 1 ? "1 Song" : "\(songs.count ) songs", systemImage: "music.note.list")
+                                Text("•")
+                                Label("52 min", systemImage: "clock")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(AppColors.textSecondary)
+                        }
+                        
+                        // Action buttons
+                        HStack(spacing: 16) {
                             Button {
-                                print("Play \(song)")
+                                // Play action
                             } label: {
-                                Image(systemName: "play.fill").foregroundColor(.purple)
+                                HStack {
+                                    Image(systemName: "play.fill")
+                                    Text("Play")
+                                        .fontWeight(.semibold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.pink, Color.purple],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .foregroundColor(.primary)
+                                .clipShape(Capsule())
+                            }
+                            
+                            Button {
+                                // Shuffle action
+                            } label: {
+                                HStack {
+                                    Image(systemName: "shuffle")
+                                    Text("Shuffle")
+                                        .fontWeight(.semibold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(.ultraThinMaterial)
+                                .foregroundColor(.primary)
+                                .clipShape(Capsule())
                             }
                         }
-                        .padding()
-                        Divider()
+                        .padding(.horizontal, 20)
+                        
+                        // Songs list with glassmorphic design
+                        VStack(spacing: 0) {
+                            ForEach(Array(songs.enumerated()), id: \.element) { index, fileURL in
+                                let songName = fileURL.deletingPathExtension().lastPathComponent
+                                
+                                SongRow(
+                                    song: songName,
+                                    index: index + 1,
+                                    isSelected: selectedSong == fileURL
+                                )
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.3)) {
+                                        selectedSong = fileURL
+                                    }
+                                    musicPlayerManager.playTrack(fileURL)
+                                    showFullPlayer = true
+                                }
+                            }
+                        }
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
                     }
                 }
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-                .padding()
+            }
+            .ignoresSafeArea(edges: .top)
+        }
+    }
+    
+    private var albumCard: some View {
+        VStack {
+            if let artwork = artwork {
+                Image(uiImage: artwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 200, height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                    .shadow(color: .black.opacity(0.4), radius: 30, x: 0, y: 20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+            } else {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(LinearGradient(
+                        colors: [.purple, .pink],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 200, height: 200)
+                    .shadow(color: .black.opacity(0.4), radius: 30, x: 0, y: 20)
             }
         }
-        .background(
-            artwork.map {
-                Image(uiImage: $0).resizable().scaledToFill()
-                    .blur(radius: 40).opacity(0.4)
-                    .ignoresSafeArea()
-            }
-        )
+    }
+}
 
+struct SongRow: View {
+    let song: String
+    let index: Int
+    let isSelected: Bool
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Track number with animated gradient
+            ZStack {
+                if isSelected {
+                    LinearGradient(
+                        colors: [.pink, .purple],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .frame(width: 32, height: 32)
+                    .clipShape(Circle())
+                    
+                    Image(systemName: "waveform")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                } else {
+                    Text("\(index)")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.medium)
+                        .foregroundColor(AppColors.textSecondary)
+                        .frame(width: 32)
+                }
+            }
+            .frame(width: 32)
+            
+            // Song title
+            VStack(alignment: .leading, spacing: 4) {
+                Text(song)
+                    .font(.system(.body, design: .rounded))
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                Text("Unknown Artist")
+                    .font(.caption)
+                    .foregroundColor(AppColors.textSecondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Duration and menu
+            HStack(spacing: 12) {
+                Text("3:24")
+                    .font(.caption)
+                    .foregroundColor(AppColors.textSecondary)
+                
+                Button {
+                    // More options
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(AppColors.textSecondary)
+                        .frame(width: 32, height: 32)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(
+            isSelected ? Color.black.opacity(0.1) : Color.clear
+        )
+        .animation(.spring(response: 0.3), value: isSelected)
     }
 }
 
 #Preview {
-    AlbumDetailsView(title: "Magadheera", songs: [""])
+    AlbumDetailsView(
+        title: "Greatest Hits",
+        artwork: nil,
+        songs: []
+    )
 }

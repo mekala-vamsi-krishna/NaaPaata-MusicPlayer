@@ -27,7 +27,7 @@ struct AlbumsView: View {
                             AlbumDetailsView(
                                 title: album.name,
                                 artwork: album.artworkImage,
-                                songs: album.files.map { $0.lastPathComponent }
+                                songs: album.files
                             )
                         } label: {
                             VStack(spacing: 10) {
@@ -55,7 +55,7 @@ struct AlbumsView: View {
                                 
                                 Text(album.name)
                                     .font(.headline)
-                                    .foregroundColor(AppColors.textPrimary)
+                                    .foregroundColor(.primary)
                                     .lineLimit(1)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 6)
@@ -66,7 +66,7 @@ struct AlbumsView: View {
                 .padding()
             }
             .navigationTitle("Albums")
-            .background(AppColors.background.ignoresSafeArea())
+//            .background(AppColors.background.ignoresSafeArea())
             .onAppear {
                 loadAlbumsFromMusicFiles()
             }
