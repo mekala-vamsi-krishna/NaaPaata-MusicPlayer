@@ -8,9 +8,10 @@
 import SwiftUI
 import AVFoundation
 
+import SwiftUI
+
 struct SongsView: View {
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
-    @State private var showDocumentPicker = false
     @State private var mp3Files: [URL] = []
     @State private var showFullPlayer = false
     
@@ -27,7 +28,7 @@ struct SongsView: View {
                             .foregroundColor(AppColors.primary).opacity(0.7)
                             .padding(.top, 50)
                         
-                        Text("Upload your local MP3 music files to enjoy playback anytime.")
+                        Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
                             .font(.headline)
                             .foregroundColor(AppColors.textPrimary)
                             .multilineTextAlignment(.center)
@@ -47,29 +48,10 @@ struct SongsView: View {
                     }
                 }
                 .navigationTitle("My Music")
-                .navigationBarItems(trailing: smallUploadIconButton)
                 .onAppear {
                     loadSongsFromDocuments()
                 }
-                .sheet(isPresented: $showDocumentPicker) {
-                    DocumentPicker { urls in
-                        for url in urls {
-                            saveFileToAppDirectory(from: url)
-                        }
-//                        mp3Files.append(contentsOf: urls)
-                        loadSongsFromDocuments()
-                        showDocumentPicker = false
-                    }
-                }
             }
-            
-            // Mini Player
-//            if let track = musicPlayerManager.currentTrack {
-//                MiniPlayerView()
-//                    .onTapGesture {
-//                        showFullPlayer = true
-//                    }
-//            }
         }
         .fullScreenCover(isPresented: $showFullPlayer) {
             MusicPlayerView()
@@ -77,43 +59,38 @@ struct SongsView: View {
         }
     }
     
-    private var smallUploadIconButton: some View {
-        Button(action: { showDocumentPicker = true }) {
-            Image(systemName: "tray.and.arrow.up.fill")
-                .font(.title2)
-                .foregroundColor(AppColors.primary)
-        }
-    }
-    
-    private func saveFileToAppDirectory(from sourceURL: URL) {
-        let fileManager = FileManager.default
-        guard let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        let destURL = documentsDir.appendingPathComponent(sourceURL.lastPathComponent)
-        
-        do {
-            if fileManager.fileExists(atPath: destURL.path) {
-                try fileManager.removeItem(at: destURL)
-            }
-            try fileManager.copyItem(at: sourceURL, to: destURL)
-            print("Saved: \(destURL.lastPathComponent)")
-        } catch {
-            print("Error copying file: \(error)")
-        }
-    }
-    
     private func loadSongsFromDocuments() {
         let fileManager = FileManager.default
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         
+        let musicFolder = docsURL.appendingPathComponent("Music", isDirectory: true)
+        
+        // Create folder if not exists
+        if !fileManager.fileExists(atPath: musicFolder.path) {
+            do {
+                try fileManager.createDirectory(at: musicFolder, withIntermediateDirectories: true, attributes: nil)
+                print("Created MyAppFiles folder at \(musicFolder.path)")
+            } catch {
+                print("Error creating folder: \(error)")
+                return
+            }
+        }
+        
         do {
-            let files = try fileManager.contentsOfDirectory(at: docsURL, includingPropertiesForKeys: nil)
+            let files = try fileManager.contentsOfDirectory(at: musicFolder,
+                                                            includingPropertiesForKeys: nil,
+                                                            options: [.skipsHiddenFiles])
                 .filter { $0.pathExtension.lowercased() == "mp3" }
+            
             self.mp3Files = files
         } catch {
             print("Error reading mp3 files: \(error)")
+            self.mp3Files = []
         }
     }
+
 }
+
 
 #Preview {
     SongsView()

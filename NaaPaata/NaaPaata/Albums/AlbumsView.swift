@@ -77,8 +77,25 @@ struct AlbumsView: View {
         let fileManager = FileManager.default
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         
+        // Use sandbox-visible folder (like VLC)
+        let musicFolder = docsURL.appendingPathComponent("Music", isDirectory: true)
+        
+        // Ensure folder exists
+        if !fileManager.fileExists(atPath: musicFolder.path) {
+            do {
+                try fileManager.createDirectory(at: musicFolder, withIntermediateDirectories: true, attributes: nil)
+                print("Created MyAppFiles folder at \(musicFolder.path)")
+            } catch {
+                print("Error creating MyAppFiles folder: \(error)")
+                return
+            }
+        }
+        
         do {
-            let files = try fileManager.contentsOfDirectory(at: docsURL, includingPropertiesForKeys: nil)
+            // Read only mp3 files inside MyAppFiles
+            let files = try fileManager.contentsOfDirectory(at: musicFolder,
+                                                            includingPropertiesForKeys: nil,
+                                                            options: [.skipsHiddenFiles])
                 .filter { $0.pathExtension.lowercased() == "mp3" }
             
             var albumMap: [String: Album] = [:]
@@ -102,18 +119,23 @@ struct AlbumsView: View {
                 }
                 
                 if albumMap[albumName] == nil {
-                    albumMap[albumName] = Album(name: albumName, artworkImage: artwork, files: [fileURL])
+                    albumMap[albumName] = Album(name: albumName,
+                                                artworkImage: artwork,
+                                                files: [fileURL])
                 } else {
                     albumMap[albumName]?.files.append(fileURL)
                 }
             }
             
+            // Sort albums alphabetically
             self.albums = Array(albumMap.values).sorted { $0.name < $1.name }
             
         } catch {
-            print("Error reading files: \(error)")
+            print("Error reading mp3 files: \(error)")
+            self.albums = []
         }
     }
+
 }
 
 
