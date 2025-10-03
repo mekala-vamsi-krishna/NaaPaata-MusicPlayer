@@ -34,17 +34,15 @@ struct MainTabView: View {
             }
             .accentColor(AppColors.primary) // purple tint for tab bar
 
-            // ✅ Mini player sits above tab bar with spacing
+            // Mini player sits above tab bar with spacing
             VStack {
                 Spacer()
                 if let _ = musicPlayerManager.currentTrack {
                     VStack(spacing: 0) {
-                        Divider() // thin line separator
                         MiniPlayerView()
                             .onTapGesture {
                                 showFullPlayer.toggle()
                             }
-                            .background(AppColors.cardBackground)
                     }
                     .padding(.horizontal, 8)
                     .padding(.bottom, 48) // leave gap equal to tab bar height
