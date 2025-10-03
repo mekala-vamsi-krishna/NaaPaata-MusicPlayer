@@ -5,8 +5,6 @@
 > **Naa Paata** means *My Song(s)* in Telugu.  
 > A sleek and modern iOS music player app that empowers users to upload, organize, and play their local MP3 music files effortlessly.
 
----
-
 ## 🚀 Main Idea
 
 The goal of **Naa Paata** is to provide a seamless experience for managing and enjoying local music by:
@@ -32,10 +30,10 @@ The goal of **Naa Paata** is to provide a seamless experience for managing and e
 ---
 
 ## 📸 Screenshots
+| Albums                                                                                                  | Playlists                                                                                               | Songs                                                                                                   | Album Details View                                                                                            | Music Player                                                                                      |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img src="https://github.com/user-attachments/assets/7f23ed54-4812-4bc9-84e6-e82afe4d5e56" width="120"> | <img src="https://github.com/user-attachments/assets/a58abba0-8b95-4945-9358-72cbaaf7b85c" width="120"> | <img src="https://github.com/user-attachments/assets/fab5dd70-49c3-4658-9ba1-d96a83890969" width="120"> | <img src="https://github.com/user-attachments/assets/44463aca-48b8-490a-a547-dd3286347931" width="120"> | <img src="https://github.com/user-attachments/assets/097f7c2d-1e5a-42bd-b4af-8ee87e8abc69" width="120"> |
 
-| Albums | Playlists | Songs | Music Player |
-|-------------|-------------|--------------|------------|
-| ![Upload](https://github.com/user-attachments/assets/7f23ed54-4812-4bc9-84e6-e82afe4d5e56) | ![Albums](https://github.com/user-attachments/assets/a58abba0-8b95-4945-9358-72cbaaf7b85c) | ![Playlists](https://github.com/user-attachments/assets/fab5dd70-49c3-4658-9ba1-d96a83890969) | ![Player](https://github.com/user-attachments/assets/efc4775c-2921-42f0-8f6d-639d1f240d9d) |
 
 ---
 
