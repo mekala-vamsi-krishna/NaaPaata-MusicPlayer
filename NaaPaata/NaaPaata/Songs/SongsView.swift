@@ -38,7 +38,7 @@ struct SongsView: View {
                     } else {
                         List(mp3Files, id: \.self) { fileURL in
                             Button {
-                                musicPlayerManager.playTrack(fileURL)
+                                musicPlayerManager.playFromAllSongs(mp3Files, startAt: fileURL)
                                 showFullPlayer = true
                             } label: {
                                 MP3FileCell(fileURL: fileURL)
@@ -83,6 +83,7 @@ struct SongsView: View {
                 .filter { $0.pathExtension.lowercased() == "mp3" }
             
             self.mp3Files = files
+            musicPlayerManager.playFromAllSongs(files)
         } catch {
             print("Error reading mp3 files: \(error)")
             self.mp3Files = []
