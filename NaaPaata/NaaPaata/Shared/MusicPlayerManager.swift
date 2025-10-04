@@ -20,8 +20,13 @@ class MusicPlayerManager: ObservableObject {
     private var player: AVAudioPlayer?
     private var timer: Timer?
     
+    var trackList: [URL] = []
+    private var currentIndex: Int = 0
+    
+    // MARK: - Play Track
     func playTrack(_ url: URL) {
         currentTrack = url
+        currentIndex = trackList.firstIndex(of: url) ?? 0
         extractMetadata(from: url)
         
         do {
@@ -35,6 +40,21 @@ class MusicPlayerManager: ObservableObject {
         }
     }
     
+    // MARK: - Next Track
+    func playNext() {
+        guard !trackList.isEmpty else { return }
+        currentIndex = (currentIndex + 1) % trackList.count
+        playTrack(trackList[currentIndex])
+    }
+    
+    // MARK: - Previous Track
+    func playPrevious() {
+        guard !trackList.isEmpty else { return }
+        currentIndex = (currentIndex - 1 + trackList.count) % trackList.count
+        playTrack(trackList[currentIndex])
+    }
+    
+    // MARK: - Play/Pause
     func togglePlayPause() {
         guard let player = player else { return }
         if isPlaying {
@@ -45,6 +65,7 @@ class MusicPlayerManager: ObservableObject {
         isPlaying.toggle()
     }
     
+    // MARK: - Stop
     func stop() {
         player?.stop()
         isPlaying = false
@@ -55,6 +76,7 @@ class MusicPlayerManager: ObservableObject {
         stopTimer()
     }
     
+    // MARK: - Timer
     private func startTimer() {
         stopTimer()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in

@@ -83,6 +83,7 @@ struct SongsView: View {
                 .filter { $0.pathExtension.lowercased() == "mp3" }
             
             self.mp3Files = files
+            musicPlayerManager.trackList = mp3Files
         } catch {
             print("Error reading mp3 files: \(error)")
             self.mp3Files = []

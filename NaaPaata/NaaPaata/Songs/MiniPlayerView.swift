@@ -50,7 +50,7 @@ struct MiniPlayerView: View {
                 .buttonStyle(.plain)
                 
                 Button {
-                    // Next button
+                    musicPlayerManager.playNext()
                 } label: {
                     Image(systemName: "forward.fill")
                         .font(.title3)

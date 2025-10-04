@@ -285,7 +285,7 @@ struct MusicPlayerView: View {
                 // Control buttons with glassmorphism
                 HStack(spacing: 50) {
                     ControlButton(icon: "backward.fill", size: 28) {
-                        // Previous track
+                        musicPlayerManager.playPrevious()
                     }
                     
                     Button(action: {
@@ -320,7 +320,7 @@ struct MusicPlayerView: View {
                     .buttonStyle(ScaleButtonStyle())
                     
                     ControlButton(icon: "forward.fill", size: 28) {
-                        // Next track
+                        musicPlayerManager.playNext()
                     }
                 }
                 .padding(.bottom, 30)
