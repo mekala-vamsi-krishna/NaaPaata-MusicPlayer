@@ -8,7 +8,7 @@
 import SwiftUI
 import AVFoundation
 
-class MusicPlayerManager: ObservableObject {
+class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var currentTrack: URL?
     @Published var artworkImage: UIImage?
     @Published var currentTitle: String?
@@ -16,6 +16,8 @@ class MusicPlayerManager: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
+    @Published var playQueue: [URL] = []
+    private var activeList: [URL] { playQueue.isEmpty ? trackList : playQueue }
     
     private var player: AVAudioPlayer?
     private var timer: Timer?
@@ -26,11 +28,12 @@ class MusicPlayerManager: ObservableObject {
     // MARK: - Play Track
     func playTrack(_ url: URL) {
         currentTrack = url
-        currentIndex = trackList.firstIndex(of: url) ?? 0
+        currentIndex = activeList.firstIndex(of: url) ?? 0
         extractMetadata(from: url)
         
         do {
             player = try AVAudioPlayer(contentsOf: url)
+            player?.delegate = self
             player?.play()
             isPlaying = true
             duration = player?.duration ?? 0
@@ -40,18 +43,58 @@ class MusicPlayerManager: ObservableObject {
         }
     }
     
+    // MARK: - Queue Management
+    /// Set a scoped play queue (e.g., an album) and optionally start at a specific track
+    func setPlayQueue(_ urls: [URL], startAt startURL: URL? = nil) {
+        playQueue = urls
+        if let startURL = startURL, let idx = urls.firstIndex(of: startURL) {
+            currentIndex = idx
+            playTrack(startURL)
+        } else if let first = urls.first {
+            currentIndex = 0
+            playTrack(first)
+        }
+    }
+
+    /// Clear the scoped play queue so that navigation uses the full trackList again
+    func clearPlayQueue() {
+        playQueue = []
+    }
+    
+    // MARK: - Playback Sources
+    /// Play from the full Songs tab list. Sets the global trackList and clears any album queue.
+    func playFromAllSongs(_ urls: [URL], startAt startURL: URL? = nil) {
+        trackList = urls
+        clearPlayQueue()
+        if let startURL = startURL, let idx = urls.firstIndex(of: startURL) {
+            currentIndex = idx
+            playTrack(startURL)
+        } else {
+            // Do not auto-play when just setting the songs list; wait for user selection.
+            currentIndex = 0
+            // Leave `currentTrack` unchanged; playback will start when the user taps a song.
+        }
+    }
+
+    /// Play within a specific album. Sets a scoped queue and starts from the given song or the first one.
+    func playFromAlbum(_ urls: [URL], startAt startURL: URL? = nil) {
+        setPlayQueue(urls, startAt: startURL)
+    }
+    
     // MARK: - Next Track
     func playNext() {
-        guard !trackList.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % trackList.count
-        playTrack(trackList[currentIndex])
+        let list = activeList
+        guard !list.isEmpty else { return }
+        currentIndex = (currentIndex + 1) % list.count
+        playTrack(list[currentIndex])
     }
     
     // MARK: - Previous Track
     func playPrevious() {
-        guard !trackList.isEmpty else { return }
-        currentIndex = (currentIndex - 1 + trackList.count) % trackList.count
-        playTrack(trackList[currentIndex])
+        let list = activeList
+        guard !list.isEmpty else { return }
+        currentIndex = (currentIndex - 1 + list.count) % list.count
+        playTrack(list[currentIndex])
     }
     
     // MARK: - Play/Pause
@@ -111,6 +154,12 @@ class MusicPlayerManager: ObservableObject {
         if currentTitle == nil {
             currentTitle = url.lastPathComponent
         }
+    }
+    
+    // MARK: - AVAudioPlayerDelegate
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        guard flag else { return }
+        playNext()
     }
 }
 

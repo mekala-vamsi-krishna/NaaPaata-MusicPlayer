@@ -176,7 +176,7 @@ struct MusicPlayerView: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
                         
-                        Text("Artist Name")
+                        Text(musicPlayerManager.artistName ?? "Unknown Artist")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(.white.opacity(0.7))
                     }
@@ -327,7 +327,9 @@ struct MusicPlayerView: View {
                 
                 // Volume and additional controls
                 HStack(spacing: 40) {
-                    SmallControlButton(icon: "shuffle")
+                    SmallControlButton(icon: "shuffle") {
+                        // ...
+                    }
                     
                     HStack(spacing: 16) {
                         Image(systemName: "speaker.fill")
@@ -355,7 +357,9 @@ struct MusicPlayerView: View {
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     
-                    SmallControlButton(icon: "repeat")
+                    SmallControlButton(icon: "repeat") {
+                        // ...
+                    }
                 }
                 .padding(.bottom, 40)
             }
@@ -441,9 +445,10 @@ struct ControlButton: View {
 
 struct SmallControlButton: View {
     let icon: String
+    let action: () -> Void
     
     var body: some View {
-        Button(action: {}) {
+        Button(action: action) {
             ZStack {
                 Circle()
                     .fill(.ultraThinMaterial)

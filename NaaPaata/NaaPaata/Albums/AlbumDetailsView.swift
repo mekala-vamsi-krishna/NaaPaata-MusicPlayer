@@ -15,7 +15,6 @@ struct AlbumDetailsView: View {
     var songs: [URL]
     
     @State private var scrollOffset: CGFloat = 0
-    @State private var selectedSong: URL?
     @State private var showFullPlayer = false
 
     @Namespace private var animation
@@ -103,7 +102,8 @@ struct AlbumDetailsView: View {
                         // Action buttons
                         HStack(spacing: 16) {
                             Button {
-                                // Play action
+                                musicPlayerManager.playFromAlbum(songs)
+                                showFullPlayer = true
                             } label: {
                                 HStack {
                                     Image(systemName: "play.fill")
@@ -124,7 +124,9 @@ struct AlbumDetailsView: View {
                             }
                             
                             Button {
-                                // Shuffle action
+                                let shuffled = songs.shuffled()
+                                musicPlayerManager.playFromAlbum(shuffled)
+                                showFullPlayer = true
                             } label: {
                                 HStack {
                                     Image(systemName: "shuffle")
@@ -148,13 +150,12 @@ struct AlbumDetailsView: View {
                                 SongRow(
                                     song: songName,
                                     index: index + 1,
-                                    isSelected: selectedSong == fileURL
+                                    artistName: musicPlayerManager.artistName ?? "Unknown Artist",
+                                    duration: musicPlayerManager.duration,
+                                    isSelected: musicPlayerManager.currentTrack == fileURL && musicPlayerManager.isPlaying
                                 )
                                 .onTapGesture {
-                                    withAnimation(.spring(response: 0.3)) {
-                                        selectedSong = fileURL
-                                    }
-                                    musicPlayerManager.playTrack(fileURL)
+                                    musicPlayerManager.playFromAlbum(songs, startAt: fileURL)
                                     showFullPlayer = true
                                 }
                             }
@@ -200,6 +201,8 @@ struct AlbumDetailsView: View {
 struct SongRow: View {
     let song: String
     let index: Int
+    let artistName: String
+    let duration: Double
     let isSelected: Bool
     
     var body: some View {
@@ -236,7 +239,7 @@ struct SongRow: View {
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
-                Text("Unknown Artist")
+                Text(artistName)
                     .font(.caption)
                     .foregroundColor(AppColors.textSecondary)
                     .lineLimit(1)
@@ -245,7 +248,7 @@ struct SongRow: View {
             
             // Duration and menu
             HStack(spacing: 12) {
-                Text("3:24")
+                Text("\(duration)")
                     .font(.caption)
                     .foregroundColor(AppColors.textSecondary)
                 
