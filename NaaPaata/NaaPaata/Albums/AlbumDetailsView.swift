@@ -105,22 +105,24 @@ struct AlbumDetailsView: View {
                                 musicPlayerManager.playFromAlbum(songs)
                                 showFullPlayer = true
                             } label: {
-                                HStack {
+                                HStack(spacing: 12) {
                                     Image(systemName: "play.fill")
-                                    Text("Play")
-                                        .fontWeight(.semibold)
+                                        .font(.system(size: 18, weight: .bold))
+                                    Text("Play All")
+                                        .font(.system(size: 16, weight: .bold))
                                 }
+                                .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .frame(height: 52)
                                 .background(
                                     LinearGradient(
-                                        colors: [Color.pink, Color.purple],
+                                        colors: [AppColors.primary, AppColors.primary.opacity(0.8)],
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
                                 )
-                                .foregroundColor(.primary)
                                 .clipShape(Capsule())
+                                .shadow(color: AppColors.primary.opacity(0.4), radius: 12, x: 0, y: 6)
                             }
                             
                             Button {
@@ -128,16 +130,21 @@ struct AlbumDetailsView: View {
                                 musicPlayerManager.playFromAlbum(shuffled)
                                 showFullPlayer = true
                             } label: {
-                                HStack {
+                                HStack(spacing: 12) {
                                     Image(systemName: "shuffle")
+                                        .font(.system(size: 18, weight: .bold))
                                     Text("Shuffle")
-                                        .fontWeight(.semibold)
+                                        .font(.system(size: 16, weight: .bold))
                                 }
+                                .foregroundColor(AppColors.primary)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .frame(height: 52)
                                 .background(.ultraThinMaterial)
-                                .foregroundColor(.primary)
                                 .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(AppColors.primary.opacity(0.3), lineWidth: 1.5)
+                                )
                             }
                         }
                         .padding(.horizontal, 20)
