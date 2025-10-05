@@ -16,6 +16,7 @@ struct Playlist: Identifiable, Hashable, Codable {
     var description: String
     var isPrivate: Bool
     var dateCreated: Date
+    var folderName: String
     
     // Default initializer for empty playlists
     init(name: String, songs: [Song] = [], coverImage: String = "music.note.list", description: String = "", isPrivate: Bool = false, dateCreated: Date = Date()) {
@@ -25,6 +26,7 @@ struct Playlist: Identifiable, Hashable, Codable {
         self.description = description
         self.isPrivate = isPrivate
         self.dateCreated = dateCreated
+        self.folderName = name
     }
 }
 

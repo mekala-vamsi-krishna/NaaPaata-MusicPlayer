@@ -13,13 +13,9 @@ struct AddSongsView: View {
     @State private var searchText = ""
     @State private var selectedSongs: Set<UUID> = []
     
-    let availableSongs = [
-        Song(title: "Rainbow", artist: "Color Dreams", duration: 234, artworkImage: "music.note", dateAdded: Date()),
-        Song(title: "Thunder Storm", artist: "Weather Sounds", duration: 267, artworkImage: "music.note", dateAdded: Date()),
-        Song(title: "Neon Lights", artist: "City Nights", duration: 198, artworkImage: "music.note", dateAdded: Date()),
-        Song(title: "Mountain High", artist: "Peak Performance", duration: 245, artworkImage: "music.note", dateAdded: Date()),
-        Song(title: "Desert Wind", artist: "Nomad Sounds", duration: 221, artworkImage: "music.note", dateAdded: Date()),
-    ]
+    @State private var availableSongs: [Song] = []
+    private let playlistManager = PlaylistManager.shared
+       
     
     var filteredSongs: [Song] {
         if searchText.isEmpty {
@@ -83,8 +79,9 @@ struct AddSongsView: View {
                         Spacer()
                         
                         Button(action: {
-                            let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
-                            playlist.songs.append(contentsOf: songsToAdd)
+                           // let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
+                           // playlist.songs.append(contentsOf: songsToAdd)
+                            addSelectedSongsToPlaylist()
                             dismiss()
                         }) {
                             Text("Add \(selectedSongs.count) Song\(selectedSongs.count == 1 ? "" : "s")")
@@ -117,8 +114,46 @@ struct AddSongsView: View {
                     .foregroundColor(AppColors.primary)
                 }
             }
+            
+        }
+        .onAppear {
+            loadAvailableSongs()
         }
     }
+}
+
+extension AddSongsView {
+    
+    private func loadAvailableSongs() {
+        let mp3Files = LoadAllSongsFromDocuments().loadSongsFromDocuments()
+        
+        availableSongs = mp3Files.map { url in
+            Song(
+                title: url.deletingPathExtension().lastPathComponent,
+                artist: "Unknown Artist", // You can extract metadata later
+                duration: 0,
+                fileURL: url, // Store the actual file URL
+                artworkImage: "music.note",
+                dateAdded: Date()
+            )
+        }
+    }
+    
+    
+    private func addSelectedSongsToPlaylist() {
+        let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
+        
+        for song in songsToAdd {
+            if let fileURL = song.fileURL {
+                // 1. Add to file system using PlaylistManager
+                playlistManager.addSongToPlaylist(songURL: fileURL, playlistName: playlist.name)
+                
+                // 2. Add to UI model
+                playlist.songs.append(song)
+            }
+        }
+    }
+    
 }
 
 struct AddableSongRow: View {

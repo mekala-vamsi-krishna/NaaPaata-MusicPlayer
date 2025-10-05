@@ -12,6 +12,8 @@ import SwiftUI
 
 struct SongsView: View {
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    @EnvironmentObject var tabState: TabState
+
     @State private var mp3Files: [URL] = []
     @State private var showFullPlayer = false
     
@@ -43,6 +45,22 @@ struct SongsView: View {
                             } label: {
                                 MP3FileCell(fileURL: fileURL)
                             }
+                            .contextMenu {
+                                Button {
+                                    /// send user to playlist
+                                    tabState.selectedTab = 2
+                                    
+                                } label: {
+                                    HStack {
+                                        Text("Add this song to playlist")
+                                        Image(systemName: "plus.square.dashed")
+                                    }
+                                    .font(.footnote)
+                                    .foregroundStyle(.purple)
+                                    .fontWeight(.semibold)
+                                }
+
+                            }
                         }
                         .listStyle(PlainListStyle())
                     }
@@ -60,34 +78,9 @@ struct SongsView: View {
     }
     
     private func loadSongsFromDocuments() {
-        let fileManager = FileManager.default
-        guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        
-        let musicFolder = docsURL.appendingPathComponent("Music", isDirectory: true)
-        
-        // Create folder if not exists
-        if !fileManager.fileExists(atPath: musicFolder.path) {
-            do {
-                try fileManager.createDirectory(at: musicFolder, withIntermediateDirectories: true, attributes: nil)
-                print("Created MyAppFiles folder at \(musicFolder.path)")
-            } catch {
-                print("Error creating folder: \(error)")
-                return
-            }
-        }
-        
-        do {
-            let files = try fileManager.contentsOfDirectory(at: musicFolder,
-                                                            includingPropertiesForKeys: nil,
-                                                            options: [.skipsHiddenFiles])
-                .filter { $0.pathExtension.lowercased() == "mp3" }
-            
-            self.mp3Files = files
-            musicPlayerManager.playFromAllSongs(files)
-        } catch {
-            print("Error reading mp3 files: \(error)")
-            self.mp3Files = []
-        }
+        let files = LoadAllSongsFromDocuments().loadSongsFromDocuments()
+        self.mp3Files = files
+        musicPlayerManager.playFromAllSongs(files)
     }
 
 }

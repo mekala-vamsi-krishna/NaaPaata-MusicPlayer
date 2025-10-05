@@ -29,6 +29,9 @@
 		ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */; };
 		ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E2A2E9286E70054344D /* AddSongsView.swift */; };
 		ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */; };
+		CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */; };
+		CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E12E92F01B006D517C /* PlaylistManager.swift */; };
+		CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E42E92F591006D517C /* PlaylistViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +59,9 @@
 		ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistSongRowView.swift; sourceTree = "<group>"; };
 		ACD23E2A2E9286E70054344D /* AddSongsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSongsView.swift; sourceTree = "<group>"; };
 		ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlaylistView.swift; sourceTree = "<group>"; };
+		CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadAllSongsFromDocuments.swift; sourceTree = "<group>"; };
+		CE7907E12E92F01B006D517C /* PlaylistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistManager.swift; sourceTree = "<group>"; };
+		CE7907E42E92F591006D517C /* PlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +78,7 @@
 		AC279E7F2E90322F00E33715 /* PlayLists */ = {
 			isa = PBXGroup;
 			children = (
+				CE7907E32E92F57A006D517C /* PlaylistViewModel */,
 				ACD23E212E9285E60054344D /* View */,
 				ACD23E202E9285D10054344D /* Model */,
 			);
@@ -131,6 +138,7 @@
 		AC6F41782E7FD05F00B5BE35 /* NaaPaata */ = {
 			isa = PBXGroup;
 			children = (
+				CE7907DE2E92E5CC006D517C /* Services */,
 				AC279E802E90325000E33715 /* App */,
 				AC6F41852E7FD13D00B5BE35 /* Songs */,
 				AC6F418C2E80421C00B5BE35 /* Albums */,
@@ -185,6 +193,23 @@
 				ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		CE7907DE2E92E5CC006D517C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */,
+				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		CE7907E32E92F57A006D517C /* PlaylistViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				CE7907E42E92F591006D517C /* PlaylistViewModel.swift */,
+			);
+			path = PlaylistViewModel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,8 +293,10 @@
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,
 				AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */,
 				AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */,
+				CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */,
 				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
 				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
+				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
 				ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */,
@@ -278,6 +305,7 @@
 				ACD23E232E9285F60054344D /* SongModel.swift in Sources */,
 				AC6F41892E7FD29A00B5BE35 /* MusicPlayerManager.swift in Sources */,
 				ACD23E1F2E927D580054344D /* PlaylistDetailsView.swift in Sources */,
+				CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */,
 				AC6F41842E7FD05F00B5BE35 /* SongsView.swift in Sources */,
 				ACD23E252E9286170054344D /* PlayListModel.swift in Sources */,
 			);
