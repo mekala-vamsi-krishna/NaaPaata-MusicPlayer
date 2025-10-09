@@ -6,31 +6,39 @@
 //
 
 import SwiftUI
+class TabState: ObservableObject {
+    @Published var selectedTab: Int = 0
+}
 
 struct MainTabView: View {
+    @EnvironmentObject var tabState: TabState
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
     @State private var showFullPlayer = false
 
     var body: some View {
         ZStack {
-            TabView {
+            TabView(selection: $tabState.selectedTab) {
                 SongsView()
                     .tabItem {
                         Image(systemName: "music.note")
                         Text("Songs")
                     }
+                    .tag(0)
+                    
 
                 AlbumsView()
                     .tabItem {
                         Image(systemName: "rectangle.stack.fill")
                         Text("Albums")
-                    }
+                    } .tag(1)
+                  
 
                 PlayListsView()
                     .tabItem {
                         Image(systemName: "list.bullet")
                         Text("Lists")
-                    }
+                    } .tag(2)
+                    
             }
             .accentColor(AppColors.primary) // purple tint for tab bar
 

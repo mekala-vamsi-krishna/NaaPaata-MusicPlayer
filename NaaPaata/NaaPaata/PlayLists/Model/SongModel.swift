@@ -12,6 +12,7 @@ struct Song: Identifiable, Hashable, Codable {
     let title: String
     let artist: String
     let duration: TimeInterval
+    var fileURL: URL?
     let artworkImage: String // Use UIImage in real app
     var dateAdded: Date
 }

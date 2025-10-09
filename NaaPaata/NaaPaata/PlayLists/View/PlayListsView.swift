@@ -9,32 +9,9 @@ import SwiftUI
 
 // MARK: - Playlists View
 struct PlayListsView: View {
-    @State private var playlists: [Playlist] = [
-        Playlist(
-            name: "Chill Vibes",
-            songs: [
-                Song(title: "Midnight Dreams", artist: "Luna Bay", duration: 245, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 5)),
-                Song(title: "Ocean Waves", artist: "Coastal Hearts", duration: 198, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 3)),
-                Song(title: "Starlight", artist: "Nova Sound", duration: 212, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 2))
-            ],
-            coverImage: "music.note.list",
-            description: "Perfect playlist for relaxing",
-            isPrivate: false,
-            dateCreated: Date().addingTimeInterval(-86400 * 30)
-        ),
-        Playlist(
-            name: "Workout Mix",
-            songs: [
-                Song(title: "Thunder Storm", artist: "Weather Sounds", duration: 267, artworkImage: "music.note", dateAdded: Date()),
-                Song(title: "Electric Feel", artist: "Neon Pulse", duration: 223, artworkImage: "music.note", dateAdded: Date())
-            ],
-            coverImage: "music.note.list",
-            description: "High energy workout tracks",
-            isPrivate: false,
-            dateCreated: Date().addingTimeInterval(-86400 * 15)
-        )
-    ]
-    
+    private let playlistManager = PlaylistManager.shared
+    @State private var playlists: [Playlist] = []
+    @StateObject private var playlistsViewModel = PlaylistViewModel()
     @State private var showAddPlaylistSheet = false
     @State private var newPlaylistName = ""
     @State private var newPlaylistDescription = ""
@@ -193,30 +170,67 @@ struct PlayListsView: View {
                 )
             }
         }
+        .onAppear
+        {
+            loadPlaylistsFromFileSystem()
+        }
     }
     
     private func addNewPlaylist() {
-        let trimmedName = newPlaylistName.trimmingCharacters(in: .whitespaces)
-        
-        if !trimmedName.isEmpty {
-            let newPlaylist = Playlist(
-                name: trimmedName,
-                songs: [],
-                coverImage: "music.note.list",
-                description: newPlaylistDescription.trimmingCharacters(in: .whitespaces),
-                isPrivate: false,
-                dateCreated: Date()
-            )
-            
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                playlists.insert(newPlaylist, at: 0)
-            }
-        }
-        
-        // Reset
-        newPlaylistName = ""
-        newPlaylistDescription = ""
-    }
+          let trimmedName = newPlaylistName.trimmingCharacters(in: .whitespaces)
+          
+          if !trimmedName.isEmpty {
+              // 1. Create folder in file system
+              playlistManager.createPlaylist(name: trimmedName)
+              
+              // 2. Create playlist model
+              let newPlaylist = Playlist(
+                  name: trimmedName,
+                  songs: [], // Empty - will load from folder later
+                  coverImage: "music.note.list",
+                  description: newPlaylistDescription.trimmingCharacters(in: .whitespaces),
+                  isPrivate: false,
+                  dateCreated: Date()
+              )
+              
+              withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                  playlists.insert(newPlaylist, at: 0)
+              }
+          }
+          
+          // Reset
+          newPlaylistName = ""
+          newPlaylistDescription = ""
+      }
+    private func loadPlaylistsFromFileSystem() {
+           let playlistNames = playlistManager.getAllPlaylists()
+           
+           playlists = playlistNames.map { name in
+               // Get songs from folder and convert to Song models
+               let songURLs = playlistManager.getSongsInPlaylist(playlistName: name)
+               let songs = songURLs.map { url in
+                   // You'll need to extract song metadata from MP3 files
+                   // For now, use placeholder
+                   Song(
+                       title: url.deletingPathExtension().lastPathComponent,
+                       artist: "Unknown Artist",
+                       duration: 0,
+                       fileURL: url,
+                       artworkImage: "music.note",
+                       dateAdded: Date()
+                   )
+               }
+               
+               return Playlist(
+                   name: name,
+                   songs: songs,
+                   coverImage: "music.note.list",
+                   description: "",
+                   isPrivate: false,
+                   dateCreated: Date() // You might want to store this in folder metadata
+               )
+           }
+       }
 }
 
 // MARK: - Playlist Card
