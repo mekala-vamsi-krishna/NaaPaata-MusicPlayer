@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import MediaPlayer
 
 struct MusicPlayerView: View {
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
@@ -331,31 +332,7 @@ struct MusicPlayerView: View {
                         // ...
                     }
                     
-                    HStack(spacing: 16) {
-                        Image(systemName: "speaker.fill")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.white.opacity(0.7))
-                        
-                        Capsule()
-                            .fill(.ultraThinMaterial)
-                            .frame(width: 140, height: 6)
-                            .overlay(
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: 100, height: 6),
-                                alignment: .leading
-                            )
-                        
-                        Image(systemName: "speaker.wave.3.fill")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.white.opacity(0.7))
-                    }
+                    VolumeControlView()
                     
                     SmallControlButton(icon: "repeat") {
                         // ...
@@ -462,14 +439,6 @@ struct SmallControlButton: View {
         .buttonStyle(ScaleButtonStyle())
     }
 }
-
-//struct ScaleButtonStyle: ButtonStyle {
-//    func makeBody(configuration: Configuration) -> some View {
-//        configuration.label
-//            .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
-//            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
-//    }
-//}
 
 // MARK: - Preview
 struct MusicPlayerView_Previews: PreviewProvider {

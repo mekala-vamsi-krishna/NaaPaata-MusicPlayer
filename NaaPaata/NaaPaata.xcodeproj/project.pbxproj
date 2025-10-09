@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
+		AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B4AB42E982764006190E4 /* VolumeControlView.swift */; };
 		AC6F41792E7FD05F00B5BE35 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */; };
 		AC6F417A2E7FD05F00B5BE35 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */; };
 		AC6F417C2E7FD05F00B5BE35 /* AlbumsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */; };
@@ -37,6 +38,7 @@
 /* Begin PBXFileReference section */
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		AC5B4AB42E982764006190E4 /* VolumeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeControlView.swift; sourceTree = "<group>"; };
 		AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumsView.swift; sourceTree = "<group>"; };
 		AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */,
 				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
 				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
+				AC5B4AB42E982764006190E4 /* VolumeControlView.swift */,
 			);
 			path = Songs;
 			sourceTree = "<group>";
@@ -296,6 +299,7 @@
 				CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */,
 				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
 				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
+				AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */,
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
