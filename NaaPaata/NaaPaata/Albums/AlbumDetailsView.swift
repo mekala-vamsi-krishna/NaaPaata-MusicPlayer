@@ -6,9 +6,21 @@
 //
 
 import SwiftUI
+import AVFoundation
+
+struct SongMetadata: Identifiable {
+    let id = UUID()
+    let url: URL
+    let title: String
+    let artist: String
+    let duration: TimeInterval
+    let artwork: UIImage?
+}
 
 struct AlbumDetailsView: View {
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    
+    @State private var songMetadataList: [SongMetadata] = []
 
     var title: String
     var artwork: UIImage?
@@ -151,18 +163,16 @@ struct AlbumDetailsView: View {
                         
                         // Songs list with glassmorphic design
                         VStack(spacing: 0) {
-                            ForEach(Array(songs.enumerated()), id: \.element) { index, fileURL in
-                                let songName = fileURL.deletingPathExtension().lastPathComponent
-                                
+                            ForEach(songMetadataList) { song in
                                 SongRow(
-                                    song: songName,
-                                    index: index + 1,
-                                    artistName: musicPlayerManager.artistName ?? "Unknown Artist",
-                                    duration: musicPlayerManager.duration,
-                                    isSelected: musicPlayerManager.currentTrack == fileURL && musicPlayerManager.isPlaying
+                                    song: song.title,
+                                    index: songMetadataList.firstIndex(where: { $0.id == song.id })! + 1,
+                                    artistName: song.artist,
+                                    duration: song.duration,
+                                    isSelected: musicPlayerManager.currentTrack == song.url && musicPlayerManager.isPlaying
                                 )
                                 .onTapGesture {
-                                    musicPlayerManager.playFromAlbum(songs, startAt: fileURL)
+                                    musicPlayerManager.playFromAlbum(songs, startAt: song.url)
                                     showFullPlayer = true
                                 }
                             }
@@ -175,6 +185,40 @@ struct AlbumDetailsView: View {
                 }
             }
             .ignoresSafeArea(edges: .top)
+        }
+        .onAppear {
+            loadAllMetadata()
+        }
+
+    }
+    
+    private func loadAllMetadata() {
+        songMetadataList = songs.map { url in
+            let asset = AVAsset(url: url)
+            var artist = "Unknown Artist"
+            var title = url.deletingPathExtension().lastPathComponent
+            var artwork: UIImage? = nil
+            
+            // Extract metadata synchronously
+            for item in asset.commonMetadata {
+                guard let key = item.commonKey else { continue }
+                
+                switch key {
+                case .commonKeyArtist:
+                    if let value = item.stringValue { artist = value }
+                case .commonKeyTitle:
+                    if let value = item.stringValue { title = value }
+                case .commonKeyArtwork:
+                    if let data = item.dataValue, let image = UIImage(data: data) {
+                        artwork = image
+                    }
+                default:
+                    break
+                }
+            }
+            
+            let duration = CMTimeGetSeconds(asset.duration)
+            return SongMetadata(url: url, title: title, artist: artist, duration: duration.isFinite ? duration : 0, artwork: artwork)
         }
     }
     
@@ -255,7 +299,7 @@ struct SongRow: View {
             
             // Duration and menu
             HStack(spacing: 12) {
-                Text("\(duration)")
+                Text("\(formatTime(duration))")
                     .font(.caption)
                     .foregroundColor(AppColors.textSecondary)
                 
@@ -276,6 +320,13 @@ struct SongRow: View {
             isSelected ? Color.black.opacity(0.1) : Color.clear
         )
         .animation(.spring(response: 0.3), value: isSelected)
+    }
+    
+    
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%d:%02d", mins, secs)
     }
 }
 
