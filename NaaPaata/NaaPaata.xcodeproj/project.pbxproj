@@ -77,16 +77,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AC279E7F2E90322F00E33715 /* PlayLists */ = {
-			isa = PBXGroup;
-			children = (
-				CE7907E32E92F57A006D517C /* PlaylistViewModel */,
-				ACD23E212E9285E60054344D /* View */,
-				ACD23E202E9285D10054344D /* Model */,
-			);
-			path = PlayLists;
-			sourceTree = "<group>";
-		};
 		AC279E802E90325000E33715 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -94,14 +84,6 @@
 				AC6F41722E7FD05F00B5BE35 /* MainTabView.swift */,
 			);
 			path = App;
-			sourceTree = "<group>";
-		};
-		AC279E812E9032A400E33715 /* Shared */ = {
-			isa = PBXGroup;
-			children = (
-				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
-			);
-			path = Shared;
 			sourceTree = "<group>";
 		};
 		AC279E822E9032B300E33715 /* Color+Ext */ = {
@@ -129,6 +111,64 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		AC6773EF2EA2A2290059C86C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				ACD23E222E9285F60054344D /* SongModel.swift */,
+				ACD23E242E9286170054344D /* PlayListModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		AC6773F02EA2A22F0059C86C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AC6773F32EA2A27E0059C86C /* Player */,
+				AC6F41852E7FD13D00B5BE35 /* Songs */,
+				AC6F418C2E80421C00B5BE35 /* Albums */,
+				AC6773F52EA2A2B30059C86C /* Playlists */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AC6773F12EA2A2350059C86C /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				CE7907E42E92F591006D517C /* PlaylistViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AC6773F22EA2A2400059C86C /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		AC6773F32EA2A27E0059C86C /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
+				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		AC6773F52EA2A2B30059C86C /* Playlists */ = {
+			isa = PBXGroup;
+			children = (
+				ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */,
+				AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */,
+				ACD23E262E9286730054344D /* CreatePlaylistSheet.swift */,
+				ACD23E2A2E9286E70054344D /* AddSongsView.swift */,
+				ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */,
+				ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */,
+			);
+			path = Playlists;
+			sourceTree = "<group>";
+		};
 		AC6F416C2E7FD05F00B5BE35 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
@@ -140,12 +180,12 @@
 		AC6F41782E7FD05F00B5BE35 /* NaaPaata */ = {
 			isa = PBXGroup;
 			children = (
-				CE7907DE2E92E5CC006D517C /* Services */,
 				AC279E802E90325000E33715 /* App */,
-				AC6F41852E7FD13D00B5BE35 /* Songs */,
-				AC6F418C2E80421C00B5BE35 /* Albums */,
-				AC279E7F2E90322F00E33715 /* PlayLists */,
-				AC279E812E9032A400E33715 /* Shared */,
+				AC6773EF2EA2A2290059C86C /* Model */,
+				CE7907DE2E92E5CC006D517C /* Services */,
+				AC6773F22EA2A2400059C86C /* Managers */,
+				AC6773F12EA2A2350059C86C /* ViewModels */,
+				AC6773F02EA2A22F0059C86C /* Views */,
 				AC279E822E9032B300E33715 /* Color+Ext */,
 				AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */,
 				AC6F41712E7FD05F00B5BE35 /* Info.plist */,
@@ -160,8 +200,6 @@
 				AC6F41772E7FD05F00B5BE35 /* SongsView.swift */,
 				AC6F41732E7FD05F00B5BE35 /* MP3FileCell.swift */,
 				AC6F41702E7FD05F00B5BE35 /* DocumentPicker.swift */,
-				AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */,
-				AC6F41742E7FD05F00B5BE35 /* MusicPlayerView.swift */,
 				AC5B4AB42E982764006190E4 /* VolumeControlView.swift */,
 			);
 			path = Songs;
@@ -176,28 +214,6 @@
 			path = Albums;
 			sourceTree = "<group>";
 		};
-		ACD23E202E9285D10054344D /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				ACD23E222E9285F60054344D /* SongModel.swift */,
-				ACD23E242E9286170054344D /* PlayListModel.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
-		ACD23E212E9285E60054344D /* View */ = {
-			isa = PBXGroup;
-			children = (
-				AC6F41762E7FD05F00B5BE35 /* PlayListsView.swift */,
-				ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */,
-				ACD23E262E9286730054344D /* CreatePlaylistSheet.swift */,
-				ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */,
-				ACD23E2A2E9286E70054344D /* AddSongsView.swift */,
-				ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
 		CE7907DE2E92E5CC006D517C /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,14 +221,6 @@
 				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
 			);
 			path = Services;
-			sourceTree = "<group>";
-		};
-		CE7907E32E92F57A006D517C /* PlaylistViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				CE7907E42E92F591006D517C /* PlaylistViewModel.swift */,
-			);
-			path = PlaylistViewModel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
