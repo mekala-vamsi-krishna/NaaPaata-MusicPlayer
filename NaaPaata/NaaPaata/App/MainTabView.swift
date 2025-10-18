@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+
 class TabState: ObservableObject {
     @Published var selectedTab: Int = 0
 }
 
 struct MainTabView: View {
     @EnvironmentObject var tabState: TabState
-    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    @StateObject private var musicPlayerManager = MusicPlayerManager.shared
     @State private var showFullPlayer = false
 
     var body: some View {
@@ -24,36 +25,33 @@ struct MainTabView: View {
                         Text("Songs")
                     }
                     .tag(0)
-                    
-
+                
                 AlbumsView()
                     .tabItem {
                         Image(systemName: "rectangle.stack.fill")
                         Text("Albums")
-                    } .tag(1)
-                  
-
+                    }
+                    .tag(1)
+                
                 PlayListsView()
                     .tabItem {
                         Image(systemName: "list.bullet")
                         Text("Lists")
-                    } .tag(2)
-                    
+                    }
+                    .tag(2)
             }
-            .accentColor(AppColors.primary) // purple tint for tab bar
+            .accentColor(AppColors.primary)
 
-            // Mini player sits above tab bar with spacing
+            // Mini player above tab bar
             VStack {
                 Spacer()
-                if let _ = musicPlayerManager.currentTrack {
-                    VStack(spacing: 0) {
-                        MiniPlayerView()
-                            .onTapGesture {
-                                showFullPlayer.toggle()
-                            }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, 48) // leave gap equal to tab bar height
+                if musicPlayerManager.currentSong != nil {
+                    MiniPlayerView()
+                        .onTapGesture {
+                            showFullPlayer.toggle()
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 48) // tab bar height
                 }
             }
         }
@@ -64,7 +62,7 @@ struct MainTabView: View {
     }
 }
 
-
 #Preview {
     MainTabView()
+        .environmentObject(TabState())
 }

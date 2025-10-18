@@ -8,82 +8,104 @@
 import SwiftUI
 import AVFoundation
 
-import SwiftUI
+struct SongsTopBar: View {
+    @ObservedObject var viewModel: SongsViewModel
+    var onSort: ((SongsViewModel.SortKey) -> Void)?
 
-struct SongsView: View {
-    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
-    @EnvironmentObject var tabState: TabState
-
-    @State private var mp3Files: [URL] = []
-    @State private var showFullPlayer = false
-    
     var body: some View {
-        ZStack(alignment: .bottom) {
-            NavigationStack {
-                VStack {
-                    if mp3Files.isEmpty {
-                        Spacer()
-                        Image(systemName: "music.note.list")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(AppColors.primary).opacity(0.7)
-                            .padding(.top, 50)
-                        
-                        Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textPrimary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        
-                        Spacer()
-                    } else {
-                        List(mp3Files, id: \.self) { fileURL in
-                            Button {
-                                musicPlayerManager.playFromAllSongs(mp3Files, startAt: fileURL)
-                                showFullPlayer = true
-                            } label: {
-                                MP3FileCell(fileURL: fileURL)
-                            }
-                            .contextMenu {
-                                Button {
-                                    /// send user to playlist
-                                    tabState.selectedTab = 2
-                                    
-                                } label: {
-                                    HStack {
-                                        Text("Add this song to playlist")
-                                        Image(systemName: "plus.square.dashed")
-                                    }
-                                    .font(.footnote)
-                                    .foregroundStyle(.purple)
-                                    .fontWeight(.semibold)
-                                }
+        HStack {
+            // Total songs
+            Text("\(viewModel.totalSongs) Songs")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.primary)
+                .padding(.leading, 5)
 
-                            }
-                        }
-                        .listStyle(PlainListStyle())
-                    }
+            Spacer()
+
+            // Buttons on the right with spacing
+            HStack(spacing: 20) {
+                Button(action: viewModel.playAll) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(AppColors.primary)
                 }
-                .navigationTitle("My Music")
-                .onAppear {
-                    loadSongsFromDocuments()
+
+                Button(action: viewModel.playShuffled) {
+                    Image(systemName: "shuffle")
+                        .font(.system(size: 18))
+                        .foregroundColor(AppColors.primary)
+                }
+
+                Menu {
+                    Button("Title") { onSort?(.title) }
+                    Button("Artist") { onSort?(.artist) }
+                    Button("Duration") { onSort?(.duration) }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .font(.system(size: 18))
+                        .foregroundColor(AppColors.primary)
                 }
             }
         }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+}
+
+
+
+struct SongsView: View {
+    @StateObject private var viewModel = SongsViewModel()
+    @EnvironmentObject var tabState: TabState
+    
+    @State private var showFullPlayer = false
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 10) {
+                if viewModel.songs.isEmpty {
+                    Spacer()
+                    Image(systemName: "music.note.list")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .foregroundColor(AppColors.primary).opacity(0.7)
+                        .padding(.top, 50)
+
+                    Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
+                        .font(.headline)
+                        .foregroundColor(AppColors.textPrimary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    Spacer()
+                } else {
+                    // Top toolbar
+                    SongsTopBar(viewModel: viewModel) { key in
+                        viewModel.sortSongs(by: key)
+                    }
+                    
+                    List(viewModel.songs, id: \.self) { song in
+                        Button {
+                            viewModel.play(song)
+                            showFullPlayer = true
+                        } label: {
+                            MP3FileCell(song: song)
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .navigationTitle("My Music")
+            .onAppear { viewModel.loadSongs() }
+        }
         .fullScreenCover(isPresented: $showFullPlayer) {
-            MusicPlayerView()
-                .environmentObject(musicPlayerManager)
+            MusicPlayerView().environmentObject(MusicPlayerManager.shared)
         }
     }
-    
-    private func loadSongsFromDocuments() {
-        let files = LoadAllSongsFromDocuments().loadSongsFromDocuments()
-        self.mp3Files = files
-        musicPlayerManager.playFromAllSongs(files)
-    }
-
 }
+
+
 
 
 #Preview {

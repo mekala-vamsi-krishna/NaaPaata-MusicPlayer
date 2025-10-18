@@ -5,43 +5,98 @@
 //  Created by User on 06/10/25.
 //
 
-import Foundation
-class PlaylistViewModel:ObservableObject {
-    @Published  var playlists: [Playlist] = []
+import SwiftUI
+import AVFoundation
+
+final class PlaylistsViewModel: ObservableObject {
+    @Published var playlists: [Playlist] = []
+    
+    private let playlistManager = PlaylistManager.shared
+    
     init() {
-        self.playlists =  loadStaticPlaylistData()
+        loadPlaylists()
     }
-}
-
-
-extension PlaylistViewModel {
-    func loadStaticPlaylistData() -> [Playlist] {
-        let playlist =  [
-        Playlist(
-            name: "Chill Vibes",
-            songs: [
-                Song(title: "Midnight Dreams", artist: "Luna Bay", duration: 245, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 5)),
-                Song(title: "Ocean Waves", artist: "Coastal Hearts", duration: 198, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 3)),
-                Song(title: "Starlight", artist: "Nova Sound", duration: 212, artworkImage: "music.note", dateAdded: Date().addingTimeInterval(-86400 * 2))
-            ],
-            coverImage: "music.note.list",
-            description: "Perfect playlist for relaxing",
+    
+    func loadPlaylists() {
+        let playlistNames = playlistManager.getAllPlaylists()
+        
+        playlists = playlistNames.map { name in
+            let songURLs = playlistManager.getSongsInPlaylist(playlistName: name)
+            let songs = songURLs.map { url in
+                extractSongMetadata(from: url)
+            }
+            
+            return Playlist(
+                name: name,
+                songs: songs,
+                coverImage: UIImage(systemName: "music.note.list"), // Updated to UIImage
+                description: "",
+                isPrivate: false,
+                dateCreated: Date() // Or get from folder metadata
+            )
+        }
+    }
+    
+    func addPlaylist(name: String, description: String = "") {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else { return }
+        
+        playlistManager.createPlaylist(name: trimmedName)
+        
+        let newPlaylist = Playlist(
+            name: trimmedName,
+            songs: [],
+            coverImage: UIImage(systemName: "music.note.list"), // Updated
+            description: description,
             isPrivate: false,
-            dateCreated: Date().addingTimeInterval(-86400 * 30)
-        ),
-        Playlist(
-            name: "Workout Mix",
-            songs: [
-                Song(title: "Thunder Storm", artist: "Weather Sounds", duration: 267, artworkImage: "music.note", dateAdded: Date()),
-                Song(title: "Electric Feel", artist: "Neon Pulse", duration: 223, artworkImage: "music.note", dateAdded: Date())
-            ],
-            coverImage: "music.note.list",
-            description: "High energy workout tracks",
-            isPrivate: false,
-            dateCreated: Date().addingTimeInterval(-86400 * 15)
+            dateCreated: Date()
         )
         
-        ]
-        return playlist
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            playlists.insert(newPlaylist, at: 0)
+        }
+    }
+    
+    func deletePlaylist(_ playlist: Playlist) {
+        playlistManager.deletePlaylist(name: playlist.name)
+        playlists.removeAll { $0.id == playlist.id }
+    }
+    
+    func updatePlaylist(_ playlist: Playlist) {
+        if let index = playlists.firstIndex(where: { $0.id == playlist.id }) {
+            playlists[index] = playlist
+        }
+    }
+    
+    // MARK: - Helper: Extract metadata from URL
+    private func extractSongMetadata(from url: URL) -> Song {
+        let asset = AVAsset(url: url)
+        
+        let title = AVMetadataItem.metadataItems(from: asset.commonMetadata,
+                                                 withKey: AVMetadataKey.commonKeyTitle,
+                                                 keySpace: .common).first?.stringValue ?? url.deletingPathExtension().lastPathComponent
+        
+        let artist = AVMetadataItem.metadataItems(from: asset.commonMetadata,
+                                                  withKey: AVMetadataKey.commonKeyArtist,
+                                                  keySpace: .common).first?.stringValue ?? "Unknown Artist"
+        
+        let duration = CMTimeGetSeconds(asset.duration)
+        
+        var artwork: UIImage? = nil
+        if let artData = AVMetadataItem.metadataItems(from: asset.commonMetadata,
+                                                     withKey: AVMetadataKey.commonKeyArtwork,
+                                                     keySpace: .common).first?.dataValue {
+            artwork = UIImage(data: artData)
+        }
+        
+        return Song(
+            url: url,
+            title: title,
+            artist: artist,
+            duration: duration,
+            artworkImage: artwork,
+            dateAdded: Date()
+        )
     }
 }
+

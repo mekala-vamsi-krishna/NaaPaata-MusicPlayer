@@ -15,6 +15,7 @@ struct PlaylistSongRowView: View {
     
     var body: some View {
         HStack(spacing: 14) {
+            // Delete button in edit mode
             if editMode == .active {
                 Button(action: onDelete) {
                     Image(systemName: "minus.circle.fill")
@@ -24,18 +25,28 @@ struct PlaylistSongRowView: View {
                 .transition(.scale.combined(with: .opacity))
             }
             
+            // Artwork
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.ultraThinMaterial)
                     .frame(width: 56, height: 56)
                 
-                Image(systemName: song.artworkImage)
-                    .font(.system(size: 24))
-                    .foregroundColor(AppColors.primary)
+                if let artwork = song.artworkImage {
+                    Image(uiImage: artwork)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(6)
+                } else {
+                    Image(systemName: "music.note")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppColors.primary)
+                }
             }
             
+            // Song title and artist
             VStack(alignment: .leading, spacing: 4) {
-                Text(song.title)
+                Text(song.title.isEmpty ? song.url.lastPathComponent : song.title)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
@@ -114,3 +125,4 @@ struct PlaylistSongRowView: View {
         return String(format: "%d:%02d", mins, secs)
     }
 }
+

@@ -8,96 +8,104 @@
 import SwiftUI
 import AVFoundation
 
-class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
-    @Published var currentTrack: URL?
+final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
+    static let shared = MusicPlayerManager()
+    
+    // MARK: - Published Properties
     @Published var artworkImage: UIImage?
-    @Published var currentTitle: String?
-    @Published var artistName: String?
     @Published var isPlaying: Bool = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
-    @Published var playQueue: [URL] = []
-    private var activeList: [URL] { playQueue.isEmpty ? trackList : playQueue }
+    @Published var currentSong: Song?
     
+    // MARK: - Private Properties
     private var player: AVAudioPlayer?
     private var timer: Timer?
     
-    var trackList: [URL] = []
+    private var allSongs: [Song] = []
+    private var playQueue: [Song] = []
     private var currentIndex: Int = 0
     
-    // MARK: - Play Track
-    func playTrack(_ url: URL) {
-        currentTrack = url
-        currentIndex = activeList.firstIndex(of: url) ?? 0
-        extractMetadata(from: url)
+    private override init() {
+        super.init()
+    }
+    
+    // MARK: - Computed Properties
+    private var currentPlaylist: [Song] {
+        playQueue.isEmpty ? allSongs : playQueue
+    }
+    
+    var currentSongArtwork: UIImage? {
+        guard let song = currentSong else { return nil }
+        return getArtwork(for: song)
+    }
+    
+    // MARK: - Playback Methods
+    func playSong(_ song: Song) {
+        currentSong = song
         
         do {
-            player = try AVAudioPlayer(contentsOf: url)
+            player = try AVAudioPlayer(contentsOf: song.url)
             player?.delegate = self
             player?.play()
             isPlaying = true
             duration = player?.duration ?? 0
+            artworkImage = currentSongArtwork
             startTimer()
         } catch {
-            print("Error playing: \(error.localizedDescription)")
+            print("Error playing song: \(error.localizedDescription)")
         }
     }
     
-    // MARK: - Queue Management
-    /// Set a scoped play queue (e.g., an album) and optionally start at a specific track
-    func setPlayQueue(_ urls: [URL], startAt startURL: URL? = nil) {
-        playQueue = urls
-        if let startURL = startURL, let idx = urls.firstIndex(of: startURL) {
-            currentIndex = idx
-            playTrack(startURL)
-        } else if let first = urls.first {
-            currentIndex = 0
-            playTrack(first)
-        }
-    }
-
-    /// Clear the scoped play queue so that navigation uses the full trackList again
-    func clearPlayQueue() {
+    func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil) {
+        allSongs = songs
         playQueue = []
-    }
-    
-    // MARK: - Playback Sources
-    /// Play from the full Songs tab list. Sets the global trackList and clears any album queue.
-    func playFromAllSongs(_ urls: [URL], startAt startURL: URL? = nil) {
-        trackList = urls
-        clearPlayQueue()
-        if let startURL = startURL, let idx = urls.firstIndex(of: startURL) {
-            currentIndex = idx
-            playTrack(startURL)
-        } else {
-            // Do not auto-play when just setting the songs list; wait for user selection.
+
+        // Determine the starting song
+        if let startSong = song {
+            currentSong = startSong
+            if let index = songs.firstIndex(of: startSong) {
+                currentIndex = index
+                playSong(startSong)
+            } else {
+                // Song not in the list, fallback to first song
+                currentIndex = 0
+                if let first = songs.first {
+                    currentSong = first
+                    playSong(first)
+                }
+            }
+        } else if let first = songs.first {
+            currentSong = first
             currentIndex = 0
-            // Leave `currentTrack` unchanged; playback will start when the user taps a song.
+            playSong(first)
         }
     }
-
-    /// Play within a specific album. Sets a scoped queue and starts from the given song or the first one.
-    func playFromAlbum(_ urls: [URL], startAt startURL: URL? = nil) {
-        setPlayQueue(urls, startAt: startURL)
+    
+    func playFromQueue(_ songs: [Song], startAt song: Song? = nil) {
+        playQueue = songs
+        
+        if let song = song, let index = songs.firstIndex(of: song) {
+            currentIndex = index
+            playSong(song)
+        } else if let first = songs.first {
+            currentIndex = 0
+            playSong(first)
+        }
     }
     
-    // MARK: - Next Track
     func playNext() {
-        let list = activeList
-        guard !list.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % list.count
-        playTrack(list[currentIndex])
+        guard !currentPlaylist.isEmpty else { return }
+        currentIndex = (currentIndex + 1) % currentPlaylist.count
+        playSong(currentPlaylist[currentIndex])
     }
     
-    // MARK: - Previous Track
     func playPrevious() {
-        let list = activeList
-        guard !list.isEmpty else { return }
-        currentIndex = (currentIndex - 1 + list.count) % list.count
-        playTrack(list[currentIndex])
+        guard !currentPlaylist.isEmpty else { return }
+        currentIndex = (currentIndex - 1 + currentPlaylist.count) % currentPlaylist.count
+        playSong(currentPlaylist[currentIndex])
     }
     
-    // MARK: - Play/Pause
     func togglePlayPause() {
         guard let player = player else { return }
         if isPlaying {
@@ -108,25 +116,31 @@ class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         isPlaying.toggle()
     }
     
-    // MARK: - Stop
     func stop() {
         player?.stop()
         isPlaying = false
-        currentTrack = nil
+        currentSong = nil
         artworkImage = nil
-        currentTitle = nil
-        artistName = nil
         stopTimer()
+    }
+    
+    // MARK: - Shuffle
+    func shufflePlay(playlist: [Song]) {
+        allSongs = playlist.shuffled()
+        playQueue = []
+        currentIndex = 0
+        if let first = allSongs.first {
+            playSong(first)
+        }
     }
     
     // MARK: - Timer
     private func startTimer() {
         stopTimer()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            if let player = self.player, self.isPlaying {
-                self.currentTime = player.currentTime
-                self.duration = player.duration
-            }
+            guard let player = self.player else { return }
+            self.currentTime = player.currentTime
+            self.duration = player.duration
         }
     }
     
@@ -135,31 +149,59 @@ class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         timer = nil
     }
     
-    private func extractMetadata(from url: URL) {
-        artistName = nil
-        let asset = AVAsset(url: url)
-        for meta in asset.commonMetadata {
-            if meta.commonKey?.rawValue == "artwork",
-               let data = meta.value as? Data,
-               let img = UIImage(data: data) {
-                artworkImage = img
-            }
-            if meta.commonKey?.rawValue == "title" {
-                currentTitle = meta.stringValue
-            }
-            if meta.commonKey?.rawValue == "artist" {
-                artistName = meta.stringValue
-            }
-        }
-        if currentTitle == nil {
-            currentTitle = url.lastPathComponent
-        }
-    }
-    
     // MARK: - AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         guard flag else { return }
         playNext()
     }
+    
+    // MARK: - Artwork Extraction
+    func getArtwork(for song: Song) -> UIImage {
+        // Return the artwork if already available
+        if let artwork = song.artworkImage {
+            return artwork
+        }
+        
+        // Otherwise, try to extract from metadata
+        let asset = AVAsset(url: song.url)
+        for meta in asset.commonMetadata {
+            if meta.commonKey?.rawValue == "artwork",
+               let data = meta.value as? Data,
+               let image = UIImage(data: data) {
+                return image
+            }
+        }
+        
+        // Fallback system image
+        return UIImage(systemName: "music.note")!
+    }
+    
+    func loadSong(from url: URL) -> Song {
+        let asset = AVAsset(url: url)
+        var title = url.deletingPathExtension().lastPathComponent
+        var artist = "Unknown Artist"
+        var duration: TimeInterval = 0
+        var artwork: UIImage? = nil // Use UIImage directly
+
+        duration = CMTimeGetSeconds(asset.duration)
+        
+        for item in asset.commonMetadata {
+            guard let key = item.commonKey else { continue }
+            switch key {
+            case .commonKeyTitle:
+                if let value = item.stringValue { title = value }
+            case .commonKeyArtist:
+                if let value = item.stringValue { artist = value }
+            case .commonKeyArtwork:
+                if let data = item.dataValue, let image = UIImage(data: data) {
+                    artwork = image
+                }
+            default: break
+            }
+        }
+
+        return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
+    }
+
 }
 

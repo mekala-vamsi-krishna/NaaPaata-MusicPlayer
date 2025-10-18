@@ -34,17 +34,29 @@ struct EditPlaylistView: View {
                                     .fill(.ultraThinMaterial)
                                     .frame(width: 160, height: 160)
                                     .overlay(
-                                        Image(systemName: playlist.coverImage)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 80, height: 80)
-                                            .foregroundStyle(
-                                                LinearGradient(
-                                                    colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                )
-                                            )
+                                        Group {
+                                            if let image = playlist.coverImage {
+                                                Image(uiImage: image)
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 80, height: 80)
+                                                    .cornerRadius(12)
+                                                    .shadow(radius: 5)
+                                            } else {
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(LinearGradient(
+                                                        colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ))
+                                                    .frame(width: 80, height: 80)
+                                                    .overlay(
+                                                        Image(systemName: "music.note")
+                                                            .font(.system(size: 36))
+                                                            .foregroundColor(.white)
+                                                    )
+                                            }
+                                        }
                                     )
                             }
                             

@@ -17,16 +17,15 @@ struct MusicPlayerView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var rotationAngle: Double = 0
     @State private var pulseAnimation = false
-    @GestureState private var dragState = false
     
     var body: some View {
         ZStack {
-            // Animated gradient background
+            // Animated background
             AnimatedGradientBackground(isPlaying: musicPlayerManager.isPlaying)
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom header
+                // Header
                 HStack {
                     Button(action: {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -37,7 +36,6 @@ struct MusicPlayerView: View {
                             Circle()
                                 .fill(.ultraThinMaterial)
                                 .frame(width: 44, height: 44)
-                            
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(.white)
@@ -51,7 +49,6 @@ struct MusicPlayerView: View {
                             Circle()
                                 .fill(.ultraThinMaterial)
                                 .frame(width: 44, height: 44)
-                            
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(.white)
@@ -63,282 +60,117 @@ struct MusicPlayerView: View {
                 
                 Spacer()
                 
-                // Vinyl-style album art with 3D rotation
-                VStack(spacing: 30) {
-                    ZStack {
-                        // Outer glow
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [
-                                        AppColors.primary.opacity(0.4),
-                                        .clear
-                                    ],
-                                    center: .center,
-                                    startRadius: 140,
-                                    endRadius: 200
-                                )
-                            )
-                            .frame(width: 400, height: 400)
-                            .blur(radius: 30)
-                            .scaleEffect(pulseAnimation ? 1.1 : 1.0)
-                        
-                        // Vinyl disk
-                        ZStack {
-                            // Disk shadow
-                            Circle()
-                                .fill(.black.opacity(0.3))
-                                .frame(width: 300, height: 300)
-                                .blur(radius: 20)
-                                .offset(y: 10)
-                            
-                            // Main vinyl disk
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            Color(white: 0.1),
-                                            Color(white: 0.15),
-                                            Color(white: 0.1)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 300, height: 300)
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(
-                                            LinearGradient(
-                                                colors: [.white.opacity(0.3), .clear],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 2
-                                        )
-                                )
-                            
-                            // Grooves effect
-                            ForEach(0..<8) { i in
-                                Circle()
-                                    .stroke(Color.white.opacity(0.03), lineWidth: 1)
-                                    .frame(width: CGFloat(280 - i * 30), height: CGFloat(280 - i * 30))
-                            }
-                            
-                            // Center album art
-                            Image(uiImage: musicPlayerManager.artworkImage ?? UIImage(systemName: "music.note")!)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 200, height: 200)
-                                .clipShape(Circle())
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(
-                                            LinearGradient(
-                                                colors: [.white.opacity(0.5), .clear],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 3
-                                        )
-                                )
-                                .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-                            
-                            // Center hole
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        colors: [Color(white: 0.2), Color(white: 0.05)],
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 20
-                                    )
-                                )
-                                .frame(width: 40, height: 40)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                                )
-                        }
-                        .rotation3DEffect(
-                            .degrees(isDragging ? 5 : 0),
-                            axis: (x: 1, y: 0, z: 0)
-                        )
-                        .rotationEffect(.degrees(rotationAngle))
-                        .scaleEffect(isDragging ? 0.95 : 1.0)
-                    }
-                    .frame(height: 320)
+                // Vinyl-style artwork
+                ZStack {
+                    Circle()
+                        .fill(RadialGradient(colors: [AppColors.primary.opacity(0.4), .clear], center: .center, startRadius: 140, endRadius: 200))
+                        .frame(width: 400, height: 400)
+                        .blur(radius: 30)
+                        .scaleEffect(pulseAnimation ? 1.1 : 1.0)
                     
-                    // Song info with glassmorphism
-                    VStack(spacing: 8) {
-                        Text(musicPlayerManager.currentTitle ?? "Unknown Title")
-                            .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        
-                        Text(musicPlayerManager.artistName ?? "Unknown Artist")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.7))
+                    Circle()
+                        .fill(
+                            LinearGradient(colors: [Color(white: 0.1), Color(white: 0.15), Color(white: 0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                        .frame(width: 300, height: 300)
+                        .overlay(
+                            Circle().strokeBorder(LinearGradient(colors: [.white.opacity(0.3), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2)
+                        )
+                    
+                    // Grooves
+                    ForEach(0..<8) { i in
+                        Circle().stroke(Color.white.opacity(0.03), lineWidth: 1)
+                            .frame(width: CGFloat(280 - i * 30), height: CGFloat(280 - i * 30))
                     }
-                    .padding(.horizontal, 40)
+                    
+                    // Center artwork
+                    if let artwork = musicPlayerManager.currentSongArtwork {
+                        Image(uiImage: artwork)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 200, height: 200)
+                            .clipShape(Circle())
+                            .overlay(Circle().strokeBorder(LinearGradient(colors: [.white.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 3))
+                            .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                    } else {
+                        Image(systemName: "music.note")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .foregroundStyle(.white)
+                    }
                 }
+                .rotationEffect(.degrees(rotationAngle))
+                .frame(height: 320)
+                
+                // Song info
+                VStack(spacing: 8) {
+                    Text(musicPlayerManager.currentSong?.title ?? "Unknown Title")
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    Text(musicPlayerManager.currentSong?.artist ?? "Unknown Artist")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .padding(.horizontal, 40)
                 
                 Spacer()
                 
-                // Futuristic progress bar
+                // Progress bar
                 VStack(spacing: 12) {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
-                            // Background track with particles
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(.ultraThinMaterial)
-                                    .frame(height: 8)
-                                
-                                // Active progress with gradient
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                AppColors.primary,
-                                                AppColors.primary.opacity(0.6)
-                                            ],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
-                                    .shadow(color: AppColors.primary.opacity(0.5), radius: 8, x: 0, y: 0)
-                                
-                                // Animated shimmer on progress
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                .clear,
-                                                .white.opacity(0.3),
-                                                .clear
-                                            ],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: 50, height: 8)
-                                    .offset(x: progressWidth(totalWidth: geometry.size.width) - 25)
-                                
-                                // Draggable thumb
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: isDragging ? 24 : 18, height: isDragging ? 24 : 18)
-                                    .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(AppColors.primary.opacity(0.5), lineWidth: 2)
-                                            .scaleEffect(isDragging ? 1.5 : 1.0)
-                                            .opacity(isDragging ? 0 : 1)
-                                    )
-                                    .offset(x: progressWidth(totalWidth: geometry.size.width) - (isDragging ? 12 : 9))
-                            }
+                            Capsule()
+                                .fill(.ultraThinMaterial)
+                                .frame(height: 8)
+                            
+                            Capsule()
+                                .fill(LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
                         }
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .updating($dragState) { value, state, _ in
-                                    state = true
-                                }
-                                .onChanged { value in
-                                    withAnimation(.interactiveSpring()) {
-                                        isDragging = true
-                                    }
-                                    let progress = min(max(0, value.location.x / geometry.size.width), 1)
-                                    dragOffset = progress * geometry.size.width
-                                }
-                                .onEnded { value in
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        isDragging = false
-                                    }
-                                    let progress = min(max(0, value.location.x / geometry.size.width), 1)
-                                    // Update music position here
-                                }
-                        )
                     }
                     .frame(height: 30)
                     .padding(.horizontal, 32)
                     
-                    // Time labels
                     HStack {
                         Text(formatTime(musicPlayerManager.currentTime))
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.8))
-                            .monospacedDigit()
-                        
                         Spacer()
-                        
                         Text(formatTime(musicPlayerManager.duration))
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.8))
-                            .monospacedDigit()
                     }
+                    .foregroundStyle(.white.opacity(0.8))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .monospacedDigit()
                     .padding(.horizontal, 32)
                 }
                 .padding(.bottom, 20)
                 
-                // Control buttons with glassmorphism
+                // Playback controls
                 HStack(spacing: 50) {
-                    ControlButton(icon: "backward.fill", size: 28) {
-                        musicPlayerManager.playPrevious()
+                    Button(action: { musicPlayerManager.playPrevious() }) {
+                        Image(systemName: "backward.fill").font(.system(size: 28))
+                            .foregroundStyle(.white)
                     }
                     
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            musicPlayerManager.togglePlayPause()
-                        }
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(.ultraThinMaterial)
-                                .frame(width: 85, height: 85)
-                                .shadow(color: AppColors.primary.opacity(0.3), radius: 20, x: 0, y: 10)
-                            
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [AppColors.primary.opacity(0.8), AppColors.primary.opacity(0.3)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 2
-                                )
-                                .frame(width: 85, height: 85)
-                            
-                            Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundStyle(.white)
-                                .offset(x: musicPlayerManager.isPlaying ? 0 : 3)
-                        }
-                        .scaleEffect(musicPlayerManager.isPlaying ? 1.0 : 1.05)
+                    Button(action: { musicPlayerManager.togglePlayPause() }) {
+                        Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 32))
+                            .foregroundStyle(.white)
+                            .frame(width: 85, height: 85)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Circle())
                     }
-                    .buttonStyle(ScaleButtonStyle())
                     
-                    ControlButton(icon: "forward.fill", size: 28) {
-                        musicPlayerManager.playNext()
+                    Button(action: { musicPlayerManager.playNext() }) {
+                        Image(systemName: "forward.fill").font(.system(size: 28))
+                            .foregroundStyle(.white)
                     }
                 }
                 .padding(.bottom, 30)
                 
-                // Volume and additional controls
-                HStack(spacing: 40) {
-                    SmallControlButton(icon: "shuffle") {
-                        // ...
-                    }
-                    
-                    VolumeControlView()
-                    
-                    SmallControlButton(icon: "repeat") {
-                        // ...
-                    }
-                }
-                .padding(.bottom, 40)
+                Spacer()
             }
         }
         .preferredColorScheme(.dark)
@@ -350,8 +182,7 @@ struct MusicPlayerView: View {
     
     private func progressWidth(totalWidth: CGFloat) -> CGFloat {
         guard musicPlayerManager.duration > 0 else { return 0 }
-        let progress = CGFloat(musicPlayerManager.currentTime / musicPlayerManager.duration)
-        return totalWidth * progress
+        return totalWidth * CGFloat(musicPlayerManager.currentTime / musicPlayerManager.duration)
     }
     
     private func formatTime(_ time: TimeInterval) -> String {
@@ -444,10 +275,18 @@ struct SmallControlButton: View {
 struct MusicPlayerView_Previews: PreviewProvider {
     static var previews: some View {
         MusicPlayerView()
-            .environmentObject(MusicPlayerManager())
+            .environmentObject(MusicPlayerManager.shared)
     }
 }
 
 #Preview {
     MusicPlayerView()
+}
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
 }

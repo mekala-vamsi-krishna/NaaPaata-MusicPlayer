@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
 		AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B4AB42E982764006190E4 /* VolumeControlView.swift */; };
+		AC6773F72EA2A4110059C86C /* MetaDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773F62EA2A4110059C86C /* MetaDataService.swift */; };
+		AC6773F92EA2A4200059C86C /* SongsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773F82EA2A4200059C86C /* SongsViewModel.swift */; };
+		AC6773FB2EA2A4B40059C86C /* MusicLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773FA2EA2A4B40059C86C /* MusicLibraryService.swift */; };
+		AC6774032EA2AF480059C86C /* PlayListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6774022EA2AF480059C86C /* PlayListCard.swift */; };
+		AC6774072EA2CA260059C86C /* AlbumsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6774062EA2CA260059C86C /* AlbumsViewModel.swift */; };
+		AC6774092EA2CAA70059C86C /* AlbumModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6774082EA2CAA70059C86C /* AlbumModel.swift */; };
 		AC6F41792E7FD05F00B5BE35 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */; };
 		AC6F417A2E7FD05F00B5BE35 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6F416F2E7FD05F00B5BE35 /* Assets.xcassets */; };
 		AC6F417C2E7FD05F00B5BE35 /* AlbumsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */; };
@@ -39,6 +45,12 @@
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		AC5B4AB42E982764006190E4 /* VolumeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeControlView.swift; sourceTree = "<group>"; };
+		AC6773F62EA2A4110059C86C /* MetaDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaDataService.swift; sourceTree = "<group>"; };
+		AC6773F82EA2A4200059C86C /* SongsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongsViewModel.swift; sourceTree = "<group>"; };
+		AC6773FA2EA2A4B40059C86C /* MusicLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibraryService.swift; sourceTree = "<group>"; };
+		AC6774022EA2AF480059C86C /* PlayListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListCard.swift; sourceTree = "<group>"; };
+		AC6774062EA2CA260059C86C /* AlbumsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumsViewModel.swift; sourceTree = "<group>"; };
+		AC6774082EA2CAA70059C86C /* AlbumModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumModel.swift; sourceTree = "<group>"; };
 		AC6F416B2E7FD05F00B5BE35 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AC6F416D2E7FD05F00B5BE35 /* AlbumsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumsView.swift; sourceTree = "<group>"; };
 		AC6F416E2E7FD05F00B5BE35 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -116,6 +128,7 @@
 			children = (
 				ACD23E222E9285F60054344D /* SongModel.swift */,
 				ACD23E242E9286170054344D /* PlayListModel.swift */,
+				AC6774082EA2CAA70059C86C /* AlbumModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -135,6 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				CE7907E42E92F591006D517C /* PlaylistViewModel.swift */,
+				AC6773F82EA2A4200059C86C /* SongsViewModel.swift */,
+				AC6774062EA2CA260059C86C /* AlbumsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -143,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
+				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -165,6 +181,7 @@
 				ACD23E2A2E9286E70054344D /* AddSongsView.swift */,
 				ACD23E282E9286BB0054344D /* PlaylistSongRowView.swift */,
 				ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */,
+				AC6774022EA2AF480059C86C /* PlayListCard.swift */,
 			);
 			path = Playlists;
 			sourceTree = "<group>";
@@ -218,7 +235,8 @@
 			isa = PBXGroup;
 			children = (
 				CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */,
-				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
+				AC6773F62EA2A4110059C86C /* MetaDataService.swift */,
+				AC6773FA2EA2A4B40059C86C /* MusicLibraryService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -298,15 +316,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC6F417C2E7FD05F00B5BE35 /* AlbumsView.swift in Sources */,
+				AC6774092EA2CAA70059C86C /* AlbumModel.swift in Sources */,
 				AC6F417D2E7FD05F00B5BE35 /* AppColors.swift in Sources */,
+				AC6774072EA2CA260059C86C /* AlbumsViewModel.swift in Sources */,
 				AC6F417E2E7FD05F00B5BE35 /* DocumentPicker.swift in Sources */,
+				AC6773FB2EA2A4B40059C86C /* MusicLibraryService.swift in Sources */,
 				ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */,
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,
 				AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */,
+				AC6773F92EA2A4200059C86C /* SongsViewModel.swift in Sources */,
 				AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */,
+				AC6774032EA2AF480059C86C /* PlayListCard.swift in Sources */,
 				CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */,
 				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
 				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
+				AC6773F72EA2A4110059C86C /* MetaDataService.swift in Sources */,
 				AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */,
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
