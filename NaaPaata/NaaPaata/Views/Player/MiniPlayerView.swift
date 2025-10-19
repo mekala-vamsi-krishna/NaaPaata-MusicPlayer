@@ -7,28 +7,38 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct MiniPlayerView: View {
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
-    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
         HStack(spacing: 12) {
-            // Album Artwork with subtle shadow
-            Image(uiImage: musicPlayerManager.artworkImage ?? UIImage(systemName: "music.note")!)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 48, height: 48)
-                .clipShape(Capsule(style: .continuous))
-                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            // Album Artwork
+            if let artwork = musicPlayerManager.currentSongArtwork {
+                Image(uiImage: artwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 48, height: 48)
+                    .clipShape(Capsule(style: .continuous))
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            } else {
+                Image(uiImage: musicPlayerManager.currentSong?.artworkImage ?? UIImage(systemName: "music.note")!)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
+                    .clipShape(Capsule(style: .continuous))
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            }
             
             // Song Info
             VStack(alignment: .leading, spacing: 2) {
-                Text(musicPlayerManager.currentTitle ?? "Unknown Song")
+                Text(musicPlayerManager.currentSong?.title ?? "Unknown Song")
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .lineLimit(1)
                 
-                Text(musicPlayerManager.artistName ?? "Unknown Artist")
+                Text(musicPlayerManager.currentSong?.artist ?? "Unknown Artist")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -39,12 +49,16 @@ struct MiniPlayerView: View {
             // Playback Controls
             HStack(spacing: 20) {
                 Button {
-                    musicPlayerManager.togglePlayPause()
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                        musicPlayerManager.togglePlayPause()
+                    }
                 } label: {
                     Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
                         .font(.title3)
                         .foregroundStyle(AppColors.primary)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
+                        .rotationEffect(.degrees(musicPlayerManager.isPlaying ? 180 : 0))
+                        .animation(.easeInOut, value: musicPlayerManager.isPlaying)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -63,17 +77,16 @@ struct MiniPlayerView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background {
-            // Modern iOS material with proper blur
+        .background(
             Capsule(style: .continuous)
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: -2)
-        }
-        .overlay(alignment: .top) {
-            // Subtle top separator line
+        )
+        .overlay(
             Capsule(style: .continuous)
-                .stroke(.quaternary, lineWidth: 0.5)
-        }
+                .stroke(.quaternary, lineWidth: 0.5),
+            alignment: .top
+        )
         .padding(.horizontal, 8)
         .padding(.bottom, 8)
     }
@@ -82,5 +95,5 @@ struct MiniPlayerView: View {
 
 #Preview {
     MiniPlayerView()
-        .environmentObject(MusicPlayerManager())
+        .environmentObject(MusicPlayerManager.shared)
 }

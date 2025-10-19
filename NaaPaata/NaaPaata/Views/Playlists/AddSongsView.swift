@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct AddSongsView: View {
     @Environment(\.dismiss) var dismiss
@@ -128,14 +129,33 @@ extension AddSongsView {
         let mp3Files = LoadAllSongsFromDocuments().loadSongsFromDocuments()
         
         availableSongs = mp3Files.map { url in
-            Song(
-                title: url.deletingPathExtension().lastPathComponent,
-                artist: "Unknown Artist", // You can extract metadata later
-                duration: 0,
-                fileURL: url, // Store the actual file URL
-                artworkImage: "music.note",
-                dateAdded: Date()
-            )
+            let asset = AVAsset(url: url)
+            
+            // Default values
+            var title = url.deletingPathExtension().lastPathComponent
+            var artist = "Unknown Artist"
+            var duration: TimeInterval = 0
+            var artwork: UIImage? = UIImage(systemName: "music.note")
+            
+            // Extract metadata
+            duration = CMTimeGetSeconds(asset.duration)
+            for item in asset.commonMetadata {
+                guard let key = item.commonKey else { continue }
+                switch key {
+                case .commonKeyTitle:
+                    if let value = item.stringValue { title = value }
+                case .commonKeyArtist:
+                    if let value = item.stringValue { artist = value }
+                case .commonKeyArtwork:
+                    if let data = item.dataValue, let image = UIImage(data: data) {
+                        artwork = image
+                    }
+                default:
+                    break
+                }
+            }
+            
+            return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
         }
     }
     
@@ -144,13 +164,11 @@ extension AddSongsView {
         let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
         
         for song in songsToAdd {
-            if let fileURL = song.fileURL {
-                // 1. Add to file system using PlaylistManager
-                playlistManager.addSongToPlaylist(songURL: fileURL, playlistName: playlist.name)
-                
-                // 2. Add to UI model
-                playlist.songs.append(song)
-            }
+            // use `song.url` instead of `song.fileURL`
+            playlistManager.addSongToPlaylist(songURL: song.url, playlistName: playlist.name)
+            
+            // Add to UI model
+            playlist.songs.append(song)
         }
     }
     
@@ -181,9 +199,12 @@ struct AddableSongRow: View {
                         .fill(.ultraThinMaterial)
                         .frame(width: 56, height: 56)
                     
-                    Image(systemName: song.artworkImage)
-                        .font(.system(size: 24))
+                    Image(uiImage: song.artworkImage ?? UIImage(systemName: "music.note")!)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
                         .foregroundColor(AppColors.primary)
+                        .cornerRadius(8)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {

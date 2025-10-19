@@ -9,13 +9,15 @@ import SwiftUI
 
 @main
 struct NaaPaataApp: App {
-    @StateObject var musicPlayerManager = MusicPlayerManager()
+    @StateObject var musicPlayerManager = MusicPlayerManager.shared
+    @StateObject var playlistsViewModel =  PlaylistsViewModel()
     @ObservedObject var tabState = TabState()
   
     var body: some Scene {
         WindowGroup {
             MainTabView()
                 .environmentObject(musicPlayerManager)
+                .environmentObject(playlistsViewModel)
                 .environmentObject(tabState)
             
         }

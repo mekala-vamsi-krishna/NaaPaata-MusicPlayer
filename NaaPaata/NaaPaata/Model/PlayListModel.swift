@@ -5,21 +5,26 @@
 //  Created by Mekala Vamsi Krishna on 10/5/25.
 //
 
-import Foundation
+import SwiftUI
 
-
-struct Playlist: Identifiable, Hashable, Codable {
+struct Playlist: Identifiable, Hashable {
     let id = UUID()
     var name: String
     var songs: [Song]
-    var coverImage: String
+    var coverImage: UIImage? = nil
     var description: String
     var isPrivate: Bool
     var dateCreated: Date
     var folderName: String
     
-    // Default initializer for empty playlists
-    init(name: String, songs: [Song] = [], coverImage: String = "music.note.list", description: String = "", isPrivate: Bool = false, dateCreated: Date = Date()) {
+    init(
+        name: String,
+        songs: [Song] = [],
+        coverImage: UIImage? = nil,
+        description: String = "",
+        isPrivate: Bool = false,
+        dateCreated: Date = Date()
+    ) {
         self.name = name
         self.songs = songs
         self.coverImage = coverImage
