@@ -18,27 +18,24 @@ class LoadAllSongsFromDocuments {
         if !fileManager.fileExists(atPath: musicFolder.path) {
             do {
                 try fileManager.createDirectory(at: musicFolder, withIntermediateDirectories: true, attributes: nil)
-                print("Created MyAppFiles folder at \(musicFolder.path)")
+                print("Created Music folder at \(musicFolder.path)")
             } catch {
                 print("Error creating folder: \(error)")
                 return []
             }
         }
         
-        do {
-            let files = try fileManager.contentsOfDirectory(at: musicFolder,
-                                                            includingPropertiesForKeys: nil,
-                                                            options: [.skipsHiddenFiles])
-                .filter { $0.pathExtension.lowercased() == "mp3" }
-            
-           // self.mp3Files = files
-           // musicPlayerManager.playFromAllSongs(files)
-            print("Loaded all  music files. ")
-            return files
-        } catch {
-            print("Error reading mp3 files: \(error)")
-           // self.mp3Files = []
+        guard let enumerator = fileManager.enumerator(at: musicFolder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles, .skipsPackageDescendants]) else {
             return []
         }
+        
+        let mp3Files = enumerator.compactMap { element -> URL? in
+            guard let url = element as? URL, url.pathExtension.lowercased() == "mp3" else { return nil }
+            return url
+        }
+        
+        print("Loaded \(mp3Files.count) music files including subfolders.")
+        return mp3Files
     }
+
 }

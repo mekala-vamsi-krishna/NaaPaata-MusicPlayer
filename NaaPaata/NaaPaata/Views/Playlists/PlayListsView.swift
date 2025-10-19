@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PlayListsView: View {
-    @StateObject private var viewModel = PlaylistsViewModel()
+    @EnvironmentObject private var viewModel: PlaylistsViewModel
     
     @State private var showAddPlaylistSheet = false
     @State private var newPlaylistName = ""

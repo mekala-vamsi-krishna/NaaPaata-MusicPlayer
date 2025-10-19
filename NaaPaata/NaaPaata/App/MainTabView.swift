@@ -14,6 +14,8 @@ class TabState: ObservableObject {
 struct MainTabView: View {
     @EnvironmentObject var tabState: TabState
     @StateObject private var musicPlayerManager = MusicPlayerManager.shared
+    @StateObject private var playlistsViewModel = PlaylistsViewModel()
+    
     @State private var showFullPlayer = false
 
     var body: some View {
@@ -58,6 +60,7 @@ struct MainTabView: View {
         .fullScreenCover(isPresented: $showFullPlayer) {
             MusicPlayerView()
                 .environmentObject(musicPlayerManager)
+                .environmentObject(playlistsViewModel)
         }
     }
 }

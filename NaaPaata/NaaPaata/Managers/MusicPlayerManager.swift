@@ -82,22 +82,27 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         }
     }
     
-    func playFromQueue(_ songs: [Song], startAt song: Song? = nil) {
-        playQueue = songs
-        
-        if let song = song, let index = songs.firstIndex(of: song) {
-            currentIndex = index
-            playSong(song)
-        } else if let first = songs.first {
-            currentIndex = 0
-            playSong(first)
+    // MARK: - Play Next in Queue
+    func addToQueueNext(_ song: Song) {
+        if playQueue.isEmpty {
+            // Initialize queue with the remaining songs after currentIndex
+            let remaining = Array(allSongs[(currentIndex+1)...])
+            playQueue = remaining
         }
+        // Insert the song at the front of the queue
+        playQueue.insert(song, at: 0)
     }
     
     func playNext() {
-        guard !currentPlaylist.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % currentPlaylist.count
-        playSong(currentPlaylist[currentIndex])
+        // If there's a queue, play the first song in it
+        if !playQueue.isEmpty {
+            let nextSong = playQueue.removeFirst()
+            currentIndex = allSongs.firstIndex(of: nextSong) ?? currentIndex
+            playSong(nextSong)
+        } else if !allSongs.isEmpty {
+            currentIndex = (currentIndex + 1) % allSongs.count
+            playSong(allSongs[currentIndex])
+        }
     }
     
     func playPrevious() {
@@ -201,6 +206,30 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         }
 
         return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
+    }
+    
+    func delete(song: Song) {
+        // Stop playback if currently playing
+        if currentSong == song {
+            stop()
+        }
+        
+        // Remove from allSongs and playQueue
+        allSongs.removeAll { $0 == song }
+        playQueue.removeAll { $0 == song }
+        
+        // Remove file from disk
+        do {
+            try FileManager.default.removeItem(at: song.url)
+            print("Deleted file at \(song.url.path)")
+        } catch {
+            print("Failed to delete file: \(error.localizedDescription)")
+        }
+        
+        // If needed, play next song automatically
+        if !allSongs.isEmpty {
+            playNext()
+        }
     }
 
 }

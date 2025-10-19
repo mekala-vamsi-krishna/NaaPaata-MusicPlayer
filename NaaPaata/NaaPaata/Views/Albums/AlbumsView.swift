@@ -8,28 +8,75 @@
 import SwiftUI
 import AVFoundation
 
+struct AlbumsTopBar: View {
+    @ObservedObject var viewModel: AlbumsViewModel
+    var onSort: ((AlbumsViewModel.SortKey) -> Void)? // callback for sort
+
+    var body: some View {
+        HStack {
+            // Total albums
+            Text("\(viewModel.albums.count) Albums")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.primary)
+                .padding(.leading, 5)
+
+            Spacer()
+
+            // Right side buttons
+            HStack(spacing: 16) {
+                Menu {
+                    Button("Name") { onSort?(.name) }
+                    Button("Date Added") { onSort?(.dateAdded) }
+                    Button("Date Modified") { onSort?(.dateModified) }
+                    Button("Size") { onSort?(.size) }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.system(size: 18))
+                        Text("Sort")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .foregroundColor(AppColors.primary)
+                }
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+}
+
+
 struct AlbumsView: View {
     @StateObject private var viewModel = AlbumsViewModel()
     
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
+    @State private var selectedSort: AlbumsViewModel.SortKey = .name
+
     var body: some View {
         NavigationView {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 24) {
-                    ForEach(viewModel.albums) { album in
-                        NavigationLink {
-                            AlbumDetailsView(
-                                title: album.name,
-                                artwork: album.artworkImage,
-                                songs: album.songs // Pass full metadata
-                            )
-                        } label: {
-                            AlbumCellView(album: album)
+            VStack(spacing: 0) {
+                AlbumsTopBar(viewModel: viewModel) { key in
+                    selectedSort = key
+                    viewModel.sortAlbums(by: key)
+                }
+
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 24) {
+                        ForEach(viewModel.albums) { album in
+                            NavigationLink {
+                                AlbumDetailsView(
+                                    title: album.name,
+                                    artwork: album.artworkImage,
+                                    songs: album.songs
+                                )
+                            } label: {
+                                AlbumCellView(album: album)
+                            }
                         }
                     }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Albums")
             .onAppear {
@@ -66,12 +113,19 @@ struct AlbumCellView: View {
                 }
             }
             
-            Text(album.name)
-                .font(.headline)
-                .foregroundColor(.primary)
-                .lineLimit(1)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 6)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(album.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 6)
+                
+                Text("\(album.songs.count) song\(album.songs.count == 1 ? "" : "s")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 6)
+            }
         }
     }
 }

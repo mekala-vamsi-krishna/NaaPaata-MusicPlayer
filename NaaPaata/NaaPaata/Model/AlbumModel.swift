@@ -13,6 +13,10 @@ struct Album: Identifiable {
     let name: String
     var artworkImage: UIImage? = nil
     var songs: [Song]
+
+    var dateAdded: Date = Date()
+    var dateModified: Date = Date()
+    var totalSize: Int64 = 0
     
     var artwork: Image {
         if let uiImage = artworkImage {

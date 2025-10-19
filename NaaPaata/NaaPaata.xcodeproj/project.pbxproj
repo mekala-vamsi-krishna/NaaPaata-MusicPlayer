@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
 		AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B4AB42E982764006190E4 /* VolumeControlView.swift */; };
+		AC5B78A42EA5891E004AD706 /* SongInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B78A32EA5891E004AD706 /* SongInfoView.swift */; };
+		AC5B78A62EA58F41004AD706 /* ActivityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B78A52EA58F41004AD706 /* ActivityViewController.swift */; };
 		AC6773F72EA2A4110059C86C /* MetaDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773F62EA2A4110059C86C /* MetaDataService.swift */; };
 		AC6773F92EA2A4200059C86C /* SongsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773F82EA2A4200059C86C /* SongsViewModel.swift */; };
 		AC6773FB2EA2A4B40059C86C /* MusicLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6773FA2EA2A4B40059C86C /* MusicLibraryService.swift */; };
@@ -45,6 +47,8 @@
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		AC5B4AB42E982764006190E4 /* VolumeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeControlView.swift; sourceTree = "<group>"; };
+		AC5B78A32EA5891E004AD706 /* SongInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongInfoView.swift; sourceTree = "<group>"; };
+		AC5B78A52EA58F41004AD706 /* ActivityViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewController.swift; sourceTree = "<group>"; };
 		AC6773F62EA2A4110059C86C /* MetaDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaDataService.swift; sourceTree = "<group>"; };
 		AC6773F82EA2A4200059C86C /* SongsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongsViewModel.swift; sourceTree = "<group>"; };
 		AC6773FA2EA2A4B40059C86C /* MusicLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLibraryService.swift; sourceTree = "<group>"; };
@@ -123,6 +127,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		AC5B78A92EA597B0004AD706 /* SongInfo */ = {
+			isa = PBXGroup;
+			children = (
+				AC5B78A32EA5891E004AD706 /* SongInfoView.swift */,
+			);
+			path = SongInfo;
+			sourceTree = "<group>";
+		};
+		AC5B78AA2EA597E8004AD706 /* ShareView */ = {
+			isa = PBXGroup;
+			children = (
+				AC5B78A52EA58F41004AD706 /* ActivityViewController.swift */,
+			);
+			path = ShareView;
+			sourceTree = "<group>";
+		};
 		AC6773EF2EA2A2290059C86C /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -140,6 +160,8 @@
 				AC6F41852E7FD13D00B5BE35 /* Songs */,
 				AC6F418C2E80421C00B5BE35 /* Albums */,
 				AC6773F52EA2A2B30059C86C /* Playlists */,
+				AC5B78A92EA597B0004AD706 /* SongInfo */,
+				AC5B78AA2EA597E8004AD706 /* ShareView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -331,6 +353,7 @@
 				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
 				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
 				AC6773F72EA2A4110059C86C /* MetaDataService.swift in Sources */,
+				AC5B78A62EA58F41004AD706 /* ActivityViewController.swift in Sources */,
 				AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */,
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
@@ -342,6 +365,7 @@
 				AC6F41892E7FD29A00B5BE35 /* MusicPlayerManager.swift in Sources */,
 				ACD23E1F2E927D580054344D /* PlaylistDetailsView.swift in Sources */,
 				CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */,
+				AC5B78A42EA5891E004AD706 /* SongInfoView.swift in Sources */,
 				AC6F41842E7FD05F00B5BE35 /* SongsView.swift in Sources */,
 				ACD23E252E9286170054344D /* PlayListModel.swift in Sources */,
 			);

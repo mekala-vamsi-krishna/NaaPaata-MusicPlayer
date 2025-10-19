@@ -56,6 +56,7 @@ struct SongsTopBar: View {
 
 struct SongsView: View {
     @StateObject private var viewModel = SongsViewModel()
+    @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
     
     @State private var showFullPlayer = false
@@ -100,7 +101,9 @@ struct SongsView: View {
             .onAppear { viewModel.loadSongs() }
         }
         .fullScreenCover(isPresented: $showFullPlayer) {
-            MusicPlayerView().environmentObject(MusicPlayerManager.shared)
+            MusicPlayerView()
+                .environmentObject(MusicPlayerManager.shared)
+                .environmentObject(playlistsViewModel)
         }
     }
 }

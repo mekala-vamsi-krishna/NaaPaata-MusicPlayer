@@ -11,7 +11,7 @@ import AVFoundation
 final class PlaylistsViewModel: ObservableObject {
     @Published var playlists: [Playlist] = []
     
-    private let playlistManager = PlaylistManager.shared
+    let playlistManager = PlaylistManager.shared
     
     init() {
         loadPlaylists()

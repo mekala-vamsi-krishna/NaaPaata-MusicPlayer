@@ -69,4 +69,9 @@ final class SongsViewModel: ObservableObject {
     func playShuffled() {
         musicManager.playFromAllSongs(songs.shuffled())
     }
+    
+    // Call this after delete or whenever manager changes
+    func refresh() {
+        loadSongs()
+    }
 }

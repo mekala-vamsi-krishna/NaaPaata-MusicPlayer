@@ -49,12 +49,16 @@ struct MiniPlayerView: View {
             // Playback Controls
             HStack(spacing: 20) {
                 Button {
-                    musicPlayerManager.togglePlayPause()
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                        musicPlayerManager.togglePlayPause()
+                    }
                 } label: {
                     Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
                         .font(.title3)
                         .foregroundStyle(AppColors.primary)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
+                        .rotationEffect(.degrees(musicPlayerManager.isPlaying ? 180 : 0))
+                        .animation(.easeInOut, value: musicPlayerManager.isPlaying)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
