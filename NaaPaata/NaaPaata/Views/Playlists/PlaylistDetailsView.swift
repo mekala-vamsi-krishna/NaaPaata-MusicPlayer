@@ -10,6 +10,8 @@ import SwiftUI
 struct PlaylistDetailsView: View {
     @Environment(\.dismiss) var dismiss
     
+    private let playlistManager = PlaylistManager.shared
+    
     @State private var playlist: Playlist
     let onUpdate: (Playlist) -> Void
     let onDelete: () -> Void
@@ -63,6 +65,10 @@ struct PlaylistDetailsView: View {
         }
         
         return songs
+    }
+    
+    private func savePlaylist() {
+        playlistManager.savePlaylist(playlist)
     }
     
     // MARK: - Body
@@ -121,7 +127,8 @@ struct PlaylistDetailsView: View {
             Button("Delete", role: .destructive) {
                 if let index = playlist.songs.firstIndex(where: { $0.id == song.id }) {
                     withAnimation { playlist.songs.remove(at: index) }
-                    onUpdate(playlist)
+                    onUpdate(playlist) // Update parent view immediately
+                    playlistManager.savePlaylist(playlist) // Persist JSON
                 }
                 selectedSong = nil
             }
@@ -154,27 +161,17 @@ struct PlaylistDetailsView: View {
                     .fill(.ultraThinMaterial)
                     .frame(width: 200, height: 200)
                     .overlay(
-                        Group {
-                            if let artwork = playlist.coverImage {
-                                LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                               startPoint: .topLeading, endPoint: .bottomTrailing)
-                                .mask {
-                                    Image(uiImage: artwork)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 100, height: 100)
-                                } // bcoz I am using uiImage, to get te purple color
-                            } else {
-                                Image(systemName: "music.note.list")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100, height: 100)
-                                    .foregroundStyle(
-                                        LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                                       startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    )
-                            }
-                        }
+                        Image(systemName: "music.note.list")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)

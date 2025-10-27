@@ -150,7 +150,7 @@ struct SongRow: View {
             
             // Song title and artist
             VStack(alignment: .leading, spacing: 2) {
-                Text(song.displayName)
+                Text(song.title)
                     .font(.body)
                     .foregroundColor(.primary)
                     .lineLimit(1)

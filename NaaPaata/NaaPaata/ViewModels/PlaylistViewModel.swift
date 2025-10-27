@@ -46,7 +46,7 @@ final class PlaylistsViewModel: ObservableObject {
         let newPlaylist = Playlist(
             name: trimmedName,
             songs: [],
-            coverImage: UIImage(systemName: "music.note.list"), // Updated
+            coverImage: UIImage(systemName: "music.note.list"),
             description: description,
             isPrivate: false,
             dateCreated: Date()
@@ -55,6 +55,8 @@ final class PlaylistsViewModel: ObservableObject {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             playlists.insert(newPlaylist, at: 0)
         }
+        
+        playlistManager.savePlaylist(newPlaylist) // ✅ persist JSON
     }
     
     func deletePlaylist(_ playlist: Playlist) {
