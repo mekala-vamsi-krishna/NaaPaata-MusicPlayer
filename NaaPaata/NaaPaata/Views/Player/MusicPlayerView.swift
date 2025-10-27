@@ -121,17 +121,13 @@ struct MusicPlayerView: View {
                 
                 // Progress bar
                 VStack(spacing: 12) {
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(.ultraThinMaterial)
-                                .frame(height: 8)
-                            
-                            Capsule()
-                                .fill(LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)], startPoint: .leading, endPoint: .trailing))
-                                .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
+                    DraggableProgressBar(
+                        currentTime: $musicPlayerManager.currentTime,
+                        duration: musicPlayerManager.duration,
+                        onDragChanged: { time in
+                            musicPlayerManager.seek(to: time)
                         }
-                    }
+                    )
                     .frame(height: 30)
                     .padding(.horizontal, 32)
                     
@@ -288,5 +284,71 @@ struct ScaleButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Draggable Progress Bar
+
+struct DraggableProgressBar: View {
+    @Binding var currentTime: TimeInterval
+    let duration: TimeInterval
+    let onDragChanged: (TimeInterval) -> Void
+    
+    @State private var isDragging = false
+    @State private var dragOffset: CGFloat = 0
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background track
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                    .frame(height: 8)
+                
+                // Filled portion
+                Capsule()
+                    .fill(LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
+                
+                // Draggable circle
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 16, height: 16)
+                    .offset(x: circleXPosition(geometry: geometry), y: 0) // -4 to center vertically
+                    .highPriorityGesture(
+                        DragGesture()
+                            .onChanged { value in
+                                isDragging = true
+                                let newPosition = max(0, min(geometry.size.width, value.location.x))
+                                let progress = newPosition / geometry.size.width
+                                let newTime = progress * duration
+                                currentTime = newTime
+                                
+                                // Update the player position as user drags
+                                onDragChanged(newTime)
+                            }
+                            .onEnded { value in
+                                isDragging = false
+                                let newPosition = max(0, min(geometry.size.width, value.location.x))
+                                let progress = newPosition / geometry.size.width
+                                let newTime = progress * duration
+                                currentTime = newTime
+                                
+                                // Update the player position when drag ends
+                                onDragChanged(newTime)
+                            }
+                    )
+            }
+        }
+    }
+    
+    private func progressWidth(totalWidth: CGFloat) -> CGFloat {
+        guard duration > 0 else { return 0 }
+        return totalWidth * CGFloat(currentTime / duration)
+    }
+    
+    private func circleXPosition(geometry: GeometryProxy) -> CGFloat {
+        guard duration > 0 else { return 0 }
+        return (currentTime / duration) * geometry.size.width - 8 // -8 to center the circle (half of 16 width)
     }
 }

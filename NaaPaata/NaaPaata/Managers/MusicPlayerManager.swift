@@ -242,6 +242,12 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             playNext()
         }
     }
+    
+    func seek(to time: TimeInterval) {
+        guard let player = player else { return }
+        player.currentTime = time
+        currentTime = time
+    }
 
 }
 
