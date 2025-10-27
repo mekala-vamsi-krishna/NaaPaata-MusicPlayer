@@ -58,8 +58,6 @@ struct SongsView: View {
     @StateObject private var viewModel = SongsViewModel()
     @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
-    
-    @State private var showFullPlayer = false
 
     var body: some View {
         NavigationStack {
@@ -89,7 +87,6 @@ struct SongsView: View {
                     List(viewModel.songs, id: \.self) { song in
                         Button {
                             viewModel.play(song)
-                            showFullPlayer = true
                         } label: {
                             MP3FileCell(song: song)
                         }
@@ -99,11 +96,6 @@ struct SongsView: View {
             }
             .navigationTitle("My Music")
             .onAppear { viewModel.loadSongs() }
-        }
-        .fullScreenCover(isPresented: $showFullPlayer) {
-            MusicPlayerView()
-                .environmentObject(MusicPlayerManager.shared)
-                .environmentObject(playlistsViewModel)
         }
     }
 }
