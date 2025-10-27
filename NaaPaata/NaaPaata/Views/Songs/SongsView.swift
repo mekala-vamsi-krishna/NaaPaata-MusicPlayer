@@ -83,49 +83,62 @@ struct SongsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 10) {
-                // Search Bar (like PlayListsView)
-                if !viewModel.songs.isEmpty {
-                    searchBar
-                        .padding(.horizontal, 20)
-                        .padding(.top, 10)
-                }
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        AppColors.background,
+                        AppColors.background.opacity(0.95),
+                        AppColors.primary.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                if viewModel.songs.isEmpty {
-                    Spacer()
-                    Image(systemName: "music.note.list")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
-                        .foregroundColor(AppColors.primary).opacity(0.7)
-                        .padding(.top, 50)
-
-                    Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
-                        .font(.headline)
-                        .foregroundColor(AppColors.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-
-                    Spacer()
-                } else {
-                    // Top toolbar
-                    SongsTopBar(viewModel: viewModel) { key in
-                        viewModel.sortSongs(by: key)
+                VStack(spacing: 10) {
+                    // Search Bar (like PlayListsView)
+                    if !viewModel.songs.isEmpty {
+                        searchBar
+                            .padding(.horizontal, 20)
+                            .padding(.top, 10)
                     }
                     
-                    List(viewModel.filteredSongs, id: \.self) { song in
-                        Button {
-                            if viewModel.searchText.isEmpty {
-                                viewModel.play(song)
-                            } else {
-                                viewModel.playFromSearchResults(song)
-                            }
-                        } label: {
-                            MP3FileCell(song: song)
-                        }
-                    }
-                    .listStyle(.plain)
+                    if viewModel.songs.isEmpty {
+                        Spacer()
+                        Image(systemName: "music.note.list")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .foregroundColor(AppColors.primary).opacity(0.7)
+                            .padding(.top, 50)
 
+                        Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
+                            .font(.headline)
+                            .foregroundColor(AppColors.textPrimary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        Spacer()
+                    } else {
+                        // Top toolbar
+                        SongsTopBar(viewModel: viewModel) { key in
+                            viewModel.sortSongs(by: key)
+                        }
+                        
+                        List(viewModel.filteredSongs, id: \.self) { song in
+                            Button {
+                                if viewModel.searchText.isEmpty {
+                                    viewModel.play(song)
+                                } else {
+                                    viewModel.playFromSearchResults(song)
+                                }
+                            } label: {
+                                MP3FileCell(song: song)
+                            }
+                        }
+                        .listStyle(.plain)
+
+                    }
                 }
             }
             .navigationTitle("My Music")

@@ -35,14 +35,14 @@ struct MP3FileCell: View {
                 .resizable()
                 .scaledToFill()
                 .frame(width: 50, height: 50)
-                .background(Color.gray.opacity(0.2))
+                .background(AppColors.background.opacity(0.2))
                 .cornerRadius(8)
 
             // Song details
             VStack(alignment: .leading, spacing: 4) {
                 Text(song.title)
                     .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
 
                 Text(song.artist)
