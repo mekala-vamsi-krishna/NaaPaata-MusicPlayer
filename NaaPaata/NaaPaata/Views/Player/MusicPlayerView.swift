@@ -168,6 +168,30 @@ struct MusicPlayerView: View {
                 
                 Spacer()
             }
+            .offset(y: dragOffset) // Apply drag offset for smooth movement
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            // Only drag downwards
+                            if value.translation.height > 0 {
+                                dragOffset = value.translation.height
+                            }
+                        }
+                        .onEnded { value in
+                            if value.translation.height > 120 {
+                                // Dismiss if dragged enough
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                    dismiss()
+                                }
+                            } else {
+                                // Snap back if not dragged enough
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                    dragOffset = 0
+                                }
+                            }
+                        }
+                )
+                .animation(.easeOut(duration: 0.2), value: dragOffset)
         }
         .preferredColorScheme(.dark)
         .onAppear {
