@@ -23,21 +23,21 @@ struct MainTabView: View {
             TabView(selection: $tabState.selectedTab) {
                 SongsView()
                     .tabItem {
-                        Image(systemName: "music.note")
+                        Image(systemName: "music.quarternote.3")
                         Text("Songs")
                     }
                     .tag(0)
                 
                 AlbumsView()
                     .tabItem {
-                        Image(systemName: "rectangle.stack.fill")
+                        Image(systemName: "rectangle.stack.badge.play")
                         Text("Albums")
                     }
                     .tag(1)
                 
                 PlayListsView()
                     .tabItem {
-                        Image(systemName: "list.bullet")
+                        Image(systemName: "music.note.list")
                         Text("Lists")
                     }
                     .tag(2)

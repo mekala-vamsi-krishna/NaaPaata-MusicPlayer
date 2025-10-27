@@ -84,12 +84,23 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     
     // MARK: - Play Next in Queue
     func addToQueueNext(_ song: Song) {
-        if playQueue.isEmpty {
-            // Initialize queue with the remaining songs after currentIndex
-            let remaining = Array(allSongs[(currentIndex+1)...])
-            playQueue = remaining
+        guard !allSongs.isEmpty else {
+            playQueue = [song]
+            return
         }
-        // Insert the song at the front of the queue
+
+        let safeIndex = (0..<allSongs.count).contains(currentIndex)
+            ? currentIndex
+            : -1
+
+        let remaining: [Song]
+        if safeIndex >= 0 && safeIndex + 1 < allSongs.count {
+            remaining = Array(allSongs[(safeIndex + 1)...])
+        } else {
+            remaining = []
+        }
+
+        playQueue = remaining
         playQueue.insert(song, at: 0)
     }
     

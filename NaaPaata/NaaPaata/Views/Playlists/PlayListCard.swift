@@ -33,33 +33,20 @@ struct PlaylistCard: View {
                     .frame(height: 160)
                     .overlay(
                         ZStack {
-                            if let cover = playlist.coverImage {
-                                LinearGradient(
-                                    colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                .mask(
-                                    Image(uiImage: cover)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 70, height: 70)
-                                ) // bcoz I am using uiImage, to get te purple color
-
-                            } else {
-                                Image(systemName: "music.note.list")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 70, height: 70)
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
+                            // Single placeholder icon
+                            Image(systemName: "music.note.list")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40) // adjust size as needed
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
                                     )
-                            }
+                                )
                             
+                            // Song count badge
                             VStack {
                                 HStack {
                                     Spacer()
@@ -82,6 +69,8 @@ struct PlaylistCard: View {
                             }
                         }
                     )
+
+
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .strokeBorder(

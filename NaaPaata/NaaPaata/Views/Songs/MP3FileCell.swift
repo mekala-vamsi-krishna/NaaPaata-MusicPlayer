@@ -40,7 +40,7 @@ struct MP3FileCell: View {
 
             // Song details
             VStack(alignment: .leading, spacing: 4) {
-                Text(song.displayName)
+                Text(song.title)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                     .lineLimit(1)
@@ -86,9 +86,12 @@ struct MP3FileCell: View {
                 ForEach(playlistsVM.playlists) { playlist in
                     Button {
                         var updatedPlaylist = playlist
-                        updatedPlaylist.songs.append(song)
-                        playlistsVM.updatePlaylist(updatedPlaylist)
-                        playlistsVM.playlistManager.addSongToPlaylist(songURL: song.url, playlistName: updatedPlaylist.name)
+                        // Avoid duplicates
+                        if !updatedPlaylist.songs.contains(where: { $0.id == song.id }) {
+                            updatedPlaylist.songs.append(song)
+                            playlistsVM.updatePlaylist(updatedPlaylist) // update Published array
+                            playlistsVM.playlistManager.savePlaylist(updatedPlaylist) // save JSON
+                        }
                     } label: {
                         Label(playlist.name, systemImage: "music.note.list")
                     }
@@ -132,7 +135,7 @@ struct MP3FileCell: View {
                         var updatedPlaylist = newPlayList
                         updatedPlaylist.songs.append(song)
                         playlistsVM.updatePlaylist(newPlayList)
-                        playlistsVM.playlistManager.addSongToPlaylist(songURL: song.url, playlistName: newPlayList.name)
+                        playlistsVM.playlistManager.savePlaylist(newPlayList)
                     }
                     newPlaylistName = ""
                     newPlaylistDescription = ""
@@ -160,7 +163,7 @@ struct MP3FileCell: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to delete \"\(song.displayName)\" from your device?")
+            Text("Are you sure you want to delete \"\(song.title)\" from your device?")
         }
     }
 }

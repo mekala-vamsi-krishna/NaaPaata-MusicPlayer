@@ -8,57 +8,68 @@
  * This shared PlaylistManager class does all thing it fetch al
  */
 import Foundation
-class PlaylistManager {
+
+final class PlaylistManager {
     static let shared = PlaylistManager()
     private let fileManager = FileManager.default
-    private let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     
+    private init() {}
+    
+    private var playlistsDir: URL {
+        let docs = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dir = docs.appendingPathComponent("Playlists", isDirectory: true)
+        if !fileManager.fileExists(atPath: dir.path) {
+            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+        return dir
+    }
+    
+    // MARK: - Create Playlist
     func createPlaylist(name: String) {
-        let playlistURL = docsURL.appendingPathComponent("Playlists/\(name)")
-        
-        if !fileManager.fileExists(atPath: playlistURL.path) {
-            try? fileManager.createDirectory(at: playlistURL, withIntermediateDirectories: true)
-        }
+        let playlist = Playlist(
+            name: name,
+            songs: [],
+            description: "",
+            isPrivate: false,
+            dateCreated: Date()
+        )
+        savePlaylist(playlist)
     }
     
-    func addSongToPlaylist(songURL: URL, playlistName: String) {
-        let playlistURL = docsURL.appendingPathComponent("Playlists/\(playlistName)")
-        let destinationURL = playlistURL.appendingPathComponent(songURL.lastPathComponent)
-        
-        // Copy song to playlist folder
-        try? fileManager.copyItem(at: songURL, to: destinationURL)
-    }
-    
-    func getSongsInPlaylist(playlistName: String) -> [URL] {
-        let playlistURL = docsURL.appendingPathComponent("Playlists/\(playlistName)")
-        
+    // MARK: - Save Playlist to JSON
+    func savePlaylist(_ playlist: Playlist) {
+        let url = playlistsDir.appendingPathComponent("\(playlist.name).json")
         do {
-            return try fileManager.contentsOfDirectory(at: playlistURL, includingPropertiesForKeys: nil)
-                .filter { $0.pathExtension == "mp3" }
+            let data = try JSONEncoder().encode(playlist)
+            try data.write(to: url)
         } catch {
-            return []
+            print("Error saving playlist \(playlist.name): \(error.localizedDescription)")
         }
     }
+    
+    // MARK: - Load All Playlist Names
     func getAllPlaylists() -> [String] {
-        let playlistsURL = docsURL.appendingPathComponent("Playlists")
-        
-        do {
-            let items = try fileManager.contentsOfDirectory(at: playlistsURL, includingPropertiesForKeys: [.isDirectoryKey])
-            return items.filter { item in
-                let values = try? item.resourceValues(forKeys: [.isDirectoryKey])
-                return values?.isDirectory == true
-            }.map { $0.lastPathComponent }
-        } catch {
-            return []
-        }
+        guard let files = try? fileManager.contentsOfDirectory(at: playlistsDir, includingPropertiesForKeys: nil)
+        else { return [] }
+        return files.map { $0.deletingPathExtension().lastPathComponent }
     }
+    
+    // MARK: - Get Songs in Playlist
+    func getSongsInPlaylist(playlistName: String) -> [URL] {
+        guard let playlist = loadPlaylist(name: playlistName) else { return [] }
+        return playlist.songs.map { $0.url }
+    }
+    
+    // MARK: - Load Playlist
+    func loadPlaylist(name: String) -> Playlist? {
+        let url = playlistsDir.appendingPathComponent("\(name).json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(Playlist.self, from: data)
+    }
+    
+    // MARK: - Delete Playlist
     func deletePlaylist(name: String) {
-        let playlistURL = docsURL.appendingPathComponent("Playlists/\(name)")
-        try? fileManager.removeItem(at: playlistURL)
-    }
-    func removeSongFromPlaylist(songURL: URL, playlistName: String) {
-        let playlistURL = docsURL.appendingPathComponent("Playlists/\(playlistName)")
-        let songFileURL = playlistURL.appendingPathComponent(songURL.lastPathComponent)
-        try? fileManager.removeItem(at: songFileURL)
+        let url = playlistsDir.appendingPathComponent("\(name).json")
+        try? fileManager.removeItem(at: url)
     }
 }

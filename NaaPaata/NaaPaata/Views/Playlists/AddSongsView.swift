@@ -160,16 +160,16 @@ extension AddSongsView {
     }
     
     
+    // MARK: - Add selected songs to playlist
     private func addSelectedSongsToPlaylist() {
+        // Filter only selected songs
         let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
         
-        for song in songsToAdd {
-            // use `song.url` instead of `song.fileURL`
-            playlistManager.addSongToPlaylist(songURL: song.url, playlistName: playlist.name)
-            
-            // Add to UI model
-            playlist.songs.append(song)
-        }
+        // Update playlist in memory
+        playlist.songs.append(contentsOf: songsToAdd)
+        
+        // Persist playlist JSON using PlaylistManager
+        playlistManager.savePlaylist(playlist)
     }
     
 }

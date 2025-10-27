@@ -7,17 +7,18 @@
 
 import SwiftUI
 
-struct Playlist: Identifiable, Hashable {
-    let id = UUID()
+struct Playlist: Identifiable, Hashable, Codable {
+    let id: UUID
     var name: String
     var songs: [Song]
-    var coverImage: UIImage? = nil
+    var coverImageData: Data? // store cover image data
     var description: String
     var isPrivate: Bool
     var dateCreated: Date
     var folderName: String
     
     init(
+        id: UUID = UUID(),
         name: String,
         songs: [Song] = [],
         coverImage: UIImage? = nil,
@@ -25,13 +26,19 @@ struct Playlist: Identifiable, Hashable {
         isPrivate: Bool = false,
         dateCreated: Date = Date()
     ) {
+        self.id = id
         self.name = name
         self.songs = songs
-        self.coverImage = coverImage
+        self.coverImageData = coverImage?.jpegData(compressionQuality: 0.9)
         self.description = description
         self.isPrivate = isPrivate
         self.dateCreated = dateCreated
         self.folderName = name
+    }
+    
+    var coverImage: UIImage? {
+        guard let data = coverImageData else { return nil }
+        return UIImage(data: data)
     }
 }
 

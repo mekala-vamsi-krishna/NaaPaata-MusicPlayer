@@ -15,7 +15,7 @@ struct SongInfoView: View {
     // MARK: - Helper Computed Properties
     private var asset: AVAsset { AVAsset(url: song.url) }
     
-    private var title: String { song.displayName }
+    private var title: String { song.title }
     
     private var artist: String {
         metadataString(for: .commonKeyArtist) ?? song.artist

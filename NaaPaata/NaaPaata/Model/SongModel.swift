@@ -7,28 +7,37 @@
 
 import SwiftUI
 
-struct Song: Identifiable, Hashable {
-    let id = UUID()
+struct Song: Identifiable, Hashable, Codable {
+    let id: UUID
     let url: URL
     var title: String
     var artist: String
     var duration: TimeInterval
-    var artworkImage: UIImage? = nil // optional UIImage
+    var artworkData: Data? // instead of UIImage
     var dateAdded: Date?
-    
-    var displayName: String {
-        title.isEmpty ? url.lastPathComponent : title
+
+    init(id: UUID = UUID(),
+         url: URL,
+         title: String,
+         artist: String,
+         duration: TimeInterval,
+         artworkImage: UIImage? = nil,
+         dateAdded: Date? = nil) {
+        self.id = id
+        self.url = url
+        self.title = title
+        self.artist = artist
+        self.duration = duration
+        self.artworkData = artworkImage?.jpegData(compressionQuality: 0.9)
+        self.dateAdded = dateAdded
     }
-    
-    // Helper to get SwiftUI Image
-    var artwork: Image {
-        if let uiImage = artworkImage {
-            return Image(uiImage: uiImage)
-        } else {
-            return Image(systemName: "music.note")
-        }
+
+    var artworkImage: UIImage? {
+        guard let data = artworkData else { return nil }
+        return UIImage(data: data)
     }
 }
+
 
 
 

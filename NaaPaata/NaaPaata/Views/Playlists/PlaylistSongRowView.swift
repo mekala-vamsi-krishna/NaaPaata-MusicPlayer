@@ -6,12 +6,29 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct PlaylistSongRowView: View {
+    @EnvironmentObject var musicManager: MusicPlayerManager
+    
     let song: Song
     let editMode: EditMode
     let onPlay: () -> Void
     let onDelete: () -> Void
+    
+    // Share Properties
+    @State private var showShareSheet = false
+    @State private var shareItems: [Any] = []
+    
+    func loadArtwork(from url: URL) -> UIImage? {
+        let asset = AVAsset(url: url)
+        if let artData = AVMetadataItem.metadataItems(from: asset.commonMetadata,
+                                                     withKey: AVMetadataKey.commonKeyArtwork,
+                                                     keySpace: .common).first?.dataValue {
+            return UIImage(data: artData)
+        }
+        return nil
+    }
     
     var body: some View {
         HStack(spacing: 14) {
@@ -31,17 +48,11 @@ struct PlaylistSongRowView: View {
                     .fill(.ultraThinMaterial)
                     .frame(width: 56, height: 56)
                 
-                if let artwork = song.artworkImage {
-                    Image(uiImage: artwork)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(6)
-                } else {
-                    Image(systemName: "music.note")
-                        .font(.system(size: 24))
-                        .foregroundColor(AppColors.primary)
-                }
+                Image(uiImage: song.artworkImage ?? loadArtwork(from: song.url) ?? UIImage(systemName: "music.note")!)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(8)
             }
             
             // Song title and artist
@@ -71,21 +82,18 @@ struct PlaylistSongRowView: View {
                             Label("Play Now", systemImage: "play.fill")
                         }
                         
-                        Button(action: {}) {
+                        Button(action: {
+                            musicManager.addToQueueNext(song)
+                        }) {
                             Label("Play Next", systemImage: "text.insert")
-                        }
-                        
-                        Button(action: {}) {
-                            Label("Add to Queue", systemImage: "text.append")
                         }
                         
                         Divider()
                         
-                        Button(action: {}) {
-                            Label("Add to Playlist", systemImage: "plus.square.on.square")
-                        }
-                        
-                        Button(action: {}) {
+                        Button(action: {
+                            shareItems = [song.url]
+                            showShareSheet = true
+                        }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                         
@@ -116,6 +124,11 @@ struct PlaylistSongRowView: View {
             if editMode == .inactive {
                 onPlay()
             }
+        }
+        // Share Sheet
+        .sheet(isPresented: $showShareSheet) {
+            ActivityViewController(activityItems: shareItems)
+                .presentationDetents([.fraction(0.4)])
         }
     }
     
