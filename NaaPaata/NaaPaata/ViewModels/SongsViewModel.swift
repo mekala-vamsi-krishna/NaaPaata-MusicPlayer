@@ -11,11 +11,26 @@ import AVFoundation
 final class SongsViewModel: ObservableObject {
     private let musicManager = MusicPlayerManager.shared
     
+    @Published var searchText: String = ""
     @Published var songs: [Song] = []
     var totalSongs: Int { songs.count }
     
     enum SortKey {
         case title, artist, duration
+    }
+
+    var filteredSongs: [Song] {
+        guard !searchText.isEmpty else { return songs }
+        return songs.filter {
+            $0.title.localizedCaseInsensitiveContains(searchText) ||
+            $0.artist.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    // Function to play within search results
+    func playFromSearchResults(_ song: Song) {
+        let results = filteredSongs
+        musicManager.playFromAllSongs(results, startAt: song)
     }
 
     func loadSongs() {

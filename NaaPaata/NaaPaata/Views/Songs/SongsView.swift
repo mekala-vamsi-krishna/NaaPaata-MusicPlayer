@@ -84,14 +84,20 @@ struct SongsView: View {
                         viewModel.sortSongs(by: key)
                     }
                     
-                    List(viewModel.songs, id: \.self) { song in
+                    List(viewModel.filteredSongs, id: \.self) { song in
                         Button {
-                            viewModel.play(song)
+                            if viewModel.searchText.isEmpty {
+                                viewModel.play(song)
+                            } else {
+                                viewModel.playFromSearchResults(song)
+                            }
                         } label: {
                             MP3FileCell(song: song)
                         }
                     }
                     .listStyle(.plain)
+                    .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+
                 }
             }
             .navigationTitle("My Music")
