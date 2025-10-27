@@ -58,10 +58,39 @@ struct SongsView: View {
     @StateObject private var viewModel = SongsViewModel()
     @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
+    
+    // MARK: - Search Bar
+    private var searchBar: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(AppColors.textSecondary)
+            
+            TextField("Search songs...", text: $viewModel.searchText)
+                .foregroundColor(.primary)
+            
+            if !viewModel.searchText.isEmpty {
+                Button { viewModel.searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(AppColors.textSecondary)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
+                // Search Bar (like PlayListsView)
+                if !viewModel.songs.isEmpty {
+                    searchBar
+                        .padding(.horizontal, 20)
+                        .padding(.top, 10)
+                }
+                
                 if viewModel.songs.isEmpty {
                     Spacer()
                     Image(systemName: "music.note.list")
@@ -96,7 +125,6 @@ struct SongsView: View {
                         }
                     }
                     .listStyle(.plain)
-                    .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .automatic))
 
                 }
             }
