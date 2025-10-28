@@ -55,27 +55,40 @@ struct AlbumsView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                AlbumsTopBar(viewModel: viewModel) { key in
-                    selectedSort = key
-                    viewModel.sortAlbums(by: key)
-                }
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        AppColors.background,
+                        AppColors.background.opacity(0.95),
+                        AppColors.primary.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    AlbumsTopBar(viewModel: viewModel) { key in
+                        selectedSort = key
+                        viewModel.sortAlbums(by: key)
+                    }
 
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(viewModel.albums) { album in
-                            NavigationLink {
-                                AlbumDetailsView(
-                                    title: album.name,
-                                    artwork: album.artworkImage,
-                                    songs: album.songs
-                                )
-                            } label: {
-                                AlbumCellView(album: album)
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 24) {
+                            ForEach(viewModel.albums) { album in
+                                NavigationLink {
+                                    AlbumDetailsView(
+                                        title: album.name,
+                                        artwork: album.artworkImage,
+                                        songs: album.songs
+                                    )
+                                } label: {
+                                    AlbumCellView(album: album)
+                                }
                             }
                         }
+                        .padding()
                     }
-                    .padding()
                 }
             }
             .navigationTitle("Albums")

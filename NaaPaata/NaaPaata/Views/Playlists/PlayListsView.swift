@@ -33,9 +33,13 @@ struct PlayListsView: View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [AppColors.background, AppColors.background.opacity(0.8)],
-                    startPoint: .top,
-                    endPoint: .bottom
+                    colors: [
+                        AppColors.background,
+                        AppColors.background.opacity(0.95),
+                        AppColors.primary.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
                 
