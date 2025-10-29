@@ -68,7 +68,9 @@ struct PlaylistDetailsView: View {
     }
     
     private func savePlaylist() {
-        playlistManager.savePlaylist(playlist)
+        // The onUpdate callback is viewModel.updatePlaylist which handles both
+        // updating the published array and saving to JSON
+        onUpdate(playlist)
     }
     
     // MARK: - Body
@@ -85,7 +87,9 @@ struct PlaylistDetailsView: View {
                     searchAndSortBar.padding(.horizontal, 20).padding(.bottom, 16)
                     songsListSection
                 }
+                .padding(.bottom, 100) // Add padding to account for mini player
             }
+            .padding(.bottom, 80) // Additional padding to ensure content doesn't go under mini player
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -127,8 +131,7 @@ struct PlaylistDetailsView: View {
             Button("Delete", role: .destructive) {
                 if let index = playlist.songs.firstIndex(where: { $0.id == song.id }) {
                     withAnimation { playlist.songs.remove(at: index) }
-                    onUpdate(playlist) // Update parent view immediately
-                    playlistManager.savePlaylist(playlist) // Persist JSON
+                    onUpdate(playlist) // Update parent view immediately (includes saving)
                 }
                 selectedSong = nil
             }
@@ -158,7 +161,7 @@ struct PlaylistDetailsView: View {
                     .blur(radius: 30)
                 
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
+                    .fill(Color.black.opacity(0.1))
                     .frame(width: 200, height: 200)
                     .overlay(
                         Image(systemName: "music.note.list")
@@ -242,7 +245,7 @@ struct PlaylistDetailsView: View {
                 }
                 .foregroundColor(AppColors.primary)
                 .frame(maxWidth: .infinity, minHeight: 52)
-                .background(.ultraThinMaterial)
+                .background(Color.black.opacity(0.1))
                 .clipShape(Capsule())
                 .overlay(Capsule().strokeBorder(AppColors.primary.opacity(0.3), lineWidth: 1.5))
             }

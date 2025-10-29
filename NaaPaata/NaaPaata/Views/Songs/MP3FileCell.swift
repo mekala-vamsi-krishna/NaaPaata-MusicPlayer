@@ -30,13 +30,25 @@ struct MP3FileCell: View {
 
     var body: some View {
         HStack(spacing: 15) {
-            // Artwork
-            Image(uiImage: musicManager.getArtwork(for: song) ?? song.artworkImage ?? UIImage(systemName: "music.note")!)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 50, height: 50)
-                .background(AppColors.background.opacity(0.2))
-                .cornerRadius(8)
+            // Artwork - use song's stored artwork first, then fall back to manager's optimized extraction
+            if let artwork = song.artworkImage {
+                Image(uiImage: artwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .background(AppColors.background.opacity(0.2))
+                    .cornerRadius(8)
+            } else {
+                // Extract artwork from file if not stored in the song object
+                let extractedArtwork = musicManager.getArtwork(for: song)
+                // Since getArtwork always returns an image (never nil), we can use it directly
+                Image(uiImage: extractedArtwork)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .background(AppColors.background.opacity(0.2))
+                    .cornerRadius(8)
+            }
 
             // Song details
             VStack(alignment: .leading, spacing: 4) {
@@ -89,8 +101,7 @@ struct MP3FileCell: View {
                         // Avoid duplicates
                         if !updatedPlaylist.songs.contains(where: { $0.id == song.id }) {
                             updatedPlaylist.songs.append(song)
-                            playlistsVM.updatePlaylist(updatedPlaylist) // update Published array
-                            playlistsVM.playlistManager.savePlaylist(updatedPlaylist) // save JSON
+                            playlistsVM.updatePlaylist(updatedPlaylist) // update Published array and save JSON
                         }
                     } label: {
                         Label(playlist.name, systemImage: "music.note.list")
@@ -134,8 +145,7 @@ struct MP3FileCell: View {
                     if let newPlayList = playlistsVM.playlists.first {
                         var updatedPlaylist = newPlayList
                         updatedPlaylist.songs.append(song)
-                        playlistsVM.updatePlaylist(newPlayList)
-                        playlistsVM.playlistManager.savePlaylist(newPlayList)
+                        playlistsVM.updatePlaylist(updatedPlaylist) // Update the playlist with the added song
                     }
                     newPlaylistName = ""
                     newPlaylistDescription = ""
