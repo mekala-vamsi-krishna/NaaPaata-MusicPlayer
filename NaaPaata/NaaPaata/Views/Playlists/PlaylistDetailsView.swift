@@ -69,6 +69,7 @@ struct PlaylistDetailsView: View {
     
     private func savePlaylist() {
         playlistManager.savePlaylist(playlist)
+        onUpdate(playlist) // Also notify parent that playlist was updated
     }
     
     // MARK: - Body
@@ -85,7 +86,9 @@ struct PlaylistDetailsView: View {
                     searchAndSortBar.padding(.horizontal, 20).padding(.bottom, 16)
                     songsListSection
                 }
+                .padding(.bottom, 100) // Add padding to account for mini player
             }
+            .padding(.bottom, 80) // Additional padding to ensure content doesn't go under mini player
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

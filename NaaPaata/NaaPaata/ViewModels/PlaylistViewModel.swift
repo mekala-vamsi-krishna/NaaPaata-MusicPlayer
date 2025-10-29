@@ -20,19 +20,73 @@ final class PlaylistsViewModel: ObservableObject {
     func loadPlaylists() {
         let playlistNames = playlistManager.getAllPlaylists()
         
-        playlists = playlistNames.map { name in
-            let songURLs = playlistManager.getSongsInPlaylist(playlistName: name)
-            let songs = songURLs.map { url in
-                extractSongMetadata(from: url)
+        playlists = playlistNames.compactMap { name in
+            // Load the playlist from JSON which contains the full playlist with songs
+            guard let savedPlaylist = playlistManager.loadPlaylist(name: name) else { return nil }
+            
+            // Get current available songs from the documents directory
+            let availableSongs = getSongsFromDocumentsDirectory()
+            
+            // Match playlist songs with currently available songs
+            // Use a more robust matching method, comparing by file path components
+            var validSongs: [Song] = []
+            for playlistSong in savedPlaylist.songs {
+                // First try exact URL match
+                if let currentSong = availableSongs.first(where: { $0.url == playlistSong.url }) {
+                    validSongs.append(currentSong)
+                } else {
+                    // If exact match fails, try matching by file name and path components
+                    let playlistFileName = playlistSong.url.lastPathComponent
+                    if let currentSong = availableSongs.first(where: { $0.url.lastPathComponent == playlistFileName }) {
+                        validSongs.append(currentSong)
+                    }
+                }
             }
             
             return Playlist(
-                name: name,
-                songs: songs,
-                coverImage: UIImage(systemName: "music.note.list"), // Updated to UIImage
-                description: "",
-                isPrivate: false,
-                dateCreated: Date() // Or get from folder metadata
+                name: savedPlaylist.name,
+                songs: validSongs,
+                coverImage: savedPlaylist.coverImage,
+                description: savedPlaylist.description,
+                isPrivate: savedPlaylist.isPrivate,
+                dateCreated: savedPlaylist.dateCreated
+            )
+        }
+    }
+    
+    // Helper function to get current songs from documents directory
+    private func getSongsFromDocumentsDirectory() -> [Song] {
+        let loader = LoadAllSongsFromDocuments()
+        let urls = loader.loadSongsFromDocuments()
+        
+        return urls.map { url in
+            let asset = AVAsset(url: url)
+            let metadata = asset.commonMetadata
+            
+            // Extract title
+            let title = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyTitle, keySpace: .common).first?.stringValue ?? url.lastPathComponent
+            
+            // Extract artist
+            let artist = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyArtist, keySpace: .common).first?.stringValue ?? "Unknown Artist"
+            
+            // Extract duration
+            let duration = CMTimeGetSeconds(asset.duration)
+            
+            // Extract artwork
+            var artwork: UIImage? = nil
+            if let artworkData = AVMetadataItem.metadataItems(from: asset.commonMetadata,
+                                                             withKey: AVMetadataKey.commonKeyArtwork,
+                                                             keySpace: .common).first?.dataValue {
+                artwork = UIImage(data: artworkData)
+            }
+            
+            return Song(
+                url: url,
+                title: title,
+                artist: artist,
+                duration: duration,
+                artworkImage: artwork,
+                dateAdded: Date()
             )
         }
     }
@@ -67,6 +121,7 @@ final class PlaylistsViewModel: ObservableObject {
     func updatePlaylist(_ playlist: Playlist) {
         if let index = playlists.firstIndex(where: { $0.id == playlist.id }) {
             playlists[index] = playlist
+            playlistManager.savePlaylist(playlist) // Persist changes to JSON
         }
     }
     
