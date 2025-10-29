@@ -61,6 +61,7 @@ struct MainTabView: View {
             MusicPlayerView()
                 .environmentObject(musicPlayerManager)
                 .environmentObject(playlistsViewModel)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
         }
     }
 }

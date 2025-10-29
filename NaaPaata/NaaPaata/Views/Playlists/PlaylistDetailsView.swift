@@ -68,8 +68,9 @@ struct PlaylistDetailsView: View {
     }
     
     private func savePlaylist() {
-        playlistManager.savePlaylist(playlist)
-        onUpdate(playlist) // Also notify parent that playlist was updated
+        // The onUpdate callback is viewModel.updatePlaylist which handles both
+        // updating the published array and saving to JSON
+        onUpdate(playlist)
     }
     
     // MARK: - Body
@@ -130,8 +131,7 @@ struct PlaylistDetailsView: View {
             Button("Delete", role: .destructive) {
                 if let index = playlist.songs.firstIndex(where: { $0.id == song.id }) {
                     withAnimation { playlist.songs.remove(at: index) }
-                    onUpdate(playlist) // Update parent view immediately
-                    playlistManager.savePlaylist(playlist) // Persist JSON
+                    onUpdate(playlist) // Update parent view immediately (includes saving)
                 }
                 selectedSong = nil
             }

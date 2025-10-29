@@ -20,9 +20,17 @@ final class PlaylistsViewModel: ObservableObject {
     func loadPlaylists() {
         let playlistNames = playlistManager.getAllPlaylists()
         
-        playlists = playlistNames.compactMap { name in
+        // Create a dictionary to ensure each playlist name only appears once
+        var uniquePlaylists: [UUID: Playlist] = [:]
+        
+        for name in playlistNames {
             // Load the playlist from JSON which contains the full playlist with songs
-            guard let savedPlaylist = playlistManager.loadPlaylist(name: name) else { return nil }
+            guard let savedPlaylist = playlistManager.loadPlaylist(name: name) else { continue }
+            
+            // Skip if we've already processed this playlist (by UUID)
+            if uniquePlaylists[savedPlaylist.id] != nil {
+                continue
+            }
             
             // Get current available songs from the documents directory
             let availableSongs = getSongsFromDocumentsDirectory()
@@ -43,7 +51,7 @@ final class PlaylistsViewModel: ObservableObject {
                 }
             }
             
-            return Playlist(
+            let playlist = Playlist(
                 name: savedPlaylist.name,
                 songs: validSongs,
                 coverImage: savedPlaylist.coverImage,
@@ -51,7 +59,12 @@ final class PlaylistsViewModel: ObservableObject {
                 isPrivate: savedPlaylist.isPrivate,
                 dateCreated: savedPlaylist.dateCreated
             )
+            
+            uniquePlaylists[savedPlaylist.id] = playlist
         }
+        
+        // Convert the dictionary values to an array
+        playlists = Array(uniquePlaylists.values)
     }
     
     // Helper function to get current songs from documents directory
@@ -95,10 +108,16 @@ final class PlaylistsViewModel: ObservableObject {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else { return }
         
-        playlistManager.createPlaylist(name: trimmedName)
+        // Check for duplicate names and modify if needed
+        var uniqueName = trimmedName
+        var counter = 1
+        while playlists.contains(where: { $0.name == uniqueName }) {
+            uniqueName = "\(trimmedName)(\(counter))"
+            counter += 1
+        }
         
         let newPlaylist = Playlist(
-            name: trimmedName,
+            name: uniqueName,
             songs: [],
             coverImage: UIImage(systemName: "music.note.list"),
             description: description,
@@ -106,11 +125,11 @@ final class PlaylistsViewModel: ObservableObject {
             dateCreated: Date()
         )
         
+        playlistManager.savePlaylist(newPlaylist) // Save to file first
+        
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             playlists.insert(newPlaylist, at: 0)
         }
-        
-        playlistManager.savePlaylist(newPlaylist) // ✅ persist JSON
     }
     
     func deletePlaylist(_ playlist: Playlist) {

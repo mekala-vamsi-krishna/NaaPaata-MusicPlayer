@@ -150,13 +150,8 @@ struct MusicPlayerView: View {
                             .foregroundStyle(.white)
                     }
                     
-                    Button(action: { musicPlayerManager.togglePlayPause() }) {
-                        Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 32))
-                            .foregroundStyle(.white)
-                            .frame(width: 85, height: 85)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
+                    PlayPauseButton(isPlaying: musicPlayerManager.isPlaying) {
+                        musicPlayerManager.togglePlayPause()
                     }
                     
                     Button(action: { musicPlayerManager.playNext() }) {
@@ -301,6 +296,57 @@ struct MusicPlayerView_Previews: PreviewProvider {
 
 #Preview {
     MusicPlayerView()
+}
+
+struct PlayPauseButton: View {
+    let isPlaying: Bool
+    let action: () -> Void
+    
+    @State private var isPressed = false
+    
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                // Outer circle with gradient
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [AppColors.primary.opacity(0.8), AppColors.primary],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 85, height: 85)
+                    .shadow(color: AppColors.primary.opacity(0.4), radius: 12, x: 0, y: 6)
+                
+                // Inner circle
+                Circle()
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 80, height: 80)
+                
+                // Icon with animation
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(LinearGradient(
+                        colors: [AppColors.primary, AppColors.primary.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 40, height: 40)
+                    .scaleEffect(isPressed ? 1.1 : 1.0)
+            }
+        }
+        .buttonStyle(PlayPauseButtonStyle())
+    }
+}
+
+struct PlayPauseButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .rotationEffect(.degrees(configuration.isPressed ? -5 : 0)) // Add rotation for extra feedback
+            .animation(.spring(response: 0.3, dampingFraction: 0.7).speed(2), value: configuration.isPressed)
+    }
 }
 
 struct ScaleButtonStyle: ButtonStyle {

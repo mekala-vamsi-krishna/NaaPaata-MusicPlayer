@@ -36,8 +36,14 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     }
     
     var currentSongArtwork: UIImage? {
+        // Use already stored artwork from the song object to avoid repeated extraction
         guard let song = currentSong else { return nil }
-        return getArtwork(for: song)
+        if let storedArtwork = song.artworkImage {
+            return storedArtwork
+        } else {
+            // Fallback to extracting artwork from URL if not stored
+            return getArtwork(for: song)
+        }
     }
     
     // MARK: - Playback Methods
@@ -50,7 +56,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             player?.play()
             isPlaying = true
             duration = player?.duration ?? 0
-            artworkImage = currentSongArtwork
+            // Use the artwork already stored in the song object instead of extracting again
+            artworkImage = song.artworkImage
             startTimer()
         } catch {
             print("Error playing song: \(error.localizedDescription)")
@@ -173,7 +180,7 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     
     // MARK: - Artwork Extraction
     func getArtwork(for song: Song) -> UIImage {
-        // Return the artwork if already available
+        // Return the artwork if already available in the song object
         if let artwork = song.artworkImage {
             return artwork
         }
