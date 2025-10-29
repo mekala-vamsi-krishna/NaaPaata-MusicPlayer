@@ -22,7 +22,13 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     private var player: AVAudioPlayer?
     private var timer: Timer?
     
-    private var allSongs: [Song] = []
+    // MARK: - Repeat Mode
+    private var repeatMode: RepeatMode = .none
+    enum RepeatMode {
+        case none, single, all
+    }
+    
+    var allSongs: [Song] = []
     private var playQueue: [Song] = []
     private var currentIndex: Int = 0
     
@@ -118,15 +124,38 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             currentIndex = allSongs.firstIndex(of: nextSong) ?? currentIndex
             playSong(nextSong)
         } else if !allSongs.isEmpty {
-            currentIndex = (currentIndex + 1) % allSongs.count
-            playSong(allSongs[currentIndex])
+            switch repeatMode {
+            case .all:
+                currentIndex = (currentIndex + 1) % allSongs.count
+                playSong(allSongs[currentIndex])
+            case .single:
+                // For single repeat, play the same song again
+                if let current = currentSong {
+                    playSong(current)
+                }
+            case .none:
+                // For no repeat, go to next song but stop if at the end
+                if currentIndex < allSongs.count - 1 {
+                    currentIndex = (currentIndex + 1)
+                    playSong(allSongs[currentIndex])
+                }
+                // If at the end, do nothing (the song will stop naturally)
+            }
         }
     }
     
     func playPrevious() {
         guard !currentPlaylist.isEmpty else { return }
-        currentIndex = (currentIndex - 1 + currentPlaylist.count) % currentPlaylist.count
-        playSong(currentPlaylist[currentIndex])
+        if repeatMode == .single {
+            // For single repeat, restart current song instead of going to previous
+            if let current = currentSong {
+                playSong(current) // This will restart the current song
+            }
+        } else {
+            // For none and all repeat modes, go to previous song
+            currentIndex = (currentIndex - 1 + currentPlaylist.count) % currentPlaylist.count
+            playSong(currentPlaylist[currentIndex])
+        }
     }
     
     func togglePlayPause() {
@@ -175,7 +204,38 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     // MARK: - AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         guard flag else { return }
-        playNext()
+        
+        switch repeatMode {
+        case .none:
+            playNext()
+        case .single:
+            // Replay the same song by playing it again through the manager
+            if let current = currentSong {
+                playSong(current)
+            }
+        case .all:
+            playNext()
+        }
+    }
+    
+    // MARK: - Repeat Mode
+    func toggleRepeatMode() {
+        switch repeatMode {
+        case .none:
+            repeatMode = .single
+        case .single:
+            repeatMode = .all
+        case .all:
+            repeatMode = .none
+        }
+    }
+    
+    var currentRepeatMode: RepeatMode {
+        return repeatMode
+    }
+    
+    func setRepeatMode(_ mode: RepeatMode) {
+        repeatMode = mode
     }
     
     // MARK: - Artwork Extraction

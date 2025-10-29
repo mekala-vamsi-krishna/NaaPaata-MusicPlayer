@@ -161,7 +161,7 @@ struct PlaylistDetailsView: View {
                     .blur(radius: 30)
                 
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
+                    .fill(Color.black.opacity(0.1))
                     .frame(width: 200, height: 200)
                     .overlay(
                         Image(systemName: "music.note.list")
@@ -245,7 +245,7 @@ struct PlaylistDetailsView: View {
                 }
                 .foregroundColor(AppColors.primary)
                 .frame(maxWidth: .infinity, minHeight: 52)
-                .background(.ultraThinMaterial)
+                .background(Color.black.opacity(0.1))
                 .clipShape(Capsule())
                 .overlay(Capsule().strokeBorder(AppColors.primary.opacity(0.3), lineWidth: 1.5))
             }
