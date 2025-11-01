@@ -132,21 +132,10 @@ struct SongRow: View {
     var body: some View {
         HStack(spacing: 16) {
             // Track number or playing waveform
-            ZStack {
-                if isSelected {
-                    LinearGradient(colors: [.pink, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        .frame(width: 32, height: 32)
-                        .clipShape(Circle())
-                    Image(systemName: "waveform")
-                        .font(.caption)
-                        .foregroundColor(.white)
-                } else {
-                    Text("\(index)")
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.textSecondary)
-                        .frame(width: 32)
-                }
-            }
+            Text("\(index)")
+                .font(.subheadline)
+                .foregroundColor(AppColors.textSecondary)
+                .frame(width: 32)
             
             // Song title and artist
             VStack(alignment: .leading, spacing: 2) {
@@ -162,6 +151,10 @@ struct SongRow: View {
             }
             
             Spacer()
+            
+            if isSelected {
+                EqualizerBars()
+            }
             
             // Duration
             Text(formatTime(song.duration))
