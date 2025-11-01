@@ -209,62 +209,48 @@ struct MusicPlayerView: View {
                 
                 // Additional controls (Shuffle, Play All, etc.)
                 HStack(spacing: 30) {
+                    // Shuffle Button
                     Button(action: {
-                        // Shuffle all songs
-                        if let currentSong = musicPlayerManager.currentSong {
-                            // This will shuffle all songs and start with the current one
-                            musicPlayerManager.shufflePlay(playlist: musicPlayerManager.allSongs)
-                        } else {
-                            // If no current song, shuffle all available songs
-                            musicPlayerManager.shufflePlay(playlist: musicPlayerManager.allSongs)
-                        }
+                        // Toggle shuffle mode
+                        musicPlayerManager.toggleShuffle()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.shuffleIsActive ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
                             Image(systemName: "shuffle")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(musicPlayerManager.shuffleIsActive ? .white : .white)
                         }
                     }
                     
+                    // Repeat One Button
                     Button(action: {
-                        // Play all songs (from the beginning)
-                        if !musicPlayerManager.allSongs.isEmpty {
-                            musicPlayerManager.playFromAllSongs(musicPlayerManager.allSongs)
-                        }
+                        // Toggle repeat one mode
+                        musicPlayerManager.toggleRepeatOne()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.currentRepeatMode == .one ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
-                            Image(systemName: "play.circle.fill")
+                            Image(systemName: "repeat.1")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(musicPlayerManager.currentRepeatMode == .one ? .white : .white)
                         }
                     }
                     
+                    // Repeat All Button  
                     Button(action: {
-                        // Toggle repeat mode
-                        musicPlayerManager.toggleRepeatMode()
+                        // Toggle repeat all mode
+                        musicPlayerManager.toggleRepeatAll()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(musicPlayerManager.currentRepeatMode != .none ? AppColors.primary : Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.currentRepeatMode == .all ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
-                            Group {
-                                switch musicPlayerManager.currentRepeatMode {
-                                case .none:
-                                    Image(systemName: "repeat")
-                                case .single:
-                                    Image(systemName: "repeat.1")
-                                case .all:
-                                    Image(systemName: "repeat")
-                                }
-                            }
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(musicPlayerManager.currentRepeatMode != .none ? .white : .white)
+                            Image(systemName: "repeat")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(musicPlayerManager.currentRepeatMode == .all ? .white : .white)
                         }
                     }
                 }
@@ -358,10 +344,7 @@ struct MusicPlayerView: View {
 
 }
 
-// MARK: - Supporting Views
-
-
-
+// MARK: - ControlButton(prev/next)
 struct ControlButton: View {
     let icon: String
     let size: CGFloat
@@ -383,6 +366,7 @@ struct ControlButton: View {
     }
 }
 
+// MARK: - SmallControlButton(Shuffle/repeat)
 struct SmallControlButton: View {
     let icon: String
     let action: () -> Void
@@ -403,18 +387,7 @@ struct SmallControlButton: View {
     }
 }
 
-// MARK: - Preview
-struct MusicPlayerView_Previews: PreviewProvider {
-    static var previews: some View {
-        MusicPlayerView()
-            .environmentObject(MusicPlayerManager.shared)
-    }
-}
-
-#Preview {
-    MusicPlayerView()
-}
-
+// MARK: - PlayPauseButton
 struct PlayPauseButton: View {
     let isPlaying: Bool
     let action: () -> Void
@@ -481,33 +454,7 @@ struct PlayPauseButton: View {
     }
 }
 
-struct PlayPauseButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .rotationEffect(.degrees(configuration.isPressed ? 5 : 0))
-            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: configuration.isPressed)
-    }
-}
-
-// MARK: - Supporting Colors (from your neumorphic theme)
-extension Color {
-    static let darkStart = Color(red: 50 / 255, green: 60 / 255, blue: 65 / 255)
-    static let darkEnd   = Color(red: 25 / 255, green: 25 / 255, blue: 30 / 255)
-}
-
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
-    }
-}
-
-
-
 // MARK: - Draggable Progress Bar
-
 struct DraggableProgressBar: View {
     @Binding var currentTime: TimeInterval
     let duration: TimeInterval
@@ -570,4 +517,9 @@ struct DraggableProgressBar: View {
         guard duration > 0 else { return 0 }
         return (currentTime / duration) * geometry.size.width - 8 // -8 to center the circle (half of 16 width)
     }
+}
+
+
+#Preview {
+    MusicPlayerView()
 }
