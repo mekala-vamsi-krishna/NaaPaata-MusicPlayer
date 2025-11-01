@@ -89,49 +89,6 @@ struct MusicPlayerView: View {
                     }
                     
                     Spacer()
-                    
-                    
-                    Menu {
-                        Button {
-                            showSongInfoSheet = true
-                        } label: {
-                            Label("Info", systemImage: "info.circle")
-                        }
-                        
-                        Divider()
-                        
-                        // Add to playlist options
-                        ForEach(playlistsVM.playlists) { playlist in
-                            Button {
-                                var updatedPlaylist = playlist
-                                // Avoid duplicates
-                                if !updatedPlaylist.songs.contains(where: { $0.id == musicPlayerManager.currentSong?.id }) {
-                                    updatedPlaylist.songs.append(musicPlayerManager.currentSong!)
-                                    playlistsVM.updatePlaylist(updatedPlaylist) // update Published array and save JSON
-                                }
-                            } label: {
-                                Label(playlist.name, systemImage: "music.note.list")
-                            }
-                        }
-                        
-                        Divider()
-                        
-                        // Create new playlist
-                        Button {
-                            showCreatePlaylistSheet = true
-                        } label: {
-                            Label("Create New Playlist", systemImage: "plus.circle")
-                        }
-                    } label: {
-                        ZStack {
-                            Circle()
-                                .fill(Color.black.opacity(0.1))
-                                .frame(width: 44, height: 44)
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -185,6 +142,78 @@ struct MusicPlayerView: View {
                 
                 // Progress bar
                 VStack(spacing: 12) {
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            if let currentSong = musicPlayerManager.currentSong {
+                                playlistsVM.toggleFavoriteSong(currentSong)
+                            }
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black.opacity(0.1))
+                                    .frame(width: 44, height: 44)
+                                Group {
+                                    if let currentSong = musicPlayerManager.currentSong,
+                                       playlistsVM.isSongInFavorites(currentSong) {
+                                        Image(systemName: "heart.fill")
+                                            .font(.system(size: 18, weight: .semibold))
+                                            .foregroundStyle(AppColors.primary)
+                                    } else {
+                                        Image(systemName: "heart")
+                                            .font(.system(size: 18, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Menu {
+                            Button {
+                                showSongInfoSheet = true
+                            } label: {
+                                Label("Info", systemImage: "info.circle")
+                            }
+                            
+                            Divider()
+                            
+                            // Add to playlist options
+                            ForEach(playlistsVM.playlists) { playlist in
+                                Button {
+                                    var updatedPlaylist = playlist
+                                    // Avoid duplicates
+                                    if !updatedPlaylist.songs.contains(where: { $0.id == musicPlayerManager.currentSong?.id }) {
+                                        updatedPlaylist.songs.append(musicPlayerManager.currentSong!)
+                                        playlistsVM.updatePlaylist(updatedPlaylist) // update Published array and save JSON
+                                    }
+                                } label: {
+                                    Label(playlist.name, systemImage: "music.note.list")
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            // Create new playlist
+                            Button {
+                                showCreatePlaylistSheet = true
+                            } label: {
+                                Label("Create New Playlist", systemImage: "plus.circle")
+                            }
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black.opacity(0.1))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "ellipsis")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .rotationEffect(.degrees(90))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 32)
+                    
                     DraggableProgressBar(
                         currentTime: $musicPlayerManager.currentTime,
                         duration: musicPlayerManager.duration,

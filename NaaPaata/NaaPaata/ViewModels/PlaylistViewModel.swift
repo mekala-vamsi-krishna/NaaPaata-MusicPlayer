@@ -10,14 +10,18 @@ import AVFoundation
 
 final class PlaylistsViewModel: ObservableObject {
     @Published var playlists: [Playlist] = []
+    @Published var isLoading: Bool = true  // Track loading state
+    @Published var favoriteSongs: Set<URL> = [] // Track favorite song URLs for quick access
     
     let playlistManager = PlaylistManager.shared
     
     init() {
         loadPlaylists()
+        isLoading = false
     }
     
     func loadPlaylists() {
+        isLoading = true
         let playlistNames = playlistManager.getAllPlaylists()
         
         // Create a dictionary to ensure each playlist name only appears once
@@ -65,6 +69,13 @@ final class PlaylistsViewModel: ObservableObject {
         
         // Convert the dictionary values to an array
         playlists = Array(uniquePlaylists.values)
+        
+        // Update favoriteSongs set for quick access
+        if let favPlaylist = playlists.first(where: { $0.name == "Favorites" }) {
+            favoriteSongs = Set(favPlaylist.songs.map { $0.url })
+        }
+        
+        isLoading = false
     }
     
     // Helper function to get current songs from documents directory
@@ -142,6 +153,74 @@ final class PlaylistsViewModel: ObservableObject {
             playlists[index] = playlist
             playlistManager.savePlaylist(playlist) // Persist changes to JSON
         }
+    }
+    
+    // MARK: - Favorites Functions
+    func isSongInFavorites(_ song: Song) -> Bool {
+        return favoriteSongs.contains(song.url)
+    }
+    
+    func toggleFavoriteSong(_ song: Song) {
+        let isCurrentlyFavorited = isSongInFavorites(song)
+        
+        if let favPlaylist = playlistManager.loadPlaylist(name: "Favorites") {
+            var updatedPlaylist = favPlaylist
+            if isCurrentlyFavorited {
+                // Remove from favorites using URL comparison
+                updatedPlaylist.songs.removeAll { $0.url == song.url }
+                
+                // If the favorites playlist is now empty, we might want to delete it
+                // or just keep it for future use - let's keep it for now
+            } else {
+                // Add to favorites - but check if the song with the same URL already exists in the playlist
+                // and update with the current song's data instead of duplicating
+                let existingIndex = updatedPlaylist.songs.firstIndex { $0.url == song.url }
+                if let index = existingIndex {
+                    // Replace the existing song with the current one to update metadata
+                    updatedPlaylist.songs[index] = song
+                } else {
+                    // Add the song if it doesn't exist
+                    updatedPlaylist.songs.append(song)
+                }
+            }
+            playlistManager.savePlaylist(updatedPlaylist)
+            // Update the favoriteSongs set to reflect the change
+            if isCurrentlyFavorited {
+                self.favoriteSongs.remove(song.url)
+            } else {
+                self.favoriteSongs.insert(song.url)
+            }
+            // Refresh all playlists to ensure UI updates properly
+            DispatchQueue.main.async {
+                self.refreshPlaylists()
+            }
+        } else {
+            // Create favorites playlist and add the song
+            let newFavPlaylist = Playlist(
+                name: "Favorites",
+                songs: [song],
+                coverImage: UIImage(systemName: "heart.fill"),
+                description: "Your favorite songs",
+                isPrivate: false,
+                dateCreated: Date()
+            )
+            playlistManager.savePlaylist(newFavPlaylist)
+            // Update the favoriteSongs set to reflect the change
+            self.favoriteSongs.insert(song.url)
+            // Refresh all playlists to ensure UI updates properly
+            DispatchQueue.main.async {
+                self.refreshPlaylists()
+            }
+        }
+    }
+    
+    func getFavoritesPlaylist() -> Playlist? {
+        return playlistManager.loadPlaylist(name: "Favorites")
+    }
+    
+    // Refresh playlists to ensure UI updates properly
+    func refreshPlaylists() {
+        loadPlaylists()
     }
     
     // MARK: - Helper: Extract metadata from URL
