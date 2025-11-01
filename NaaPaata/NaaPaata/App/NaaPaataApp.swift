@@ -12,14 +12,19 @@ struct NaaPaataApp: App {
     @StateObject var musicPlayerManager = MusicPlayerManager.shared
     @StateObject var playlistsViewModel =  PlaylistsViewModel()
     @ObservedObject var tabState = TabState()
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
   
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .environmentObject(musicPlayerManager)
-                .environmentObject(playlistsViewModel)
-                .environmentObject(tabState)
-            
+            if hasCompletedOnboarding {
+                MainTabView()
+                    .environmentObject(musicPlayerManager)
+                    .environmentObject(playlistsViewModel)
+                    .environmentObject(tabState)
+            } else {
+                OnboardingView()
+                    .environmentObject(musicPlayerManager)
+            }
         }
     }
 }

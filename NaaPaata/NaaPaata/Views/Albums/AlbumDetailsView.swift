@@ -85,7 +85,6 @@ struct AlbumDetailsView: View {
                 .padding(.bottom, 40)
             }
         }
-        .padding(.bottom, 80) /// Adding padding to ensure the mini player dont overlap on the songs
         .navigationBarTitleDisplayMode(.inline)
     }
     

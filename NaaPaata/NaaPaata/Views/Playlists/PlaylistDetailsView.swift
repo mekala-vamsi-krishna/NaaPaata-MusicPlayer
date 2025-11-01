@@ -87,9 +87,7 @@ struct PlaylistDetailsView: View {
                     searchAndSortBar.padding(.horizontal, 20).padding(.bottom, 16)
                     songsListSection
                 }
-                .padding(.bottom, 100) // Add padding to account for mini player
             }
-            .padding(.bottom, 80) // Additional padding to ensure content doesn't go under mini player
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
