@@ -1,6 +1,6 @@
 # 🎵 Naa Paata (నా పాట)
 
-<img width="473" height="434" alt="Screenshot 2025-09-14 at 2 49 44 AM" src="https://github.com/user-attachments/assets/3edf4256-82dd-4782-b344-f15b19a713a6" />
+<img width="473" height="434" alt="Screenshot 2025-09-14 at 2 49 44 AM" src="https://github.com/user-attachments/assets/3438b25f-e952-453c-905f-d7901474f891" />
 
 > **Naa Paata** means *My Song(s)* in Telugu.  
 > A sleek and modern iOS music player app that empowers users to upload, organize, and play your local MP3 music files effortlessly.
