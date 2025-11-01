@@ -286,7 +286,7 @@ struct MusicPlayerView: View {
                             }
                         }
                         .onEnded { value in
-                            if value.translation.height > 120 {
+                            if value.translation.height > 0 {
                                 // Dismiss if dragged enough
                                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                     dismiss()
