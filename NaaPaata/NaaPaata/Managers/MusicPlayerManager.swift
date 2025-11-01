@@ -32,10 +32,12 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     private var isShuffleActive: Bool = false
     private var originalAllSongs: [Song] = [] // Store original order when shuffle is toggled on
     
-    var allSongs: [Song] = []  // This will always be the original playlist
+    var allSongs: [Song] = []  // This will be the current playlist or all songs
     private var shuffledPlaylist: [Song] = [] // This will store the shuffled playlist when shuffle is active
     private var playQueue: [Song] = []
     private var currentIndex: Int = 0
+    private var currentPlaylistName: String? = nil // Track the source playlist
+    private var isPlayingFromPlaylist: Bool = false // Track if we're currently playing from a specific playlist
     
     private override init() {
         super.init()
@@ -91,18 +93,21 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         }
     }
     
-    func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil) {
+    func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil, fromPlaylist playlistName: String? = nil) {
         allSongs = songs
         originalAllSongs = songs  // Store original playlist
         // When loading new playlist, reset shuffle state and shuffled playlist
         shuffledPlaylist = []
         isShuffleActive = false
         playQueue = []
+        currentPlaylistName = playlistName // Track which playlist we're playing from
+        isPlayingFromPlaylist = (playlistName != nil) // Set flag based on whether playlist name is provided
 
         // Determine the starting song
         if let startSong = song {
             currentSong = startSong
-            if let index = songs.firstIndex(of: startSong) {
+            // Use URL-based comparison instead of object identity since Song UUIDs are auto-generated
+            if let index = songs.firstIndex(where: { $0.url == startSong.url }) {
                 currentIndex = index
                 playSong(startSong)
             } else {
@@ -147,20 +152,21 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         if !playQueue.isEmpty {
             let nextSong = playQueue.removeFirst()
             // Update currentIndex to match the song in the original list
-            if let originalIndex = allSongs.firstIndex(of: nextSong) {
+            // Use URL-based comparison instead of object identity
+            if let originalIndex = allSongs.firstIndex(where: { $0.url == nextSong.url }) {
                 currentIndex = originalIndex
             } else {
-                currentIndex = allSongs.firstIndex(of: nextSong) ?? currentIndex
+                currentIndex = allSongs.firstIndex(where: { $0.url == nextSong.url }) ?? currentIndex
             }
             playSong(nextSong)
         } else if !allSongs.isEmpty {
-            // When repeat mode is active, always use original order regardless of shuffle state
-            // According to requirement: "songs should be played one by one without shuffle"
-            let playlistToUse = (repeatMode != .none) ? allSongs : 
-                              (isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs)
+            // Use shuffled playlist if shuffle is active, otherwise use original order
+            // Repeat mode doesn't override shuffle - both can coexist
+            let playlistToUse = isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs
             
             switch repeatMode {
             case .all:
+                // For all repeat, go to next song and wrap around to the beginning
                 currentIndex = (currentIndex + 1) % playlistToUse.count
                 let nextSong = playlistToUse[currentIndex]
                 playSong(nextSong)
@@ -182,9 +188,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     }
     
     func playPrevious() {
-        // When repeat mode is active, always use original order regardless of shuffle state
-        let playlistToUse = (repeatMode != .none) ? allSongs : 
-                          (isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs)
+        // Use shuffled playlist if shuffle is active, otherwise use original order
+        let playlistToUse = isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs
         guard !playlistToUse.isEmpty else { return }
         if repeatMode == .one {
             // For one repeat, restart current song instead of going to previous
@@ -217,7 +222,7 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     }
     
     // MARK: - Shuffle
-    func shufflePlay(playlist: [Song]) {
+    func shufflePlay(playlist: [Song], fromPlaylist playlistName: String? = nil) {
         // Store original playlist
         allSongs = playlist
         originalAllSongs = playlist  // Store original order
@@ -238,6 +243,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             currentIndex = 0
         }
         
+        currentPlaylistName = playlistName // Track which playlist we're playing from
+        isPlayingFromPlaylist = (playlistName != nil) // Set flag based on whether playlist name is provided
         playQueue = []
         if let songToPlay = isShuffleActive ? shuffledPlaylist.first : allSongs.first {
             playSong(songToPlay)

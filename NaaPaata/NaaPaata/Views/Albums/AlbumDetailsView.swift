@@ -55,11 +55,11 @@ struct AlbumDetailsView: View {
                 // Play / Shuffle Buttons
                 HStack(spacing: 16) {
                     actionButton(title: "Play All", isPrimary: true) {
-                        musicPlayerManager.playFromAllSongs(songs)
+                        musicPlayerManager.playFromAllSongs(songs, fromPlaylist: title)
                         showFullPlayer = true
                     }
                     actionButton(title: "Shuffle", isPrimary: false) {
-                        musicPlayerManager.playFromAllSongs(songs.shuffled())
+                        musicPlayerManager.playFromAllSongs(songs.shuffled(), fromPlaylist: title)
                         showFullPlayer = true
                     }
                 }
@@ -74,7 +74,7 @@ struct AlbumDetailsView: View {
                             isSelected: musicPlayerManager.currentSong == song && musicPlayerManager.isPlaying
                         )
                         .onTapGesture {
-                            musicPlayerManager.playFromAllSongs(songs, startAt: song)
+                            musicPlayerManager.playFromAllSongs(songs, startAt: song, fromPlaylist: title)
                             showFullPlayer = true
                         }
                     }
