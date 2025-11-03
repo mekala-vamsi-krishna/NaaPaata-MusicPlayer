@@ -38,9 +38,10 @@ final class PlaylistManager {
     
     // MARK: - Save Playlist to JSON
     func savePlaylist(_ playlist: Playlist) {
-        // Use the playlist's UUID to ensure uniqueness
-        let fileName = playlist.id.uuidString
-        let url = playlistsDir.appendingPathComponent("\(fileName).json")
+        // Use the playlist's name as the identifier to ensure there's only one file per playlist
+        // Sanitize the name to make it a valid filename
+        let sanitizedName = sanitizeFileName(playlist.name)
+        let url = playlistsDir.appendingPathComponent("\(sanitizedName).json")
         do {
             let data = try JSONEncoder().encode(playlist)
             try data.write(to: url)
@@ -49,31 +50,38 @@ final class PlaylistManager {
         }
     }
     
+    // Helper to sanitize playlist names for use as filenames
+    private func sanitizeFileName(_ name: String) -> String {
+        // Replace invalid characters for filenames with underscores
+        let invalidChars = CharacterSet(charactersIn: "/\\:*?\"<>|")
+        var sanitizedName = ""
+        for char in name.unicodeScalars {
+            if invalidChars.contains(char) {
+                sanitizedName += "_"
+            } else {
+                sanitizedName += String(char)
+            }
+        }
+        // Remove any trailing spaces or periods that might cause issues
+        sanitizedName = sanitizedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return sanitizedName.isEmpty ? "unnamed_playlist" : sanitizedName
+    }
+    
     // MARK: - Load All Playlist Names
     func getAllPlaylists() -> [String] {
         guard let files = try? fileManager.contentsOfDirectory(at: playlistsDir, includingPropertiesForKeys: nil)
         else { return [] }
         
         // For each JSON file, load the playlist to get its name
-        // Use a Set to ensure unique names only
-        var playlistNames: Set<String> = []
+        var playlistNames: [String] = []
         for fileURL in files {
-            let fileName = fileURL.deletingPathExtension().lastPathComponent
-            // Only process files that look like UUIDs (36 chars with hyphens)
-            if fileName.count == 36 && fileName.contains("-") {
-                if let playlist = loadPlaylist(byID: fileName) {
-                    playlistNames.insert(playlist.name)
+            if fileURL.pathExtension.lowercased() == "json" {
+                if let playlist = try? JSONDecoder().decode(Playlist.self, from: Data(contentsOf: fileURL)) {
+                    playlistNames.append(playlist.name)
                 }
             }
         }
-        return Array(playlistNames)
-    }
-    
-    // MARK: - Load Playlist by ID (for internal use)
-    private func loadPlaylist(byID id: String) -> Playlist? {
-        let url = playlistsDir.appendingPathComponent("\(id).json")
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(Playlist.self, from: data)
+        return Array(Set(playlistNames)) // Use Set to ensure unique names only
     }
     
     // MARK: - Get Songs in Playlist
@@ -84,37 +92,21 @@ final class PlaylistManager {
     
     // MARK: - Load Playlist
     func loadPlaylist(name: String) -> Playlist? {
-        // Search for the playlist with the given name across all files
-        let playlistFiles = (try? fileManager.contentsOfDirectory(at: playlistsDir, includingPropertiesForKeys: nil)) ?? []
-        
-        for fileURL in playlistFiles {
-            let fileName = fileURL.deletingPathExtension().lastPathComponent
-            // Only process files that look like UUIDs (36 chars with hyphens)
-            if fileName.count == 36 && fileName.contains("-") {
-                if let playlist = try? JSONDecoder().decode(Playlist.self, from: Data(contentsOf: fileURL)),
-                   playlist.name == name {
-                    return playlist
-                }
-            }
-        }
-        return nil
+        // Use the playlist name to load the specific file
+        let sanitizedName = sanitizeFileName(name)
+        let url = playlistsDir.appendingPathComponent("\(sanitizedName).json")
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(Playlist.self, from: data)
     }
     
     // MARK: - Delete Playlist
     func deletePlaylist(name: String) {
-        // Search for the file containing the playlist with the given name
-        let playlistFiles = (try? fileManager.contentsOfDirectory(at: playlistsDir, includingPropertiesForKeys: nil)) ?? []
+        let sanitizedName = sanitizeFileName(name)
+        let url = playlistsDir.appendingPathComponent("\(sanitizedName).json")
         
-        for fileURL in playlistFiles {
-            let fileName = fileURL.deletingPathExtension().lastPathComponent
-            // Only process files that look like UUIDs (36 chars with hyphens)
-            if fileName.count == 36 && fileName.contains("-") {
-                if let playlist = try? JSONDecoder().decode(Playlist.self, from: Data(contentsOf: fileURL)),
-                   playlist.name == name {
-                    try? fileManager.removeItem(at: fileURL)
-                    return
-                }
-            }
+        // Check if the file exists before attempting to remove
+        if fileManager.fileExists(atPath: url.path) {
+            try? fileManager.removeItem(at: url)
         }
     }
 }

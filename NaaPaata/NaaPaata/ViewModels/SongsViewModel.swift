@@ -74,15 +74,19 @@ final class SongsViewModel: ObservableObject {
     }
     
     func play(_ song: Song) {
-        musicManager.playFromAllSongs(songs, startAt: song)
+        musicManager.playFromAllSongs(songs, startAt: song, fromPlaylist: "All Songs")
     }
     
     func playAll() {
-        musicManager.playFromAllSongs(songs)
+        musicManager.playFromAllSongs(songs, fromPlaylist: "All Songs")
     }
     
     func playShuffled() {
-        musicManager.playFromAllSongs(songs.shuffled())
+        // Play all songs first to set the original playlist
+        musicManager.playFromAllSongs(songs, fromPlaylist: "All Songs")
+        
+        // Then toggle shuffle mode to shuffle the playlist while starting from the current song
+        musicManager.toggleShuffle()
     }
     
     // Call this after delete or whenever manager changes

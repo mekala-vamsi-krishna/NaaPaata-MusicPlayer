@@ -10,8 +10,18 @@ import AVFoundation
 import MediaPlayer
 
 struct MusicPlayerView: View {
-    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
     @Environment(\.dismiss) var dismiss
+    
+    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    @EnvironmentObject var playlistsVM: PlaylistsViewModel
+    
+    // Create Playlist
+    @State private var showCreatePlaylistSheet = false
+    @State private var newPlaylistName = ""
+    @State private var newPlaylistDescription = ""
+    
+    // Song Info
+    @State private var showSongInfoSheet = false
     
     @State private var isDragging = false
     @State private var dragOffset: CGFloat = 0
@@ -79,17 +89,6 @@ struct MusicPlayerView: View {
                     }
                     
                     Spacer()
-                    
-                    Button(action: { }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.black.opacity(0.1))
-                                .frame(width: 44, height: 44)
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -143,6 +142,78 @@ struct MusicPlayerView: View {
                 
                 // Progress bar
                 VStack(spacing: 12) {
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            if let currentSong = musicPlayerManager.currentSong {
+                                playlistsVM.toggleFavoriteSong(currentSong)
+                            }
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black.opacity(0.1))
+                                    .frame(width: 44, height: 44)
+                                Group {
+                                    if let currentSong = musicPlayerManager.currentSong,
+                                       playlistsVM.isSongInFavorites(currentSong) {
+                                        Image(systemName: "heart.fill")
+                                            .font(.system(size: 18, weight: .semibold))
+                                            .foregroundStyle(AppColors.primary)
+                                    } else {
+                                        Image(systemName: "heart")
+                                            .font(.system(size: 18, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Menu {
+                            Button {
+                                showSongInfoSheet = true
+                            } label: {
+                                Label("Info", systemImage: "info.circle")
+                            }
+                            
+                            Divider()
+                            
+                            // Add to playlist options
+                            ForEach(playlistsVM.playlists) { playlist in
+                                Button {
+                                    var updatedPlaylist = playlist
+                                    // Avoid duplicates
+                                    if !updatedPlaylist.songs.contains(where: { $0.id == musicPlayerManager.currentSong?.id }) {
+                                        updatedPlaylist.songs.append(musicPlayerManager.currentSong!)
+                                        playlistsVM.updatePlaylist(updatedPlaylist) // update Published array and save JSON
+                                    }
+                                } label: {
+                                    Label(playlist.name, systemImage: "music.note.list")
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            // Create new playlist
+                            Button {
+                                showCreatePlaylistSheet = true
+                            } label: {
+                                Label("Create New Playlist", systemImage: "plus.circle")
+                            }
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black.opacity(0.1))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "ellipsis")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .rotationEffect(.degrees(90))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 32)
+                    
                     DraggableProgressBar(
                         currentTime: $musicPlayerManager.currentTime,
                         duration: musicPlayerManager.duration,
@@ -167,62 +238,48 @@ struct MusicPlayerView: View {
                 
                 // Additional controls (Shuffle, Play All, etc.)
                 HStack(spacing: 30) {
+                    // Shuffle Button
                     Button(action: {
-                        // Shuffle all songs
-                        if let currentSong = musicPlayerManager.currentSong {
-                            // This will shuffle all songs and start with the current one
-                            musicPlayerManager.shufflePlay(playlist: musicPlayerManager.allSongs)
-                        } else {
-                            // If no current song, shuffle all available songs
-                            musicPlayerManager.shufflePlay(playlist: musicPlayerManager.allSongs)
-                        }
+                        // Toggle shuffle mode
+                        musicPlayerManager.toggleShuffle()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.shuffleIsActive ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
                             Image(systemName: "shuffle")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(musicPlayerManager.shuffleIsActive ? .white : .white)
                         }
                     }
                     
+                    // Repeat One Button
                     Button(action: {
-                        // Play all songs (from the beginning)
-                        if !musicPlayerManager.allSongs.isEmpty {
-                            musicPlayerManager.playFromAllSongs(musicPlayerManager.allSongs)
-                        }
+                        // Toggle repeat one mode
+                        musicPlayerManager.toggleRepeatOne()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.currentRepeatMode == .one ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
-                            Image(systemName: "play.circle.fill")
+                            Image(systemName: "repeat.1")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(musicPlayerManager.currentRepeatMode == .one ? .white : .white)
                         }
                     }
                     
+                    // Repeat All Button  
                     Button(action: {
-                        // Toggle repeat mode
-                        musicPlayerManager.toggleRepeatMode()
+                        // Toggle repeat all mode
+                        musicPlayerManager.toggleRepeatAll()
                     }) {
                         ZStack {
                             Circle()
-                                .fill(musicPlayerManager.currentRepeatMode != .none ? AppColors.primary : Color.black.opacity(0.1))
+                                .fill(musicPlayerManager.currentRepeatMode == .all ? AppColors.primary : Color.black.opacity(0.1))
                                 .frame(width: 50, height: 50)
-                            Group {
-                                switch musicPlayerManager.currentRepeatMode {
-                                case .none:
-                                    Image(systemName: "repeat")
-                                case .single:
-                                    Image(systemName: "repeat.1")
-                                case .all:
-                                    Image(systemName: "repeat")
-                                }
-                            }
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(musicPlayerManager.currentRepeatMode != .none ? .white : .white)
+                            Image(systemName: "repeat")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(musicPlayerManager.currentRepeatMode == .all ? .white : .white)
                         }
                     }
                 }
@@ -258,7 +315,7 @@ struct MusicPlayerView: View {
                             }
                         }
                         .onEnded { value in
-                            if value.translation.height > 120 {
+                            if value.translation.height > 0 {
                                 // Dismiss if dragged enough
                                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                     dismiss()
@@ -274,6 +331,32 @@ struct MusicPlayerView: View {
                 .animation(.easeOut(duration: 0.2), value: dragOffset)
         }
         .preferredColorScheme(.dark)
+        // Sheet to create playlist and immediately add the song
+        .sheet(isPresented: $showCreatePlaylistSheet) {
+            CreatePlaylistSheet(
+                name: $newPlaylistName,
+                description: $newPlaylistDescription,
+                onCreate: {
+                    playlistsVM.addPlaylist(name: newPlaylistName, description: newPlaylistDescription)
+                    if let newPlayList = playlistsVM.playlists.first {
+                        var updatedPlaylist = newPlayList
+                        updatedPlaylist.songs.append(musicPlayerManager.currentSong!)
+                        playlistsVM.updatePlaylist(updatedPlaylist) // Update the playlist with the added song
+                    }
+                    newPlaylistName = ""
+                    newPlaylistDescription = ""
+                    showCreatePlaylistSheet = false
+                }
+            )
+        }
+        // Song Info Sheet
+        .sheet(isPresented: $showSongInfoSheet) {
+            NavigationStack {
+                SongInfoView(song: musicPlayerManager.currentSong!)
+            }
+            .presentationDetents([.fraction(0.7)])
+            .presentationDragIndicator(.visible)
+        }
     }
     
     private func progressWidth(totalWidth: CGFloat) -> CGFloat {
@@ -290,10 +373,7 @@ struct MusicPlayerView: View {
 
 }
 
-// MARK: - Supporting Views
-
-
-
+// MARK: - ControlButton(prev/next)
 struct ControlButton: View {
     let icon: String
     let size: CGFloat
@@ -315,6 +395,7 @@ struct ControlButton: View {
     }
 }
 
+// MARK: - SmallControlButton(Shuffle/repeat)
 struct SmallControlButton: View {
     let icon: String
     let action: () -> Void
@@ -335,18 +416,7 @@ struct SmallControlButton: View {
     }
 }
 
-// MARK: - Preview
-struct MusicPlayerView_Previews: PreviewProvider {
-    static var previews: some View {
-        MusicPlayerView()
-            .environmentObject(MusicPlayerManager.shared)
-    }
-}
-
-#Preview {
-    MusicPlayerView()
-}
-
+// MARK: - PlayPauseButton
 struct PlayPauseButton: View {
     let isPlaying: Bool
     let action: () -> Void
@@ -362,78 +432,58 @@ struct PlayPauseButton: View {
             }
         } label: {
             ZStack {
-                // Outer glow effect
+                // --- Neumorphic Background ---
                 Circle()
                     .fill(LinearGradient(
-                        colors: [AppColors.primary.opacity(0.3), AppColors.primary.opacity(0.1)],
+                        colors: [Color.darkStart, Color.darkEnd],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ))
-                    .frame(width: 110, height: 110)
-                
-                // Main button
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [AppColors.primary, AppColors.primary.opacity(0.8)],
-                            center: .center,
-                            startRadius: 5,
-                            endRadius: 45
-                        )
+                    .frame(width: 85, height: 85)
+                    .shadow(color: Color.black.opacity(0.4), radius: 10, x: 10, y: 10)
+                    .shadow(color: Color.white.opacity(0.08), radius: 10, x: -6, y: -6)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(colors: [Color.darkEnd, Color.darkStart],
+                                               startPoint: .topLeading,
+                                               endPoint: .bottomTrailing),
+                                lineWidth: 3
+                            )
                     )
-                    .frame(width: 95, height: 95)
-                    .shadow(color: AppColors.primary.opacity(0.5), radius: 15, x: 0, y: 5)
-                    .scaleEffect(isPressed ? 0.95 : 1.0)
+                    .scaleEffect(isPressed ? 0.96 : 1.0)
                     .animation(.easeOut(duration: 0.1), value: isPressed)
                 
-                // Inner highlight
+                // Inner highlight (subtle emboss)
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.white.opacity(0.4), .clear],
-                            center: .topLeading,
-                            startRadius: 5,
-                            endRadius: 40
-                        )
+                    .stroke(Color.white.opacity(0.05), lineWidth: 2)
+                    .blur(radius: 2)
+                    .offset(x: -2, y: -2)
+                    .mask(
+                        Circle()
+                            .fill(LinearGradient(
+                                colors: [Color.white, .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
                     )
-                    .frame(width: 90, height: 90)
+                    .frame(width: 75, height: 75)
                 
-                // Play/Pause icon
+                // --- Play/Pause Icon ---
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 36, weight: .bold))
+                    .font(.system(size: 38, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(width: 45, height: 45)
+                    .frame(width: 35, height: 35)
                     .scaleEffect(isPressed ? 1.1 : 1.0)
-                    .rotationEffect(.degrees(animateIcon ? 180 : 0))
+                    .rotationEffect(.degrees(animateIcon ? 360 : 0))
                     .animation(.spring(response: 0.5, dampingFraction: 0.6), value: animateIcon)
-
             }
         }
         .buttonStyle(PlayPauseButtonStyle())
     }
 }
 
-struct PlayPauseButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .rotationEffect(.degrees(configuration.isPressed ? 5 : 0)) // Add rotation for extra feedback
-            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: configuration.isPressed)
-    }
-}
-
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
-    }
-}
-
-
-
 // MARK: - Draggable Progress Bar
-
 struct DraggableProgressBar: View {
     @Binding var currentTime: TimeInterval
     let duration: TimeInterval
@@ -496,4 +546,9 @@ struct DraggableProgressBar: View {
         guard duration > 0 else { return 0 }
         return (currentTime / duration) * geometry.size.width - 8 // -8 to center the circle (half of 16 width)
     }
+}
+
+
+#Preview {
+    MusicPlayerView()
 }

@@ -31,6 +31,8 @@
 		AC6F41872E7FD26300B5BE35 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */; };
 		AC6F41892E7FD29A00B5BE35 /* MusicPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */; };
 		AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F418A2E7FE03700B5BE35 /* AlbumDetailsView.swift */; };
+		AC8269A82EB6751C00722433 /* ButtonStyleViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8269A72EB6751C00722433 /* ButtonStyleViewModifier.swift */; };
+		AC8269AB2EB678D400722433 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8269AA2EB678D400722433 /* OnboardingView.swift */; };
 		ACD23E1F2E927D580054344D /* PlaylistDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */; };
 		ACD23E232E9285F60054344D /* SongModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E222E9285F60054344D /* SongModel.swift */; };
 		ACD23E252E9286170054344D /* PlayListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E242E9286170054344D /* PlayListModel.swift */; };
@@ -70,6 +72,8 @@
 		AC6F41862E7FD26300B5BE35 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
 		AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPlayerManager.swift; sourceTree = "<group>"; };
 		AC6F418A2E7FE03700B5BE35 /* AlbumDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumDetailsView.swift; sourceTree = "<group>"; };
+		AC8269A72EB6751C00722433 /* ButtonStyleViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyleViewModifier.swift; sourceTree = "<group>"; };
+		AC8269AA2EB678D400722433 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailsView.swift; sourceTree = "<group>"; };
 		ACD23E222E9285F60054344D /* SongModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModel.swift; sourceTree = "<group>"; };
 		ACD23E242E9286170054344D /* PlayListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListModel.swift; sourceTree = "<group>"; };
@@ -156,12 +160,14 @@
 		AC6773F02EA2A22F0059C86C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AC8269A92EB678BD00722433 /* OnboardingView */,
 				AC6773F32EA2A27E0059C86C /* Player */,
 				AC6F41852E7FD13D00B5BE35 /* Songs */,
 				AC6F418C2E80421C00B5BE35 /* Albums */,
 				AC6773F52EA2A2B30059C86C /* Playlists */,
 				AC5B78A92EA597B0004AD706 /* SongInfo */,
 				AC5B78AA2EA597E8004AD706 /* ShareView */,
+				AC8269A62EB6750B00722433 /* ViewModifiers */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -251,6 +257,22 @@
 				AC6F418A2E7FE03700B5BE35 /* AlbumDetailsView.swift */,
 			);
 			path = Albums;
+			sourceTree = "<group>";
+		};
+		AC8269A62EB6750B00722433 /* ViewModifiers */ = {
+			isa = PBXGroup;
+			children = (
+				AC8269A72EB6751C00722433 /* ButtonStyleViewModifier.swift */,
+			);
+			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
+		AC8269A92EB678BD00722433 /* OnboardingView */ = {
+			isa = PBXGroup;
+			children = (
+				AC8269AA2EB678D400722433 /* OnboardingView.swift */,
+			);
+			path = OnboardingView;
 			sourceTree = "<group>";
 		};
 		CE7907DE2E92E5CC006D517C /* Services */ = {
@@ -352,11 +374,13 @@
 				CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */,
 				AC6F41802E7FD05F00B5BE35 /* MP3FileCell.swift in Sources */,
 				AC6F41812E7FD05F00B5BE35 /* MusicPlayerView.swift in Sources */,
+				AC8269A82EB6751C00722433 /* ButtonStyleViewModifier.swift in Sources */,
 				AC6773F72EA2A4110059C86C /* MetaDataService.swift in Sources */,
 				AC5B78A62EA58F41004AD706 /* ActivityViewController.swift in Sources */,
 				AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */,
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
+				AC8269AB2EB678D400722433 /* OnboardingView.swift in Sources */,
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
 				ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */,
 				ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */,

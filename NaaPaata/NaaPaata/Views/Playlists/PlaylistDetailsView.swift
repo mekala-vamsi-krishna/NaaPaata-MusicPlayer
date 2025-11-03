@@ -87,9 +87,7 @@ struct PlaylistDetailsView: View {
                     searchAndSortBar.padding(.horizontal, 20).padding(.bottom, 16)
                     songsListSection
                 }
-                .padding(.bottom, 100) // Add padding to account for mini player
             }
-            .padding(.bottom, 80) // Additional padding to ensure content doesn't go under mini player
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -129,7 +127,8 @@ struct PlaylistDetailsView: View {
         .alert("Delete Song", isPresented: .constant(selectedSong != nil), presenting: selectedSong) { song in
             Button("Cancel", role: .cancel) { selectedSong = nil }
             Button("Delete", role: .destructive) {
-                if let index = playlist.songs.firstIndex(where: { $0.id == song.id }) {
+                // Use URL-based comparison instead of ID comparison since Song IDs change when loaded from JSON
+                if let index = playlist.songs.firstIndex(where: { $0.url == song.url }) {
                     withAnimation { playlist.songs.remove(at: index) }
                     onUpdate(playlist) // Update parent view immediately (includes saving)
                 }
@@ -224,7 +223,7 @@ struct PlaylistDetailsView: View {
     // MARK: - Action Buttons
     private var actionButtons: some View {
         HStack(spacing: 16) {
-            Button(action: { MusicPlayerManager.shared.playFromAllSongs(playlist.songs) }) {
+            Button(action: { MusicPlayerManager.shared.playFromAllSongs(playlist.songs, fromPlaylist: playlist.name) }) {
                 HStack(spacing: 12) {
                     Image(systemName: "play.fill").font(.system(size: 18, weight: .bold))
                     Text("Play All").font(.system(size: 16, weight: .bold))
@@ -238,7 +237,7 @@ struct PlaylistDetailsView: View {
             .disabled(playlist.songs.isEmpty)
             .opacity(playlist.songs.isEmpty ? 0.5 : 1.0)
             
-            Button(action: { MusicPlayerManager.shared.shufflePlay(playlist: playlist.songs) }) {
+            Button(action: { MusicPlayerManager.shared.shufflePlay(playlist: playlist.songs, fromPlaylist: playlist.name) }) {
                 HStack(spacing: 12) {
                     Image(systemName: "shuffle").font(.system(size: 18, weight: .bold))
                     Text("Shuffle").font(.system(size: 16, weight: .bold))
@@ -333,7 +332,10 @@ struct PlaylistDetailsView: View {
                     PlaylistSongRowView(
                         song: song,
                         editMode: editMode,
-                        onPlay: { MusicPlayerManager.shared.playSong(song) },
+                        onPlay: { 
+                            // Play from the full playlist context, starting with this song
+                            MusicPlayerManager.shared.playFromAllSongs(playlist.songs, startAt: song, fromPlaylist: playlist.name)
+                        },
                         onDelete: { selectedSong = song }
                     )
                     .padding(.horizontal, 20)

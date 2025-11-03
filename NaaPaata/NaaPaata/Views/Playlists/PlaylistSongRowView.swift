@@ -70,6 +70,11 @@ struct PlaylistSongRowView: View {
             
             Spacer()
             
+            if musicManager.currentSong == song {
+                EqualizerBars()
+                    .frame(width: 20, height: 20)
+            }
+            
             if editMode == .inactive {
                 HStack(spacing: 12) {
                     Text(formatDuration(song.duration))
