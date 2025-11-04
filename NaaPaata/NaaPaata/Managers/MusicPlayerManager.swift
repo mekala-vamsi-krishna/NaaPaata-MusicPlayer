@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import MediaPlayer
 
 final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     static let shared = MusicPlayerManager()
@@ -91,6 +92,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         } catch {
             print("Error playing song: \(error.localizedDescription)")
         }
+        
+        updateNowPlayingInfo()
     }
     
     func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil, fromPlaylist playlistName: String? = nil) {
@@ -211,6 +214,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             player.play()
         }
         isPlaying.toggle()
+        
+        updateNowPlayingInfo()
     }
     
     func stop() {
@@ -258,6 +263,10 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             guard let player = self.player else { return }
             self.currentTime = player.currentTime
             self.duration = player.duration
+            
+            // Update lock screen progress
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentTime
+
         }
     }
     
@@ -281,6 +290,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         case .all:
             playNext()
         }
+        
+        updateNowPlayingInfo()
     }
     
     // MARK: - Repeat Mode
@@ -467,3 +478,77 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
 
 }
 
+// MARK: - MPNowPlayingInfoCenter + MPRemoteCommandCenter
+extension MusicPlayerManager {
+    private func setupAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to setup audio session: \(error.localizedDescription)")
+        }
+    }
+    
+    private func updateNowPlayingInfo() {
+        guard let currentSong = currentSong else { return }
+        guard let player = player else { return }
+
+        var nowPlayingInfo: [String: Any] = [
+            MPMediaItemPropertyTitle: currentSong.title,
+            MPMediaItemPropertyArtist: currentSong.artist,
+            MPMediaItemPropertyPlaybackDuration: player.duration,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentTime,
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
+        ]
+        
+        if let artworkImage = currentSong.artworkImage {
+            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { _ in artworkImage }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+        }
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+
+    private func setupRemoteTransportControls() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+        
+        commandCenter.playCommand.addTarget { [weak self] _ in
+            guard let self = self else { return .commandFailed }
+            self.play()
+            return .success
+        }
+        
+        commandCenter.pauseCommand.addTarget { [weak self] _ in
+            guard let self = self else { return .commandFailed }
+            self.pause()
+            return .success
+        }
+        
+        commandCenter.nextTrackCommand.addTarget { [weak self] _ in
+            guard let self = self else { return .commandFailed }
+            self.playNext()
+            return .success
+        }
+        
+        commandCenter.previousTrackCommand.addTarget { [weak self] _ in
+            guard let self = self else { return .commandFailed }
+            self.playPrevious()
+            return .success
+        }
+    }
+    
+    func play() {
+        guard let player = player else { return }
+        player.play()
+        isPlaying = true
+        updateNowPlayingInfo()
+    }
+
+    func pause() {
+        guard let player = player else { return }
+        player.pause()
+        isPlaying = false
+        updateNowPlayingInfo()
+    }
+
+}

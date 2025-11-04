@@ -125,6 +125,8 @@ struct AlbumDetailsView: View {
 
 
 struct SongRow: View {
+    @EnvironmentObject var musicPlayerManager: MusicPlayerManager
+    
     let song: Song
     let index: Int
     let isSelected: Bool
@@ -152,8 +154,9 @@ struct SongRow: View {
             
             Spacer()
             
-            if isSelected {
-                EqualizerBars()
+            if musicPlayerManager.currentSong == song {
+                EqualizerBars(isPlaying: musicPlayerManager.isPlaying)
+                    .frame(width: 20, height: 20)
             }
             
             // Duration

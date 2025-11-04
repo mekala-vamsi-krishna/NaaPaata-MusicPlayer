@@ -67,7 +67,7 @@ struct MP3FileCell: View {
 
             // Now Playing Indicator
             if musicManager.currentSong == song {
-                EqualizerBars()
+                EqualizerBars(isPlaying: musicManager.isPlaying)
                     .frame(width: 20, height: 20)
             }
 
@@ -181,7 +181,11 @@ struct MP3FileCell: View {
 
 struct EqualizerBars: View {
     @State private var heights: [CGFloat] = [5, 10, 7]
-    let timer = Timer.publish(every: 0.3, on: .main, in: .common).autoconnect()
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isAnimating = false
+    
+    let isPlaying: Bool
+    private let timer = Timer.publish(every: 0.3, on: .main, in: .common).autoconnect()
 
     var body: some View {
         HStack(spacing: 2) {
@@ -192,12 +196,22 @@ struct EqualizerBars: View {
             }
         }
         .onReceive(timer) { _ in
+            guard isPlaying else { return } // ✅ Only animate when playing
             withAnimation(.linear(duration: 0.25)) {
                 heights = heights.map { _ in CGFloat(Int.random(in: 5...15)) }
             }
         }
+        .onChange(of: isPlaying) { newValue in
+            // Reset bars when paused
+            if !newValue {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    heights = [5, 5, 5]
+                }
+            }
+        }
     }
 }
+
 
 
 
