@@ -71,7 +71,7 @@ struct PlaylistSongRowView: View {
             Spacer()
             
             if musicManager.currentSong == song {
-                EqualizerBars()
+                EqualizerBars(isPlaying: musicManager.isPlaying)
                     .frame(width: 20, height: 20)
             }
             

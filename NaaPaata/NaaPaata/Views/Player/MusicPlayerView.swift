@@ -433,7 +433,7 @@ struct PlayPauseButton: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ))
-                    .frame(width: 85, height: 85)
+                    .frame(width: 75, height: 75)
                     .shadow(color: Color.black.opacity(0.4), radius: 10, x: 10, y: 10)
                     .shadow(color: Color.white.opacity(0.08), radius: 10, x: -6, y: -6)
                     .overlay(
@@ -461,16 +461,19 @@ struct PlayPauseButton: View {
                                 endPoint: .bottomTrailing
                             ))
                     )
-                    .frame(width: 75, height: 75)
+                    .frame(width: 65, height: 65)
                 
                 // --- Play/Pause Icon ---
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 38, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 35, height: 35)
-                    .scaleEffect(isPressed ? 1.1 : 1.0)
-                    .rotationEffect(.degrees(animateIcon ? 360 : 0))
-                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: animateIcon)
+                ZStack {
+                    Image(systemName: "play.fill")
+                        .opacity(isPlaying ? 0 : 1)
+                    Image(systemName: "pause.fill")
+                        .opacity(isPlaying ? 1 : 0)
+                }
+                .font(.system(size: 38, weight: .bold))
+                .foregroundColor(.white)
+                .animation(.easeInOut(duration: 0.5), value: isPlaying)
+
             }
         }
         .buttonStyle(PlayPauseButtonStyle())

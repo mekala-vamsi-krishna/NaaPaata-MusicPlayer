@@ -124,6 +124,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         } catch {
             print("Error playing song: \(error.localizedDescription)")
         }
+        
+        updateNowPlayingInfo()
     }
     
     func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil, fromPlaylist playlistName: String? = nil) {
