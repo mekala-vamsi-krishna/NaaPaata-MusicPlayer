@@ -40,8 +40,29 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     private var currentPlaylistName: String? = nil // Track the source playlist
     private var isPlayingFromPlaylist: Bool = false // Track if we're currently playing from a specific playlist
     
-    private override init() {
+    override init() {
         super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleInterruption(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+        
+        if type == .began {
+            player?.pause()
+            isPlaying = false
+        } else if type == .ended {
+            player?.play()
+            isPlaying = true
+            updateNowPlayingInfo()
+        }
     }
     
     // MARK: - Computed Properties
@@ -80,15 +101,26 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     func playSong(_ song: Song) {
         currentSong = song
         
+        // ✅ 1️⃣ Setup audio session BEFORE player init
+        setupAudioSession()
+        
         do {
             player = try AVAudioPlayer(contentsOf: song.url)
             player?.delegate = self
+            
+            // ✅ 2️⃣ Setup lock screen controls BEFORE playback
+            setupRemoteTransportControls()
+            
+            player?.prepareToPlay()
             player?.play()
+            
             isPlaying = true
             duration = player?.duration ?? 0
-            // Use the artwork already stored in the song object instead of extracting again
-            artworkImage = song.artworkImage
+            artworkImage = song.artworkImage  // ✅ before updating Now Playing
+            
+            updateNowPlayingInfo()            // ✅ after artwork assigned
             startTimer()
+            
         } catch {
             print("Error playing song: \(error.localizedDescription)")
         }
@@ -263,6 +295,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             guard let player = self.player else { return }
             self.currentTime = player.currentTime
             self.duration = player.duration
+            self.updateNowPlayingProgress()
+                self.updateNowPlayingInfo()
             
             // Update lock screen progress
             MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentTime
@@ -478,77 +512,87 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
 
 }
 
-// MARK: - MPNowPlayingInfoCenter + MPRemoteCommandCenter
+// MARK: - Lock Screen (Now Playing)
 extension MusicPlayerManager {
+    
     private func setupAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("Failed to setup audio session: \(error.localizedDescription)")
-        }
+        } catch { print("Audio Session Error: \(error.localizedDescription)") }
     }
     
     private func updateNowPlayingInfo() {
-        guard let currentSong = currentSong else { return }
-        guard let player = player else { return }
-
-        var nowPlayingInfo: [String: Any] = [
-            MPMediaItemPropertyTitle: currentSong.title,
-            MPMediaItemPropertyArtist: currentSong.artist,
+        guard let song = currentSong, let player = player else { return }
+        
+        var info: [String : Any] = [
+            MPMediaItemPropertyTitle: song.title,
+            MPMediaItemPropertyArtist: song.artist,
             MPMediaItemPropertyPlaybackDuration: player.duration,
             MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentTime,
             MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
         ]
-        
-        if let artworkImage = currentSong.artworkImage {
-            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { _ in artworkImage }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+        if let img = currentSong?.artworkImage {
+            let artwork = MPMediaItemArtwork(boundsSize: CGSize(width: 600, height: 600)) { _ in img }
+            info[MPMediaItemPropertyArtwork] = artwork
+        } else {
+            let fallback = UIImage(systemName: "music.note")!
+            let artwork = MPMediaItemArtwork(boundsSize: CGSize(width: 600, height: 600)) { _ in fallback }
+            info[MPMediaItemPropertyArtwork] = artwork
         }
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
-    private func setupRemoteTransportControls() {
-        let commandCenter = MPRemoteCommandCenter.shared()
-        
-        commandCenter.playCommand.addTarget { [weak self] _ in
-            guard let self = self else { return .commandFailed }
-            self.play()
-            return .success
+        if let img = song.artworkImage {
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: img.size) { _ in img }
         }
         
-        commandCenter.pauseCommand.addTarget { [weak self] _ in
-            guard let self = self else { return .commandFailed }
-            self.pause()
-            return .success
-        }
-        
-        commandCenter.nextTrackCommand.addTarget { [weak self] _ in
-            guard let self = self else { return .commandFailed }
-            self.playNext()
-            return .success
-        }
-        
-        commandCenter.previousTrackCommand.addTarget { [weak self] _ in
-            guard let self = self else { return .commandFailed }
-            self.playPrevious()
-            return .success
-        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
     
-    func play() {
-        guard let player = player else { return }
-        player.play()
-        isPlaying = true
-        updateNowPlayingInfo()
+    private func updateNowPlayingProgress() {
+        MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
     }
-
-    func pause() {
-        guard let player = player else { return }
-        player.pause()
-        isPlaying = false
-        updateNowPlayingInfo()
+    
+    private func setupRemoteTransportControls() {
+        let cc = MPRemoteCommandCenter.shared()
+        
+        cc.playCommand.isEnabled = true
+        cc.pauseCommand.isEnabled = true
+        cc.nextTrackCommand.isEnabled = true
+        cc.previousTrackCommand.isEnabled = true
+        cc.changePlaybackPositionCommand.isEnabled = true
+        
+        cc.playCommand.addTarget { [weak self] _ in
+            self?.player?.play()
+            self?.isPlaying = true
+            self?.updateNowPlayingInfo()
+            return .success
+        }
+        
+        cc.changePlaybackPositionCommand.addTarget { [weak self] event in
+            guard let self = self,
+                  let player = self.player,
+                  let positionEvent = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            
+            player.currentTime = positionEvent.positionTime
+            self.updateNowPlayingInfo()
+            return .success
+        }
+        
+        cc.pauseCommand.addTarget { [weak self] _ in
+            self?.player?.pause()
+            self?.isPlaying = false
+            self?.updateNowPlayingInfo()
+            return .success
+        }
+        
+        cc.nextTrackCommand.addTarget { [weak self] _ in
+            self?.playNext()
+            return .success
+        }
+        
+        cc.previousTrackCommand.addTarget { [weak self] _ in
+            self?.playPrevious()
+            return .success
+        }
     }
-
 }
