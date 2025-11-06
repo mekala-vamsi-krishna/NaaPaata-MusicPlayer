@@ -105,18 +105,12 @@ struct MusicPlayerView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                             .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                     } else {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(LinearGradient(
-                                colors: [AppColors.primary.opacity(0.3), AppColors.primary.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
+                        Image(systemName: "music.note")
+                            .font(.system(size: 80))
+                            .foregroundColor(AppColors.primary)
                             .frame(width: 300, height: 300)
-                            .overlay(
-                                Image(systemName: "music.note")
-                                    .font(.system(size: 80))
-                                    .foregroundColor(AppColors.primary)
-                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                     }
                 }
                 
