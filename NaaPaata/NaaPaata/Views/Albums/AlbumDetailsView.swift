@@ -22,7 +22,12 @@ struct AlbumDetailsView: View {
     
     // Helper: total album duration
     private var totalDuration: TimeInterval {
-        songs.reduce(0) { $0 + $1.duration }
+        sortedSongs.reduce(0) { $0 + $1.duration }
+    }
+    
+    // Sort songs by title by default
+    private var sortedSongs: [Song] {
+        songs.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
     
     var body: some View {
@@ -46,7 +51,7 @@ struct AlbumDetailsView: View {
                     Text(title)
                         .font(.system(size: 28, weight: .bold))
                     
-                    Text("\(songs.count) songs • \(formatTime(totalDuration))")
+                    Text("\(sortedSongs.count) songs • \(formatTime(totalDuration))")
                         .foregroundColor(.secondary)
                         .font(.subheadline)
                 }
@@ -55,11 +60,11 @@ struct AlbumDetailsView: View {
                 // Play / Shuffle Buttons
                 HStack(spacing: 16) {
                     actionButton(title: "Play All", isPrimary: true) {
-                        musicPlayerManager.playFromAllSongs(songs, fromPlaylist: title)
+                        musicPlayerManager.playFromAllSongs(sortedSongs, fromPlaylist: title)
                         showFullPlayer = true
                     }
                     actionButton(title: "Shuffle", isPrimary: false) {
-                        musicPlayerManager.playFromAllSongs(songs.shuffled(), fromPlaylist: title)
+                        musicPlayerManager.playFromAllSongs(sortedSongs.shuffled(), fromPlaylist: title)
                         showFullPlayer = true
                     }
                 }
@@ -67,14 +72,14 @@ struct AlbumDetailsView: View {
                 
                 // Songs List
                 VStack(spacing: 0) {
-                    ForEach(Array(songs.enumerated()), id: \.1.id) { index, song in
+                    ForEach(Array(sortedSongs.enumerated()), id: \.1.id) { index, song in
                         SongRow(
                             song: song,
                             index: index + 1,
                             isSelected: musicPlayerManager.currentSong == song && musicPlayerManager.isPlaying
                         )
                         .onTapGesture {
-                            musicPlayerManager.playFromAllSongs(songs, startAt: song, fromPlaylist: title)
+                            musicPlayerManager.playFromAllSongs(sortedSongs, startAt: song, fromPlaylist: title)
                             showFullPlayer = true
                         }
                     }

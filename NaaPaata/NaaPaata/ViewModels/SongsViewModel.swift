@@ -57,6 +57,9 @@ final class SongsViewModel: ObservableObject {
                 duration: duration
             )
         }
+        
+        // Sort songs by title by default
+        sortSongs(by: .title)
     }
     
     // Shuffle songs

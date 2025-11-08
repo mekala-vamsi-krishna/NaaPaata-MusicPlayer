@@ -10,6 +10,7 @@ import AVFoundation
 
 struct SongsTopBar: View {
     @ObservedObject var viewModel: SongsViewModel
+    @Binding var currentSort: SongsViewModel.SortKey
     var onSort: ((SongsViewModel.SortKey) -> Void)?
 
     var body: some View {
@@ -37,9 +38,39 @@ struct SongsTopBar: View {
                 }
 
                 Menu {
-                    Button("Title") { onSort?(.title) }
-                    Button("Artist") { onSort?(.artist) }
-                    Button("Duration") { onSort?(.duration) }
+                    Button(action: {
+                        onSort?(.title)
+                    }) {
+                        HStack {
+                            Text("Title")
+                            if currentSort == .title {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.artist)
+                    }) {
+                        HStack {
+                            Text("Artist")
+                            if currentSort == .artist {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.duration)
+                    }) {
+                        HStack {
+                            Text("Duration")
+                            if currentSort == .duration {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 18))
@@ -56,6 +87,7 @@ struct SongsTopBar: View {
 
 struct SongsView: View {
     @StateObject private var viewModel = SongsViewModel()
+    @State private var currentSort: SongsViewModel.SortKey = .title
     @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
     
@@ -121,7 +153,8 @@ struct SongsView: View {
                         Spacer()
                     } else {
                         // Top toolbar
-                        SongsTopBar(viewModel: viewModel) { key in
+                        SongsTopBar(viewModel: viewModel, currentSort: $currentSort) { key in
+                            currentSort = key
                             viewModel.sortSongs(by: key)
                         }
                         
@@ -142,7 +175,10 @@ struct SongsView: View {
                 }
             }
             .navigationTitle("Naa Paata")
-            .onAppear { viewModel.loadSongs() }
+            .onAppear { 
+                viewModel.loadSongs()
+                currentSort = .title  // Ensure default sort is Title
+            }
         }
     }
 }

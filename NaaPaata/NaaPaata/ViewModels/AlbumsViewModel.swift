@@ -84,6 +84,8 @@ class AlbumsViewModel: ObservableObject {
 
         DispatchQueue.main.async {
             self.albums = Array(albumMap.values)
+            // Sort albums by name by default
+            self.sortAlbums(by: .name)
         }
     }
 

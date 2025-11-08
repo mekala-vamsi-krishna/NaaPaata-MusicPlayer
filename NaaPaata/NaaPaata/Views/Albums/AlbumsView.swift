@@ -10,6 +10,7 @@ import AVFoundation
 
 struct AlbumsTopBar: View {
     @ObservedObject var viewModel: AlbumsViewModel
+    @Binding var currentSort: AlbumsViewModel.SortKey
     var onSort: ((AlbumsViewModel.SortKey) -> Void)? // callback for sort
 
     var body: some View {
@@ -25,10 +26,52 @@ struct AlbumsTopBar: View {
             // Right side buttons
             HStack(spacing: 16) {
                 Menu {
-                    Button("Name") { onSort?(.name) }
-                    Button("Date Added") { onSort?(.dateAdded) }
-                    Button("Date Modified") { onSort?(.dateModified) }
-                    Button("Size") { onSort?(.size) }
+                    Button(action: {
+                        onSort?(.name)
+                    }) {
+                        HStack {
+                            Text("Name")
+                            if currentSort == .name {
+                                Image(systemName: "checkmark")
+                                    .labelStyle(.titleAndIcon)
+                                    .foregroundColor(AppColors.primary)
+                                    .symbolRenderingMode(.hierarchical)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.dateAdded)
+                    }) {
+                        HStack {
+                            Text("Date Added")
+                            if currentSort == .dateAdded {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.dateModified)
+                    }) {
+                        HStack {
+                            Text("Date Modified")
+                            if currentSort == .dateModified {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.size)
+                    }) {
+                        HStack {
+                            Text("Size")
+                            if currentSort == .size {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.up.arrow.down")
@@ -68,7 +111,7 @@ struct AlbumsView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    AlbumsTopBar(viewModel: viewModel) { key in
+                    AlbumsTopBar(viewModel: viewModel, currentSort: $selectedSort) { key in
                         selectedSort = key
                         viewModel.sortAlbums(by: key)
                     }
@@ -94,6 +137,7 @@ struct AlbumsView: View {
             .navigationTitle("Albums")
             .onAppear {
                 viewModel.loadAlbums()
+                selectedSort = .name  // Ensure default sort is Name
             }
         }
     }
