@@ -8,7 +8,7 @@
 import SwiftUI
 
 class TabState: ObservableObject {
-    @Published var selectedTab: Int = 0
+    @AppStorage("selectedTab") var selectedTab: Int = 0
 }
 
 struct MainTabView: View {
