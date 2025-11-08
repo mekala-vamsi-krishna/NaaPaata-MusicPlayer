@@ -37,9 +37,39 @@ struct SongsTopBar: View {
                 }
 
                 Menu {
-                    Button("Title") { onSort?(.title) }
-                    Button("Artist") { onSort?(.artist) }
-                    Button("Duration") { onSort?(.duration) }
+                    Button(action: {
+                        onSort?(.title)
+                    }) {
+                        HStack {
+                            Text("Title")
+                            if viewModel.currentSort == .title {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.artist)
+                    }) {
+                        HStack {
+                            Text("Artist")
+                            if viewModel.currentSort == .artist {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.duration)
+                    }) {
+                        HStack {
+                            Text("Duration")
+                            if viewModel.currentSort == .duration {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 18))
@@ -122,6 +152,7 @@ struct SongsView: View {
                     } else {
                         // Top toolbar
                         SongsTopBar(viewModel: viewModel) { key in
+                            viewModel.currentSort = key
                             viewModel.sortSongs(by: key)
                         }
                         
@@ -142,7 +173,9 @@ struct SongsView: View {
                 }
             }
             .navigationTitle("Naa Paata")
-            .onAppear { viewModel.loadSongs() }
+            .onAppear { 
+                viewModel.loadSongs()
+            }
         }
     }
 }

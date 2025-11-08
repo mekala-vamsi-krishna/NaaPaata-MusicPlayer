@@ -11,9 +11,11 @@ import AVFoundation
 class AlbumsViewModel: ObservableObject {
     @Published var albums: [Album] = []
 
-    enum SortKey {
+    enum SortKey: String, CaseIterable {
         case name, artist, dateAdded, dateModified, size
     }
+    
+    @AppStorage("albumsSortOption") var currentSort: SortKey = .name
 
     func loadAlbums() {
         let fileManager = FileManager.default
@@ -84,6 +86,8 @@ class AlbumsViewModel: ObservableObject {
 
         DispatchQueue.main.async {
             self.albums = Array(albumMap.values)
+            // Sort albums by the saved sort option
+            self.sortAlbums(by: self.currentSort)
         }
     }
 
@@ -104,6 +108,8 @@ class AlbumsViewModel: ObservableObject {
         case .size:
             albums.sort { $0.songs.count > $1.songs.count }
         }
+        // Update the current sort option
+        currentSort = key
     }
 }
 

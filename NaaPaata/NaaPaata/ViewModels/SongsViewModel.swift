@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFoundation
+import SwiftUI
 
 final class SongsViewModel: ObservableObject {
     private let musicManager = MusicPlayerManager.shared
@@ -15,9 +16,11 @@ final class SongsViewModel: ObservableObject {
     @Published var songs: [Song] = []
     var totalSongs: Int { songs.count }
     
-    enum SortKey {
+    enum SortKey: String, CaseIterable {
         case title, artist, duration
     }
+    
+    @AppStorage("songsSortOption") var currentSort: SortKey = .title
 
     var filteredSongs: [Song] {
         guard !searchText.isEmpty else { return songs }
@@ -57,6 +60,9 @@ final class SongsViewModel: ObservableObject {
                 duration: duration
             )
         }
+        
+        // Sort songs by the saved sort option
+        sortSongs(by: currentSort)
     }
     
     // Shuffle songs
@@ -71,6 +77,8 @@ final class SongsViewModel: ObservableObject {
         case .artist: songs.sort { $0.artist < $1.artist }
         case .duration: songs.sort { $0.duration < $1.duration }
         }
+        // Update the current sort option
+        currentSort = key
     }
     
     func play(_ song: Song) {
