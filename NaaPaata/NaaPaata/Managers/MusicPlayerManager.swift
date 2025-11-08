@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import MediaPlayer
+import Foundation
 
 final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     static let shared = MusicPlayerManager()
@@ -256,6 +257,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         currentSong = nil
         artworkImage = nil
         stopTimer()
+        // Clear the saved playback state when playback is stopped
+        PlaybackStateService.shared.clearPlaybackState()
     }
     
     // MARK: - Shuffle
@@ -309,6 +312,55 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         timer = nil
     }
     
+    // MARK: - Persistent Playback State Methods
+    func saveCurrentPlaybackState() {
+        guard let currentSong = currentSong else { return }
+        
+        let playbackState = PlaybackState(
+            song: currentSong,
+            position: currentTime,
+            isPlaying: isPlaying
+        )
+        PlaybackStateService.shared.savePlaybackState(playbackState)
+    }
+    
+    func restoreLastPlaybackState() {
+        guard let playbackState = PlaybackStateService.shared.loadPlaybackState() else { return }
+        
+        // Check if the file still exists
+        guard let songURL = URL(string: playbackState.songURL),
+              FileManager.default.fileExists(atPath: songURL.path) else {
+            // If the file doesn't exist, clear the saved state
+            PlaybackStateService.shared.clearPlaybackState()
+            return
+        }
+        
+        // Create a song object with the restored state
+        let restoredSong = Song(
+            url: songURL,
+            title: playbackState.songTitle,
+            artist: playbackState.songArtist,
+            duration: 0, // Duration will be updated when loaded
+            artworkImage: playbackState.artworkData != nil ? UIImage(data: playbackState.artworkData!) : nil
+        )
+        
+        // Play the song and seek to the saved position
+        playSong(restoredSong)
+        
+        // Update playback position after a short delay to ensure player is ready
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if playbackState.playbackPosition > 0 {
+                self.seek(to: playbackState.playbackPosition)
+            }
+            
+            // Keep the song paused when app opens, regardless of previous state
+            // Only seek to the position but don't resume playback
+            if self.isPlaying {
+                self.togglePlayPause()  // Pause if it starts playing automatically
+            }
+        }
+    }
+    
     // MARK: - AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         guard flag else { return }
@@ -326,6 +378,12 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         }
         
         updateNowPlayingInfo()
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        print("Audio player decode error: \(error?.localizedDescription ?? "Unknown error")")
+        // Clear the saved playback state if there's an error with the current song
+        PlaybackStateService.shared.clearPlaybackState()
     }
     
     // MARK: - Repeat Mode
@@ -484,6 +542,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         // Stop playback if currently playing
         if currentSong == song {
             stop()
+            // Clear the saved playback state if this was the current song
+            PlaybackStateService.shared.clearPlaybackState()
         }
         
         // Remove from allSongs and playQueue
@@ -508,6 +568,7 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         guard let player = player else { return }
         player.currentTime = time
         currentTime = time
+        updateNowPlayingInfo()
     }
 
 }

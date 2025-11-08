@@ -26,5 +26,16 @@ struct NaaPaataApp: App {
                     .environmentObject(musicPlayerManager)
             }
         }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .background {
+                // Save playback state when app goes to background
+                musicPlayerManager.saveCurrentPlaybackState()
+            } else if newPhase == .active {
+                // Restore playback state when app becomes active
+                musicPlayerManager.restoreLastPlaybackState()
+            }
+        }
     }
+    
+    @Environment(\.scenePhase) private var scenePhase
 }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Song: Identifiable, Hashable, Codable {
+struct Song: Identifiable, Hashable, Codable, Equatable {
     let id: UUID
     let url: URL
     var title: String
@@ -35,6 +35,14 @@ struct Song: Identifiable, Hashable, Codable {
     var artworkImage: UIImage? {
         guard let data = artworkData else { return nil }
         return UIImage(data: data)
+    }
+    
+    static func == (lhs: Song, rhs: Song) -> Bool {
+        return lhs.url == rhs.url
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(url)
     }
 }
 
