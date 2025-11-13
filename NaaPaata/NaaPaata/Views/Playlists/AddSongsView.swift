@@ -17,6 +17,7 @@ struct AddSongsView: View {
     @State private var availableSongs: [Song] = []
     private let playlistManager = PlaylistManager.shared
        
+    @State var isLoaded = false
     
     var filteredSongs: [Song] {
         if searchText.isEmpty {
@@ -118,45 +119,66 @@ struct AddSongsView: View {
             
         }
         .onAppear {
-            loadAvailableSongs()
+            loadIfNeeded()
         }
     }
 }
 
 extension AddSongsView {
     
-    private func loadAvailableSongs() {
-        let mp3Files = LoadAllSongsFromDocuments().loadSongsFromDocuments()
+    func loadIfNeeded() {
+        guard !isLoaded else { return }
+        isLoaded = true
+        loadAvailableSongs()
+    }
+    
+    func loadAvailableSongs() {
+        let urls = LoadAllSongsFromDocuments().loadSongsFromDocuments()
+        availableSongs = [] // reset
+        let group = DispatchGroup()
+        let queue = DispatchQueue.global(qos: .userInitiated)
         
-        availableSongs = mp3Files.map { url in
-            let asset = AVAsset(url: url)
-            
-            // Default values
-            var title = url.deletingPathExtension().lastPathComponent
-            var artist = "Unknown Artist"
-            var duration: TimeInterval = 0
-            var artwork: UIImage? = UIImage(systemName: "music.note")
-            
-            // Extract metadata
-            duration = CMTimeGetSeconds(asset.duration)
-            for item in asset.commonMetadata {
-                guard let key = item.commonKey else { continue }
-                switch key {
-                case .commonKeyTitle:
-                    if let value = item.stringValue { title = value }
-                case .commonKeyArtist:
-                    if let value = item.stringValue { artist = value }
-                case .commonKeyArtwork:
-                    if let data = item.dataValue, let image = UIImage(data: data) {
-                        artwork = image
-                    }
-                default:
-                    break
+        for url in urls {
+            group.enter()
+            queue.async {
+                let song = self.loadMetadata(for: url)
+                DispatchQueue.main.async {
+                    self.availableSongs.append(song)
+                    group.leave()
                 }
             }
-            
-            return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
         }
+        
+        group.notify(queue: .main) {
+            print("✅ Finished loading \(self.availableSongs.count) songs.")
+        }
+    }
+
+    private func loadMetadata(for url: URL) -> Song {
+        let asset = AVAsset(url: url)
+        
+        var title = url.deletingPathExtension().lastPathComponent
+        var artist = "Unknown Artist"
+        var duration: TimeInterval = 0
+        var artwork: UIImage? = UIImage(systemName: "music.note")
+        
+        duration = CMTimeGetSeconds(asset.duration)
+        for item in asset.commonMetadata {
+            guard let key = item.commonKey else { continue }
+            switch key {
+            case .commonKeyTitle:
+                title = item.stringValue ?? title
+            case .commonKeyArtist:
+                artist = item.stringValue ?? artist
+            case .commonKeyArtwork:
+                if let data = item.dataValue, let img = UIImage(data: data) {
+                    artwork = img
+                }
+            default: break
+            }
+        }
+        
+        return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
     }
     
     
