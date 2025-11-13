@@ -84,7 +84,7 @@ struct MiniPlayerView: View {
         .padding(.vertical, 12)
         .background(
             Capsule(style: .continuous)
-                .fill(Color.black.opacity(0.15))
+                .fill(Color.white)
                 .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: -2)
         )
         .overlay(
