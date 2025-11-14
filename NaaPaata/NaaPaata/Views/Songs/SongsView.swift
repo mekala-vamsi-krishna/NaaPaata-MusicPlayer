@@ -172,8 +172,8 @@ struct SongsView: View {
                     }
                 }
             }
-            .navigationTitle("Naa Paata")
-            .onAppear { 
+            .navigationTitle("Naa Paata ♪")
+            .onAppear {
                 viewModel.loadSongs()
             }
         }
