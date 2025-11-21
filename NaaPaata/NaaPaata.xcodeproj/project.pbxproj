@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC2CBA702ECA027B005DD432 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */; };
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
 		AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B4AB42E982764006190E4 /* VolumeControlView.swift */; };
 		AC5B78A42EA5891E004AD706 /* SongInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B78A32EA5891E004AD706 /* SongInfoView.swift */; };
@@ -49,6 +50,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		AC5B4AB42E982764006190E4 /* VolumeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeControlView.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 			children = (
 				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
 				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
+				AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -381,6 +384,7 @@
 				AC6F417D2E7FD05F00B5BE35 /* AppColors.swift in Sources */,
 				AC6774072EA2CA260059C86C /* AlbumsViewModel.swift in Sources */,
 				AC6F417E2E7FD05F00B5BE35 /* DocumentPicker.swift in Sources */,
+				AC2CBA702ECA027B005DD432 /* HapticManager.swift in Sources */,
 				AC6773FB2EA2A4B40059C86C /* MusicLibraryService.swift in Sources */,
 				ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */,
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,

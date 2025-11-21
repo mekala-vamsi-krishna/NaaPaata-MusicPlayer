@@ -281,7 +281,10 @@ struct MusicPlayerView: View {
                 
                 // Playback controls
                 HStack(spacing: 50) {
-                    Button(action: { musicPlayerManager.playPrevious() }) {
+                    Button(action: {
+                        HapticManager.shared.light()
+                        musicPlayerManager.playPrevious()
+                    }) {
                         Image(systemName: "backward.fill").font(.system(size: 28))
                             .foregroundStyle(.white)
                     }
@@ -290,7 +293,10 @@ struct MusicPlayerView: View {
                         musicPlayerManager.togglePlayPause()
                     }
                     
-                    Button(action: { musicPlayerManager.playNext() }) {
+                    Button(action: {
+                        HapticManager.shared.light()
+                        musicPlayerManager.playNext()
+                    }) {
                         Image(systemName: "forward.fill").font(.system(size: 28))
                             .foregroundStyle(.white)
                     }
@@ -420,6 +426,7 @@ struct PlayPauseButton: View {
 
     var body: some View {
         Button {
+            HapticManager.shared.light()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                 action()
                 animateIcon.toggle()
