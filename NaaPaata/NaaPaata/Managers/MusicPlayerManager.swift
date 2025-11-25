@@ -41,6 +41,9 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     private var currentPlaylistName: String? = nil // Track the source playlist
     private var isPlayingFromPlaylist: Bool = false // Track if we're currently playing from a specific playlist
     
+    // Cache for artwork to improve scrolling performance
+    private let artworkCache = NSCache<NSString, UIImage>()
+    
     override init() {
         super.init()
         NotificationCenter.default.addObserver(
@@ -509,6 +512,42 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         
         // Fallback system image
         return UIImage(systemName: "music.note")!
+    }
+    
+    func loadArtworkAsync(for song: Song) async -> UIImage {
+        // Check cache first
+        let key = song.url.absoluteString as NSString
+        if let cached = artworkCache.object(forKey: key) {
+            return cached
+        }
+        
+        // Check song object
+        if let artwork = song.artworkImage {
+            artworkCache.setObject(artwork, forKey: key)
+            return artwork
+        }
+        
+        // Extract from file asynchronously
+        return await Task.detached(priority: .userInitiated) { [weak self] in
+            let asset = AVAsset(url: song.url)
+            var image: UIImage?
+            
+            let metadata = try? await asset.load(.commonMetadata)
+            if let metadata = metadata {
+                for meta in metadata {
+                    if meta.commonKey?.rawValue == "artwork",
+                       let data = try? await meta.load(.value) as? Data,
+                       let img = UIImage(data: data) {
+                        image = img
+                        break
+                    }
+                }
+            }
+            
+            let result = image ?? UIImage(systemName: "music.note")!
+            self?.artworkCache.setObject(result, forKey: key)
+            return result
+        }.value
     }
     
     func loadSong(from url: URL) -> Song {

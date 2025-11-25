@@ -11,6 +11,7 @@ import SwiftUI
 struct NaaPaataApp: App {
     @StateObject var musicPlayerManager = MusicPlayerManager.shared
     @StateObject var playlistsViewModel =  PlaylistsViewModel()
+    @StateObject var songsViewModel = SongsViewModel() // Initialize here
     @ObservedObject var tabState = TabState()
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
   
@@ -20,7 +21,11 @@ struct NaaPaataApp: App {
                 MainTabView()
                     .environmentObject(musicPlayerManager)
                     .environmentObject(playlistsViewModel)
+                    .environmentObject(songsViewModel) // Inject into environment
                     .environmentObject(tabState)
+                    .onAppear {
+                        songsViewModel.loadSongs() // Load songs on app launch
+                    }
             } else {
                 OnboardingView()
                     .environmentObject(musicPlayerManager)

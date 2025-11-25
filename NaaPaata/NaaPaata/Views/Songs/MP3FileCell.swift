@@ -27,11 +27,14 @@ struct MP3FileCell: View {
     
     // Delete Alert
     @State private var showDeleteAlert = false
+    
+    // Async Artwork
+    @State private var artwork: UIImage?
 
     var body: some View {
         HStack(spacing: 15) {
-            // Artwork - use song's stored artwork first, then fall back to manager's optimized extraction
-            if let artwork = song.artworkImage {
+            // Artwork
+            if let artwork = artwork {
                 Image(uiImage: artwork)
                     .resizable()
                     .scaledToFill()
@@ -39,15 +42,17 @@ struct MP3FileCell: View {
                     .background(AppColors.background.opacity(0.2))
                     .cornerRadius(8)
             } else {
-                // Extract artwork from file if not stored in the song object
-                let extractedArtwork = musicManager.getArtwork(for: song)
-                // Since getArtwork always returns an image (never nil), we can use it directly
-                Image(uiImage: extractedArtwork)
+                Image(systemName: "music.note")
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
+                    .padding(10)
                     .frame(width: 50, height: 50)
                     .background(AppColors.background.opacity(0.2))
                     .cornerRadius(8)
+                    .foregroundColor(AppColors.primary)
+                    .task {
+                        self.artwork = await musicManager.loadArtworkAsync(for: song)
+                    }
             }
 
             // Song details

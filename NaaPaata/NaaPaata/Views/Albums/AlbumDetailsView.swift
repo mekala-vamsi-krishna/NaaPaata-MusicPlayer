@@ -87,7 +87,7 @@ struct AlbumDetailsView: View {
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .padding(.horizontal, 20)
-                .padding(.bottom, 40)
+                .padding(.bottom, 80)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
