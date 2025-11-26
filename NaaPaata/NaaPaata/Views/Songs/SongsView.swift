@@ -85,7 +85,7 @@ struct SongsTopBar: View {
 
 
 struct SongsView: View {
-    @StateObject private var viewModel = SongsViewModel()
+    @EnvironmentObject var viewModel: SongsViewModel
     @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
     
@@ -127,7 +127,13 @@ struct SongsView: View {
                 
                 VStack(spacing: 10) {
                     // Search Bar (like PlayListsView)
-                    if !viewModel.songs.isEmpty {
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView("Loading Songs...")
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
+                            .scaleEffect(1.2)
+                        Spacer()
+                    } else if !viewModel.songs.isEmpty {
                         searchBar
                             .padding(.horizontal, 20)
                             .padding(.top, 10)
@@ -174,7 +180,7 @@ struct SongsView: View {
             }
             .navigationTitle("Naa Paata ♪")
             .onAppear {
-                viewModel.loadSongs()
+                // Songs are loaded in App entry point
             }
         }
     }

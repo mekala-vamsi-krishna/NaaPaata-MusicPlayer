@@ -30,6 +30,8 @@ final class SongsViewModel: ObservableObject {
         }
     }
 
+    @Published var isLoading: Bool = false
+    
     // Function to play within search results
     func playFromSearchResults(_ song: Song) {
         let results = filteredSongs
@@ -37,32 +39,43 @@ final class SongsViewModel: ObservableObject {
     }
 
     func loadSongs() {
-        let loader = LoadAllSongsFromDocuments()
-        let urls = loader.loadSongsFromDocuments()
+        guard songs.isEmpty else { return } // Prevent reloading if already loaded
         
-        songs = urls.map { url in
-            let asset = AVAsset(url: url)
-            let metadata = asset.commonMetadata
+        isLoading = true
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
             
-            // Extract title
-            let title = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyTitle, keySpace: .common).first?.stringValue ?? url.lastPathComponent
+            let loader = LoadAllSongsFromDocuments()
+            let urls = loader.loadSongsFromDocuments()
             
-            // Extract artist
-            let artist = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyArtist, keySpace: .common).first?.stringValue ?? "Unknown Artist"
+            let loadedSongs = urls.map { url -> Song in
+                let asset = AVAsset(url: url)
+                let metadata = asset.commonMetadata
+                
+                // Extract title
+                let title = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyTitle, keySpace: .common).first?.stringValue ?? url.lastPathComponent
+                
+                // Extract artist
+                let artist = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyArtist, keySpace: .common).first?.stringValue ?? "Unknown Artist"
+                
+                // Extract duration
+                let duration = CMTimeGetSeconds(asset.duration)
+                
+                return Song(
+                    url: url,
+                    title: title,
+                    artist: artist,
+                    duration: duration
+                )
+            }
             
-            // Extract duration
-            let duration = CMTimeGetSeconds(asset.duration)
-            
-            return Song(
-                url: url,
-                title: title,
-                artist: artist,
-                duration: duration
-            )
+            DispatchQueue.main.async {
+                self.songs = loadedSongs
+                self.sortSongs(by: self.currentSort)
+                self.isLoading = false
+            }
         }
-        
-        // Sort songs by the saved sort option
-        sortSongs(by: currentSort)
     }
     
     // Shuffle songs
