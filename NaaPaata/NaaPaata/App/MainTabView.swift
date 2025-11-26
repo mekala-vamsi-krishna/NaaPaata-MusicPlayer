@@ -43,35 +43,8 @@ struct MainTabView: View {
                         Text("Lists")
                     }
                     .tag(2)
-                
-                // MARK: - Custom Buy Me a Coffee Tab
-                Color.clear
-                    .tabItem {
-                        Image("BuyMeCoffee")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .padding(6)
-                            .background(Color(.systemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .shadow(color: .black.opacity(0.15), radius: 3, y: 2)
-                    }
-                    .tag(3)
             }
             .accentColor(AppColors.primary)
-            .onChange(of: tabState.selectedTab) { newValue in
-                if newValue == 3 {
-                    tabState.selectedTab = 0
-                    showBuyMeCoffeeSheet = true
-                }
-            }
-            .sheet(isPresented: $showBuyMeCoffeeSheet) {
-                if let url = URL(string: "https://buymeacoffee.com/mekalavamsikrishna") {
-                    SafariView(url: url)
-                        .presentationDetents([.large]) // makes it appear as a large bottom sheet
-                        .ignoresSafeArea(edges: .bottom)
-                }
-            }
             
             // MARK: - Mini Player above Tab Bar
             VStack {
