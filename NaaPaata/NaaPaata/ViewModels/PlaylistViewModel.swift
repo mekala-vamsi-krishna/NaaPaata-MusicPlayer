@@ -21,64 +21,80 @@ final class PlaylistsViewModel: ObservableObject {
     }
     
     func loadPlaylists() {
+        // Prevent reloading if already loaded to avoid lag on tab switch
+        if !playlists.isEmpty {
+            return
+        }
+        
         isLoading = true
-        let playlistNames = playlistManager.getAllPlaylists()
         
-        // Create a dictionary to ensure each playlist name only appears once
-        var uniquePlaylists: [UUID: Playlist] = [:]
-        
-        for name in playlistNames {
-            // Load the playlist from JSON which contains the full playlist with songs
-            guard let savedPlaylist = playlistManager.loadPlaylist(name: name) else { continue }
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
             
-            // Skip if we've already processed this playlist (by UUID)
-            if uniquePlaylists[savedPlaylist.id] != nil {
-                continue
-            }
+            let playlistNames = self.playlistManager.getAllPlaylists()
             
-            // Get current available songs from the documents directory
-            let availableSongs = getSongsFromDocumentsDirectory()
+            // Create a dictionary to ensure each playlist name only appears once
+            var uniquePlaylists: [UUID: Playlist] = [:]
             
-            // Match playlist songs with currently available songs
-            // Use a more robust matching method, comparing by file path components
-            var validSongs: [Song] = []
-            for playlistSong in savedPlaylist.songs {
-                // First try exact URL match
-                if let currentSong = availableSongs.first(where: { $0.url == playlistSong.url }) {
-                    validSongs.append(currentSong)
-                } else {
-                    // If exact match fails, try matching by file name and path components
-                    let playlistFileName = playlistSong.url.lastPathComponent
-                    if let currentSong = availableSongs.first(where: { $0.url.lastPathComponent == playlistFileName }) {
+            // Get current available songs from cache or documents
+            // Use SongCacheService to avoid re-scanning files
+            let availableSongs = SongCacheService.shared.loadSongs() ?? self.getSongsFromDocumentsDirectory()
+            
+            for name in playlistNames {
+                // Load the playlist from JSON which contains the full playlist with songs
+                guard let savedPlaylist = self.playlistManager.loadPlaylist(name: name) else { continue }
+                
+                // Skip if we've already processed this playlist (by UUID)
+                if uniquePlaylists[savedPlaylist.id] != nil {
+                    continue
+                }
+                
+                // Match playlist songs with currently available songs
+                // Use a more robust matching method, comparing by file path components
+                var validSongs: [Song] = []
+                for playlistSong in savedPlaylist.songs {
+                    // First try exact URL match
+                    if let currentSong = availableSongs.first(where: { $0.url == playlistSong.url }) {
                         validSongs.append(currentSong)
+                    } else {
+                        // If exact match fails, try matching by file name and path components
+                        let playlistFileName = playlistSong.url.lastPathComponent
+                        if let currentSong = availableSongs.first(where: { $0.url.lastPathComponent == playlistFileName }) {
+                            validSongs.append(currentSong)
+                        }
                     }
                 }
+                
+                let playlist = Playlist(
+                    name: savedPlaylist.name,
+                    songs: validSongs,
+                    coverImage: savedPlaylist.coverImage,
+                    description: savedPlaylist.description,
+                    isPrivate: savedPlaylist.isPrivate,
+                    dateCreated: savedPlaylist.dateCreated
+                )
+                
+                uniquePlaylists[savedPlaylist.id] = playlist
             }
             
-            let playlist = Playlist(
-                name: savedPlaylist.name,
-                songs: validSongs,
-                coverImage: savedPlaylist.coverImage,
-                description: savedPlaylist.description,
-                isPrivate: savedPlaylist.isPrivate,
-                dateCreated: savedPlaylist.dateCreated
-            )
+            // Convert the dictionary values to an array
+            let loadedPlaylists = Array(uniquePlaylists.values)
             
-            uniquePlaylists[savedPlaylist.id] = playlist
+            DispatchQueue.main.async {
+                self.playlists = loadedPlaylists
+                
+                // Update favoriteSongs set for quick access
+                if let favPlaylist = self.playlists.first(where: { $0.name == "Favorites" }) {
+                    self.favoriteSongs = Set(favPlaylist.songs.map { $0.url })
+                }
+                
+                self.isLoading = false
+            }
         }
-        
-        // Convert the dictionary values to an array
-        playlists = Array(uniquePlaylists.values)
-        
-        // Update favoriteSongs set for quick access
-        if let favPlaylist = playlists.first(where: { $0.name == "Favorites" }) {
-            favoriteSongs = Set(favPlaylist.songs.map { $0.url })
-        }
-        
-        isLoading = false
     }
     
     // Helper function to get current songs from documents directory
+    // Kept as fallback if cache is empty
     private func getSongsFromDocumentsDirectory() -> [Song] {
         let loader = LoadAllSongsFromDocuments()
         let urls = loader.loadSongsFromDocuments()

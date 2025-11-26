@@ -56,7 +56,7 @@ struct AddSongsView: View {
                     .padding(20)
                     
                     ScrollView {
-                        VStack(spacing: 8) {
+                        LazyVStack(spacing: 8) {
                             ForEach(filteredSongs) { song in
                                 AddableSongRow(
                                     song: song,
@@ -133,24 +133,29 @@ extension AddSongsView {
     }
     
     func loadAvailableSongs() {
-        let urls = LoadAllSongsFromDocuments().loadSongsFromDocuments()
-        availableSongs = [] // reset
-        let group = DispatchGroup()
-        let queue = DispatchQueue.global(qos: .userInitiated)
-        
-        for url in urls {
-            group.enter()
-            queue.async {
-                let song = self.loadMetadata(for: url)
-                DispatchQueue.main.async {
-                    self.availableSongs.append(song)
-                    group.leave()
-                }
-            }
+        // Use SongCacheService for instant load
+        if let cachedSongs = SongCacheService.shared.loadSongs(), !cachedSongs.isEmpty {
+            self.availableSongs = cachedSongs
+            print("✅ Loaded \(cachedSongs.count) songs from cache.")
+            return
         }
         
-        group.notify(queue: .main) {
-            print("✅ Finished loading \(self.availableSongs.count) songs.")
+        // Fallback to background load if cache is empty
+        DispatchQueue.global(qos: .userInitiated).async {
+            let urls = LoadAllSongsFromDocuments().loadSongsFromDocuments()
+            var loadedSongs: [Song] = []
+            
+            for url in urls {
+                let song = self.loadMetadata(for: url)
+                loadedSongs.append(song)
+            }
+            
+            DispatchQueue.main.async {
+                self.availableSongs = loadedSongs
+                print("✅ Finished loading \(loadedSongs.count) songs from disk.")
+                // Save to cache for next time
+                SongCacheService.shared.saveSongs(loadedSongs)
+            }
         }
     }
 
@@ -160,7 +165,7 @@ extension AddSongsView {
         var title = url.deletingPathExtension().lastPathComponent
         var artist = "Unknown Artist"
         var duration: TimeInterval = 0
-        var artwork: UIImage? = UIImage(systemName: "music.note")
+        var artwork: UIImage? = nil // Don't set default here, let getArtwork handle it
         
         duration = CMTimeGetSeconds(asset.duration)
         for item in asset.commonMetadata {
@@ -187,11 +192,14 @@ extension AddSongsView {
         // Filter only selected songs
         let songsToAdd = availableSongs.filter { selectedSongs.contains($0.id) }
         
-        // Update playlist in memory
+        // Update playlist in memory immediately for UI responsiveness
         playlist.songs.append(contentsOf: songsToAdd)
         
-        // Persist playlist JSON using PlaylistManager
-        playlistManager.savePlaylist(playlist)
+        // Persist playlist JSON in background
+        let playlistToSave = playlist
+        DispatchQueue.global(qos: .background).async {
+            PlaylistManager.shared.savePlaylist(playlistToSave)
+        }
     }
     
 }
@@ -221,12 +229,26 @@ struct AddableSongRow: View {
                         .fill(.ultraThinMaterial)
                         .frame(width: 56, height: 56)
                     
-                    Image(uiImage: song.artworkImage ?? UIImage(systemName: "music.note")!)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(AppColors.primary)
-                        .cornerRadius(8)
+                    // Use artwork from song directly to avoid expensive getArtwork call during scroll
+                    if let artwork = song.artworkImage {
+                        Image(uiImage: artwork)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(8)
+                    } else {
+                        Image(systemName: "music.note")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [AppColors.primary, AppColors.primary.opacity(0.6)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {

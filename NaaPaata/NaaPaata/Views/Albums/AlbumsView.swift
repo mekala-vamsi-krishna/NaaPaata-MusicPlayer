@@ -110,26 +110,35 @@ struct AlbumsView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    AlbumsTopBar(viewModel: viewModel) { key in
-                        viewModel.currentSort = key
-                        viewModel.sortAlbums(by: key)
-                    }
+                    // Search Bar (like PlayListsView)
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView("Loading Albums...")
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
+                            .scaleEffect(1.2)
+                        Spacer()
+                    } else {
+                        AlbumsTopBar(viewModel: viewModel) { key in
+                            viewModel.currentSort = key
+                            viewModel.sortAlbums(by: key)
+                        }
 
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 24) {
-                            ForEach(viewModel.albums) { album in
-                                NavigationLink {
-                                    AlbumDetailsView(
-                                        title: album.name,
-                                        artwork: album.artworkImage,
-                                        songs: album.songs
-                                    )
-                                } label: {
-                                    AlbumCellView(album: album)
+                        ScrollView {
+                            LazyVGrid(columns: columns, spacing: 24) {
+                                ForEach(viewModel.albums) { album in
+                                    NavigationLink {
+                                        AlbumDetailsView(
+                                            title: album.name,
+                                            artwork: album.artworkImage,
+                                            songs: album.songs
+                                        )
+                                    } label: {
+                                        AlbumCellView(album: album)
+                                    }
                                 }
                             }
+                            .padding()
                         }
-                        .padding()
                     }
                 }
             }

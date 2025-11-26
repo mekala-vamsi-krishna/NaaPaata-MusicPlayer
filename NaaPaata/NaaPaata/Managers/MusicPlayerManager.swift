@@ -510,8 +510,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             }
         }
         
-        // Fallback system image
-        return UIImage(systemName: "music.note")!
+        // Fallback custom image
+        return generateDefaultArtwork()
     }
     
     func loadArtworkAsync(for song: Song) async -> UIImage {
@@ -529,6 +529,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         
         // Extract from file asynchronously
         return await Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self = self else { return UIImage(systemName: "music.note")! }
+            
             let asset = AVAsset(url: song.url)
             var image: UIImage?
             
@@ -544,10 +546,41 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
                 }
             }
             
-            let result = image ?? UIImage(systemName: "music.note")!
-            self?.artworkCache.setObject(result, forKey: key)
+            let result = image ?? self.generateDefaultArtwork()
+            self.artworkCache.setObject(result, forKey: key)
             return result
         }.value
+    }
+    
+    private func generateDefaultArtwork() -> UIImage {
+        let size = CGSize(width: 500, height: 500)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        
+        return renderer.image { context in
+            let rect = CGRect(origin: .zero, size: size)
+            
+            // Draw Gradient Background
+            let colors = [UIColor(AppColors.primary).cgColor, UIColor(AppColors.secondary).cgColor]
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let gradient = CGGradient(colorsSpace: colorSpace, colors: colors as CFArray, locations: [0.0, 1.0])!
+            
+            context.cgContext.drawLinearGradient(
+                gradient,
+                start: CGPoint(x: 0, y: 0),
+                end: CGPoint(x: size.width, y: size.height),
+                options: []
+            )
+            
+            // Draw Music Note Symbol
+            if let symbolImage = UIImage(systemName: "music.note")?.withTintColor(.white, renderingMode: .alwaysOriginal) {
+                let symbolSize = CGSize(width: size.width * 0.5, height: size.height * 0.5)
+                let symbolOrigin = CGPoint(
+                    x: (size.width - symbolSize.width) / 2,
+                    y: (size.height - symbolSize.height) / 2
+                )
+                symbolImage.draw(in: CGRect(origin: symbolOrigin, size: symbolSize))
+            }
+        }
     }
     
     func loadSong(from url: URL) -> Song {
@@ -593,6 +626,14 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         do {
             try FileManager.default.removeItem(at: song.url)
             print("Deleted file at \(song.url.path)")
+            
+            // Notify listeners that a song has been deleted
+            NotificationCenter.default.post(
+                name: .songDeleted,
+                object: nil,
+                userInfo: ["song": song]
+            )
+            
         } catch {
             print("Failed to delete file: \(error.localizedDescription)")
         }
@@ -610,6 +651,10 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         updateNowPlayingInfo()
     }
 
+}
+
+extension Notification.Name {
+    static let songDeleted = Notification.Name("songDeleted")
 }
 
 // MARK: - Lock Screen (Now Playing)
