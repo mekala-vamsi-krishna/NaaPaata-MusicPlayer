@@ -32,17 +32,44 @@ final class SongsViewModel: ObservableObject {
 
     @Published var isLoading: Bool = false
     
+    init() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSongDeleted), name: .songDeleted, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     // Function to play within search results
     func playFromSearchResults(_ song: Song) {
         let results = filteredSongs
         musicManager.playFromAllSongs(results, startAt: song)
     }
+    
+    @objc private func handleSongDeleted(notification: Notification) {
+        guard let song = notification.userInfo?["song"] as? Song else { return }
+        
+        DispatchQueue.main.async {
+            // Remove the song from the list
+            if let index = self.songs.firstIndex(where: { $0.url == song.url }) {
+                self.songs.remove(at: index)
+            }
+        }
+    }
 
     func loadSongs() {
-        guard songs.isEmpty else { return } // Prevent reloading if already loaded
+        // 1. Load from cache first for instant UI
+        if songs.isEmpty {
+            if let cachedSongs = SongCacheService.shared.loadSongs(), !cachedSongs.isEmpty {
+                self.songs = cachedSongs
+                self.sortSongs(by: self.currentSort)
+                // Don't set isLoading = true if we have cached data
+            } else {
+                isLoading = true
+            }
+        }
         
-        isLoading = true
-        
+        // 2. Perform background sync to check for file changes
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             
@@ -62,17 +89,36 @@ final class SongsViewModel: ObservableObject {
                 // Extract duration
                 let duration = CMTimeGetSeconds(asset.duration)
                 
+                // Extract artwork
+                var artwork: UIImage? = nil
+                if let data = AVMetadataItem.metadataItems(from: metadata, withKey: AVMetadataKey.commonKeyArtwork, keySpace: .common).first?.dataValue {
+                    artwork = UIImage(data: data)
+                }
+                
                 return Song(
                     url: url,
                     title: title,
                     artist: artist,
-                    duration: duration
+                    duration: duration,
+                    artworkImage: artwork
                 )
             }
             
             DispatchQueue.main.async {
-                self.songs = loadedSongs
-                self.sortSongs(by: self.currentSort)
+                // Check if the loaded songs are different from current songs
+                // We compare counts or sets of URLs to decide if update is needed
+                // For simplicity and correctness, we'll update if the list is different
+                
+                let currentURLs = Set(self.songs.map { $0.url })
+                let newURLs = Set(loadedSongs.map { $0.url })
+                
+                if currentURLs != newURLs || self.songs.isEmpty {
+                    self.songs = loadedSongs
+                    self.sortSongs(by: self.currentSort)
+                    // Save to cache
+                    SongCacheService.shared.saveSongs(loadedSongs)
+                }
+                
                 self.isLoading = false
             }
         }

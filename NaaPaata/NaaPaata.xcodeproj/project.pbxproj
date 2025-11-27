@@ -44,6 +44,7 @@
 		ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E2A2E9286E70054344D /* AddSongsView.swift */; };
 		ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */; };
 		ACD767E02EC6503D00895236 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD767DF2EC6503D00895236 /* SafariView.swift */; };
+		ACFFFD292ED75D5600A338D6 /* SongCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */; };
 		CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */; };
 		CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E12E92F01B006D517C /* PlaylistManager.swift */; };
 		CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E42E92F591006D517C /* PlaylistViewModel.swift */; };
@@ -89,6 +90,7 @@
 		ACD23E2A2E9286E70054344D /* AddSongsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSongsView.swift; sourceTree = "<group>"; };
 		ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlaylistView.swift; sourceTree = "<group>"; };
 		ACD767DF2EC6503D00895236 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
+		ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongCacheService.swift; sourceTree = "<group>"; };
 		CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadAllSongsFromDocuments.swift; sourceTree = "<group>"; };
 		CE7907E12E92F01B006D517C /* PlaylistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistManager.swift; sourceTree = "<group>"; };
 		CE7907E42E92F591006D517C /* PlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewModel.swift; sourceTree = "<group>"; };
@@ -297,6 +299,7 @@
 		CE7907DE2E92E5CC006D517C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */,
 				ACAB2BA72EBFC7D9005F84D8 /* PlaybackStateService.swift */,
 				CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */,
 				AC6773F62EA2A4110059C86C /* MetaDataService.swift */,
@@ -386,6 +389,7 @@
 				AC6F417E2E7FD05F00B5BE35 /* DocumentPicker.swift in Sources */,
 				AC2CBA702ECA027B005DD432 /* HapticManager.swift in Sources */,
 				AC6773FB2EA2A4B40059C86C /* MusicLibraryService.swift in Sources */,
+				ACFFFD292ED75D5600A338D6 /* SongCacheService.swift in Sources */,
 				ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */,
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,
 				AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */,
@@ -549,7 +553,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"NaaPaata/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = K4K55XNXA6;
@@ -572,6 +576,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "NaaPaata Dev Profile";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -586,7 +594,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"NaaPaata/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = K4K55XNXA6;
@@ -609,6 +617,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "NaaPaata Prod Profile";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

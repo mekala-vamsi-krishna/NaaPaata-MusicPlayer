@@ -44,10 +44,21 @@ struct PlayListsView: View {
                 .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 24) {
-                        searchBar
-                        playlistsGrid
-                        emptyState
+                    if viewModel.isLoading {
+                        VStack {
+                            Spacer()
+                                .frame(height: 100)
+                            ProgressView("Loading Playlists...")
+                                .tint(AppColors.primary)
+                                .foregroundColor(AppColors.textSecondary)
+                            Spacer()
+                        }
+                    } else {
+                        VStack(spacing: 24) {
+                            searchBar
+                            playlistsGrid
+                            emptyState
+                        }
                     }
                 }
             }
