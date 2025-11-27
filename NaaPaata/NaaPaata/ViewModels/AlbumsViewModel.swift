@@ -10,6 +10,7 @@ import AVFoundation
 
 class AlbumsViewModel: ObservableObject {
     @Published var albums: [Album] = []
+    @Published var searchText: String = ""
 
     enum SortKey: String, CaseIterable {
         case name, artist, dateAdded, dateModified, size
@@ -18,6 +19,15 @@ class AlbumsViewModel: ObservableObject {
     @AppStorage("albumsSortOption") var currentSort: SortKey = .name
 
     @Published var isLoading: Bool = false
+    
+    var filteredAlbums: [Album] {
+        guard !searchText.isEmpty else { return albums }
+        return albums.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.songs.contains(where: { $0.artist.localizedCaseInsensitiveContains(searchText) })
+        }
+    }
+
 
     func loadAlbums() {
         // Cache check: if we already have albums, don't reload

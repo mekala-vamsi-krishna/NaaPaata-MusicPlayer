@@ -10,12 +10,13 @@ import AVFoundation
 
 struct AlbumsTopBar: View {
     @ObservedObject var viewModel: AlbumsViewModel
+    var filteredCount: Int
     var onSort: ((AlbumsViewModel.SortKey) -> Void)? // callback for sort
 
     var body: some View {
         HStack {
             // Total albums
-            Text("\(viewModel.albums.count) Albums")
+            Text("\(filteredCount) Album\(filteredCount == 1 ? "" : "s")")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.primary)
                 .padding(.leading, 5)
@@ -94,6 +95,28 @@ struct AlbumsView: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
     @State private var selectedSort: AlbumsViewModel.SortKey = .name
+    
+    // MARK: - Search Bar
+    private var searchBar: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(AppColors.textSecondary)
+            
+            TextField("Search albums...", text: $viewModel.searchText)
+                .foregroundColor(.primary)
+            
+            if !viewModel.searchText.isEmpty {
+                Button { viewModel.searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(AppColors.textSecondary)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
 
     var body: some View {
         NavigationStack {
@@ -109,23 +132,28 @@ struct AlbumsView: View {
                 )
                 .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Search Bar (like PlayListsView)
+                VStack(spacing: 10) {
                     if viewModel.isLoading {
                         Spacer()
                         ProgressView("Loading Albums...")
                             .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
                             .scaleEffect(1.2)
                         Spacer()
-                    } else {
-                        AlbumsTopBar(viewModel: viewModel) { key in
+                    } else if !viewModel.albums.isEmpty {
+                        // Search Bar
+                        searchBar
+                            .padding(.horizontal, 20)
+                            .padding(.top, 10)
+                        
+                        // Top toolbar with dynamic count
+                        AlbumsTopBar(viewModel: viewModel, filteredCount: viewModel.filteredAlbums.count) { key in
                             viewModel.currentSort = key
                             viewModel.sortAlbums(by: key)
                         }
 
                         ScrollView {
                             LazyVGrid(columns: columns, spacing: 24) {
-                                ForEach(viewModel.albums) { album in
+                                ForEach(viewModel.filteredAlbums) { album in
                                     NavigationLink {
                                         AlbumDetailsView(
                                             title: album.name,
