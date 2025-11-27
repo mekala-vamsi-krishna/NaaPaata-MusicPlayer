@@ -91,8 +91,7 @@ struct AlbumsTopBar: View {
 
 struct AlbumsView: View {
     @StateObject private var viewModel = AlbumsViewModel()
-    
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    @Environment(\.horizontalSizeClass) var sizeClass
     
     @State private var selectedSort: AlbumsViewModel.SortKey = .name
     
@@ -119,60 +118,72 @@ struct AlbumsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        AppColors.background,
-                        AppColors.background.opacity(0.95),
-                        AppColors.primary.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
-                VStack(spacing: 10) {
-                    if viewModel.isLoading {
-                        Spacer()
-                        ProgressView("Loading Albums...")
-                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
-                            .scaleEffect(1.2)
-                        Spacer()
-                    } else if !viewModel.albums.isEmpty {
-                        // Search Bar
-                        searchBar
-                            .padding(.horizontal, 20)
-                            .padding(.top, 10)
-                        
-                        // Top toolbar with dynamic count
-                        AlbumsTopBar(viewModel: viewModel, filteredCount: viewModel.filteredAlbums.count) { key in
-                            viewModel.currentSort = key
-                            viewModel.sortAlbums(by: key)
-                        }
+        GeometryReader { geometry in
+            let layout = AdaptiveLayout(
+                horizontalSizeClass: sizeClass,
+                screenWidth: geometry.size.width
+            )
+            let columns = Array(
+                repeating: GridItem(.flexible(), spacing: layout.gridSpacing),
+                count: layout.gridColumns
+            )
+            
+            NavigationStack {
+                ZStack {
+                    LinearGradient(
+                        colors: [
+                            AppColors.background,
+                            AppColors.background.opacity(0.95),
+                            AppColors.primary.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .ignoresSafeArea()
+                    
+                    VStack(spacing: layout.verticalSpacing) {
+                        if viewModel.isLoading {
+                            Spacer()
+                            ProgressView("Loading Albums...")
+                                .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
+                                .scaleEffect(1.2)
+                            Spacer()
+                        } else if !viewModel.albums.isEmpty {
+                            // Search Bar
+                            searchBar
+                                .padding(.horizontal, layout.horizontalPadding)
+                                .padding(.top, 10)
+                            
+                            // Top toolbar with dynamic count
+                            AlbumsTopBar(viewModel: viewModel, filteredCount: viewModel.filteredAlbums.count) { key in
+                                viewModel.currentSort = key
+                                viewModel.sortAlbums(by: key)
+                            }
 
-                        ScrollView {
-                            LazyVGrid(columns: columns, spacing: 24) {
-                                ForEach(viewModel.filteredAlbums) { album in
-                                    NavigationLink {
-                                        AlbumDetailsView(
-                                            title: album.name,
-                                            artwork: album.artworkImage,
-                                            songs: album.songs
-                                        )
-                                    } label: {
-                                        AlbumCellView(album: album)
+                            ScrollView {
+                                LazyVGrid(columns: columns, spacing: layout.gridSpacing) {
+                                    ForEach(viewModel.filteredAlbums) { album in
+                                        NavigationLink {
+                                            AlbumDetailsView(
+                                                title: album.name,
+                                                artwork: album.artworkImage,
+                                                songs: album.songs
+                                            )
+                                        } label: {
+                                            AlbumCellView(album: album, imageSize: layout.cardImageSize)
+                                        }
                                     }
                                 }
+                                .padding(.horizontal, layout.horizontalPadding)
+                                .padding(.bottom, 20)
                             }
-                            .padding()
                         }
                     }
                 }
-            }
-            .navigationTitle("Albums")
-            .onAppear {
-                viewModel.loadAlbums()
+                .navigationTitle("Albums")
+                .onAppear {
+                    viewModel.loadAlbums()
+                }
             }
         }
     }
@@ -180,6 +191,7 @@ struct AlbumsView: View {
 
 struct AlbumCellView: View {
     let album: Album
+    let imageSize: CGFloat
     
     var body: some View {
         VStack(spacing: 10) {
@@ -188,19 +200,20 @@ struct AlbumCellView: View {
                     Image(uiImage: artwork)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 160, height: 160)
+                        .frame(width: imageSize, height: imageSize)
                         .cornerRadius(16)
                         .shadow(radius: 10)
                 } else {
                     Image(systemName: "opticaldisc")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 120, height: 120)
+                        .frame(width: imageSize * 0.75, height: imageSize * 0.75)
                         .padding()
                         .foregroundColor(.gray.opacity(0.6))
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(Color(.systemGray6))
+                                .frame(width: imageSize, height: imageSize)
                         )
                 }
             }
