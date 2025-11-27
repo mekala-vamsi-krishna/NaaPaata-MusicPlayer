@@ -96,7 +96,7 @@ struct AlbumsView: View {
     @State private var selectedSort: AlbumsViewModel.SortKey = .name
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LinearGradient(
                     colors: [

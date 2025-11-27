@@ -16,7 +16,7 @@ struct CreatePlaylistSheet: View {
     @FocusState private var isNameFocused: Bool
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 AppColors.background.ignoresSafeArea()
                 
