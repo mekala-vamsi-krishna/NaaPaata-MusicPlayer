@@ -560,7 +560,7 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             let rect = CGRect(origin: .zero, size: size)
             
             // Draw Gradient Background
-            let colors = [UIColor(AppColors.primary).cgColor, UIColor(AppColors.secondary).cgColor]
+            let colors = [UIColor(AppColors.primary).cgColor, UIColor(AppColors.primary).cgColor]
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             let gradient = CGGradient(colorsSpace: colorSpace, colors: colors as CFArray, locations: [0.0, 1.0])!
             
