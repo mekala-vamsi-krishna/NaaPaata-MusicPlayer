@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PlaylistCard: View {
     let playlist: Playlist
+    let cardHeight: CGFloat
     @State private var isPressed = false
     
     var body: some View {
@@ -24,20 +25,20 @@ struct PlaylistCard: View {
                             endRadius: 90
                         )
                     )
-                    .frame(height: 160)
+                    .frame(height: cardHeight)
                     .blur(radius: 20)
                 
                 // Main card
                 RoundedRectangle(cornerRadius: 16)
                     .fill(.ultraThinMaterial)
-                    .frame(height: 160)
+                    .frame(height: cardHeight)
                     .overlay(
                         ZStack {
                             // Single placeholder icon
                             Image(systemName: "music.note.list")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 40, height: 40) // adjust size as needed
+                                .frame(width: cardHeight * 0.25, height: cardHeight * 0.25)
                                 .foregroundStyle(
                                     LinearGradient(
                                         colors: [AppColors.primary, AppColors.primary.opacity(0.6)],

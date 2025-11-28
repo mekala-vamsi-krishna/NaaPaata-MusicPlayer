@@ -395,7 +395,7 @@ struct PlaylistDetailsView: View {
 
 // MARK: - Preview
 #Preview {
-    NavigationView {
+    NavigationStack {
 //        PlaylistDetailsView(playlist: <#Playlist#>, onUpdate: <#(Playlist) -> Void#>, onDelete: <#() -> Void#>)
     }
     .preferredColorScheme(.dark)

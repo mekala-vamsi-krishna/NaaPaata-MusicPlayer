@@ -11,6 +11,7 @@ import MediaPlayer
 
 struct MusicPlayerView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.horizontalSizeClass) var sizeClass
     
     @EnvironmentObject var musicPlayerManager: MusicPlayerManager
     @EnvironmentObject var playlistsVM: PlaylistsViewModel
@@ -95,24 +96,35 @@ struct MusicPlayerView: View {
                 
                 Spacer()
                 
-                // Simple artwork display
-                ZStack {
-                    if let artwork = musicPlayerManager.currentSongArtwork {
-                        Image(uiImage: artwork)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 300, height: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                            .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
-                    } else {
-                        Image(systemName: "music.note")
-                            .font(.system(size: 80))
-                            .foregroundColor(AppColors.primary)
-                            .frame(width: 300, height: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                            .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                // Adaptive artwork display
+                GeometryReader { geometry in
+                    let layout = AdaptiveLayout(
+                        horizontalSizeClass: sizeClass,
+                        screenWidth: geometry.size.width
+                    )
+                    
+                    VStack {
+                        ZStack {
+                            if let artwork = musicPlayerManager.currentSongArtwork {
+                                Image(uiImage: artwork)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: layout.albumArtSize, height: layout.albumArtSize)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                            } else {
+                                Image(systemName: "music.note")
+                                    .font(.system(size: layout.albumArtSize * 0.27))
+                                    .foregroundColor(AppColors.primary)
+                                    .frame(width: layout.albumArtSize, height: layout.albumArtSize)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
+                .frame(height: sizeClass == .regular ? 400 : 300)
                 
                 // Song info with normal text
                 VStack(spacing: 8) {

@@ -36,6 +36,7 @@
 		AC8269AB2EB678D400722433 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8269AA2EB678D400722433 /* OnboardingView.swift */; };
 		ACAB2BA82EBFC7E4005F84D8 /* PlaybackStateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAB2BA72EBFC7D9005F84D8 /* PlaybackStateService.swift */; };
 		ACAB2BAA2EBFC80B005F84D8 /* PlaybackStateModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAB2BA92EBFC80B005F84D8 /* PlaybackStateModel.swift */; };
+		ACC27B4D2ED8B2F10037273C /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC27B4B2ED8B2F10037273C /* AdaptiveLayout.swift */; };
 		ACD23E1F2E927D580054344D /* PlaylistDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */; };
 		ACD23E232E9285F60054344D /* SongModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E222E9285F60054344D /* SongModel.swift */; };
 		ACD23E252E9286170054344D /* PlayListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E242E9286170054344D /* PlayListModel.swift */; };
@@ -82,6 +83,7 @@
 		AC8269AA2EB678D400722433 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		ACAB2BA72EBFC7D9005F84D8 /* PlaybackStateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackStateService.swift; sourceTree = "<group>"; };
 		ACAB2BA92EBFC80B005F84D8 /* PlaybackStateModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackStateModel.swift; sourceTree = "<group>"; };
+		ACC27B4B2ED8B2F10037273C /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
 		ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailsView.swift; sourceTree = "<group>"; };
 		ACD23E222E9285F60054344D /* SongModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModel.swift; sourceTree = "<group>"; };
 		ACD23E242E9286170054344D /* PlayListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListModel.swift; sourceTree = "<group>"; };
@@ -241,6 +243,7 @@
 				AC279E802E90325000E33715 /* App */,
 				AC6773EF2EA2A2290059C86C /* Model */,
 				CE7907DE2E92E5CC006D517C /* Services */,
+				ACC27B4C2ED8B2F10037273C /* Utils */,
 				AC6773F22EA2A2400059C86C /* Managers */,
 				AC6773F12EA2A2350059C86C /* ViewModels */,
 				AC6773F02EA2A22F0059C86C /* Views */,
@@ -286,6 +289,14 @@
 				AC8269AA2EB678D400722433 /* OnboardingView.swift */,
 			);
 			path = OnboardingView;
+			sourceTree = "<group>";
+		};
+		ACC27B4C2ED8B2F10037273C /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				ACC27B4B2ED8B2F10037273C /* AdaptiveLayout.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		ACD767DE2EC6502100895236 /* SafariView */ = {
@@ -406,6 +417,7 @@
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
 				AC8269AB2EB678D400722433 /* OnboardingView.swift in Sources */,
+				ACC27B4D2ED8B2F10037273C /* AdaptiveLayout.swift in Sources */,
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
 				ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */,
 				ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */,

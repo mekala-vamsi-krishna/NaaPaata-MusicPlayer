@@ -30,7 +30,7 @@ struct AddSongsView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 AppColors.background.ignoresSafeArea()
                 

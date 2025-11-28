@@ -9,16 +9,12 @@ import SwiftUI
 
 struct PlayListsView: View {
     @EnvironmentObject private var viewModel: PlaylistsViewModel
+    @Environment(\.horizontalSizeClass) var sizeClass
     
     @State private var showAddPlaylistSheet = false
     @State private var newPlaylistName = ""
     @State private var newPlaylistDescription = ""
     @State private var searchText = ""
-    
-    let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
     
     var filteredPlaylists: [Playlist] {
         if searchText.isEmpty {
@@ -30,67 +26,78 @@ struct PlayListsView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        AppColors.background,
-                        AppColors.background.opacity(0.95),
-                        AppColors.primary.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
-                ScrollView {
-                    if viewModel.isLoading {
-                        VStack {
-                            Spacer()
-                                .frame(height: 100)
-                            ProgressView("Loading Playlists...")
-                                .tint(AppColors.primary)
-                                .foregroundColor(AppColors.textSecondary)
-                            Spacer()
-                        }
-                    } else {
-                        VStack(spacing: 24) {
-                            searchBar
-                            playlistsGrid
-                            emptyState
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Playlists")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if !viewModel.playlists.isEmpty {
-                        Button {
-                            showAddPlaylistSheet = true
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(AppColors.primary)
+        GeometryReader { geometry in
+            let layout = AdaptiveLayout(
+                horizontalSizeClass: sizeClass,
+                screenWidth: geometry.size.width
+            )
+            let columns = Array(
+                repeating: GridItem(.flexible(), spacing: layout.gridSpacing),
+                count: layout.gridColumns
+            )
+            
+            NavigationStack {
+                ZStack {
+                    LinearGradient(
+                        colors: [
+                            AppColors.background,
+                            AppColors.background.opacity(0.95),
+                            AppColors.primary.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .ignoresSafeArea()
+                    
+                    ScrollView {
+                        if viewModel.isLoading {
+                            VStack {
+                                Spacer()
+                                    .frame(height: 100)
+                                ProgressView("Loading Playlists...")
+                                    .tint(AppColors.primary)
+                                    .foregroundColor(AppColors.textSecondary)
+                                Spacer()
+                            }
+                        } else {
+                            VStack(spacing: 24) {
+                                searchBar(layout: layout)
+                                playlistsGrid(columns: columns, layout: layout)
+                                emptyState
+                            }
                         }
                     }
                 }
-            }
-            .sheet(isPresented: $showAddPlaylistSheet) {
-                CreatePlaylistSheet(
-                    name: $newPlaylistName,
-                    description: $newPlaylistDescription,
-                    onCreate: {
-                        viewModel.addPlaylist(name: newPlaylistName, description: newPlaylistDescription)
-                        newPlaylistName = ""
-                        newPlaylistDescription = ""
-                        showAddPlaylistSheet = false
+                .navigationTitle("Playlists")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if !viewModel.playlists.isEmpty {
+                            Button {
+                                showAddPlaylistSheet = true
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
                     }
-                )
-            }
-            .onAppear {
-                viewModel.loadPlaylists()
+                }
+                .sheet(isPresented: $showAddPlaylistSheet) {
+                    CreatePlaylistSheet(
+                        name: $newPlaylistName,
+                        description: $newPlaylistDescription,
+                        onCreate: {
+                            viewModel.addPlaylist(name: newPlaylistName, description: newPlaylistDescription)
+                            newPlaylistName = ""
+                            newPlaylistDescription = ""
+                            showAddPlaylistSheet = false
+                        }
+                    )
+                }
+                .onAppear {
+                    viewModel.loadPlaylists()
+                }
             }
         }
     }
@@ -98,7 +105,7 @@ struct PlayListsView: View {
 
 // MARK: - Subviews
 private extension PlayListsView {
-    var searchBar: some View {
+    func searchBar(layout: AdaptiveLayout) -> some View {
         if viewModel.playlists.isEmpty { return AnyView(EmptyView()) }
         return AnyView(
             HStack(spacing: 12) {
@@ -119,25 +126,25 @@ private extension PlayListsView {
             .padding(.vertical, 12)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .padding(.horizontal, 20)
+            .padding(.horizontal, layout.horizontalPadding)
             .padding(.top, 8)
         )
     }
     
-    var playlistsGrid: some View {
-        LazyVGrid(columns: columns, spacing: 20) {
+    func playlistsGrid(columns: [GridItem], layout: AdaptiveLayout) -> some View {
+        LazyVGrid(columns: columns, spacing: layout.gridSpacing) {
             ForEach(filteredPlaylists) { playlist in
                 NavigationLink(destination: PlaylistDetailsView(
                     playlist: playlist,
                     onUpdate: viewModel.updatePlaylist,
                     onDelete: { viewModel.deletePlaylist(playlist) }
                 )) {
-                    PlaylistCard(playlist: playlist)
+                    PlaylistCard(playlist: playlist, cardHeight: layout.playlistCardHeight)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, layout.horizontalPadding)
         .padding(.bottom, 32)
     }
     

@@ -18,52 +18,65 @@ struct MainTabView: View {
     
     @State private var showFullPlayer = false
     @State private var showBuyMeCoffeeSheet = false
+    
+    @Environment(\.horizontalSizeClass) var sizeClass
 
     var body: some View {
-        ZStack {
-            // MARK: - Main Tabs
-            TabView(selection: $tabState.selectedTab) {
-                SongsView()
-                    .tabItem {
-                        Image(systemName: "music.quarternote.3")
-                        Text("Songs")
-                    }
-                    .tag(0)
-                
-                AlbumsView()
-                    .tabItem {
-                        Image(systemName: "rectangle.stack.badge.play")
-                        Text("Albums")
-                    }
-                    .tag(1)
-                
-                PlayListsView()
-                    .tabItem {
-                        Image(systemName: "music.note.list")
-                        Text("Lists")
-                    }
-                    .tag(2)
-            }
-            .accentColor(AppColors.primary)
+        GeometryReader { geometry in
+            let layout = AdaptiveLayout(
+                horizontalSizeClass: sizeClass,
+                screenWidth: geometry.size.width
+            )
             
-            // MARK: - Mini Player above Tab Bar
-            VStack {
-                Spacer()
-                if musicPlayerManager.currentSong != nil {
-                    MiniPlayerView()
-                        .onTapGesture {
-                            showFullPlayer.toggle()
+            ZStack {
+                // MARK: - Main Tabs
+                TabView(selection: $tabState.selectedTab) {
+                    SongsView()
+                        .tabItem {
+                            Image(systemName: "music.quarternote.3")
+                            Text("Songs")
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 48) // tab bar height
+                        .tag(0)
+                    
+                    AlbumsView()
+                        .tabItem {
+                            Image(systemName: "rectangle.stack.badge.play")
+                            Text("Albums")
+                        }
+                        .tag(1)
+                    
+                    PlayListsView()
+                        .tabItem {
+                            Image(systemName: "music.note.list")
+                            Text("Lists")
+                        }
+                        .tag(2)
+                }
+                .accentColor(AppColors.primary)
+                
+                // MARK: - Mini Player above Tab Bar
+                VStack {
+                    Spacer()
+                    if musicPlayerManager.currentSong != nil {
+                        MiniPlayerView()
+                            .onTapGesture {
+                                showFullPlayer.toggle()
+                            }
+                            .padding(.horizontal, layout.miniPlayerHorizontalPadding)
+                            .padding(.bottom, layout.miniPlayerBottomPadding)
+                    }
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showFullPlayer) {
-            MusicPlayerView()
-                .environmentObject(musicPlayerManager)
-                .environmentObject(playlistsViewModel)
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            .fullScreenCover(isPresented: $showFullPlayer) {
+                MusicPlayerView()
+                    .environmentObject(musicPlayerManager)
+                    .environmentObject(playlistsViewModel)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+            .onAppear {
+                print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!)
+
+            }
         }
     }
 }

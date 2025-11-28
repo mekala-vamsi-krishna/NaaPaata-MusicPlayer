@@ -35,13 +35,13 @@ struct MiniPlayerView: View {
             // Song Info
             VStack(alignment: .leading, spacing: 2) {
                 Text(musicPlayerManager.currentSong?.title ?? "Unknown Song")
+                    .foregroundStyle(Color.primary)
                     .font(.subheadline)
-                    .fontWeight(.medium)
                     .lineLimit(1)
                 
                 Text(musicPlayerManager.currentSong?.artist ?? "Unknown Artist")
+                    .foregroundStyle(Color.primary)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             
@@ -84,7 +84,7 @@ struct MiniPlayerView: View {
         .padding(.vertical, 12)
         .background(
             Capsule(style: .continuous)
-                .fill(Color.white)
+                .fill(.background)
                 .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: -2)
         )
         .overlay(
