@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC0093872EDADD2300589BB2 /* EqualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC00937F2EDADD2300589BB2 /* EqualizerView.swift */; };
 		AC2CBA702ECA027B005DD432 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */; };
 		AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */; };
 		AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B4AB42E982764006190E4 /* VolumeControlView.swift */; };
@@ -52,6 +53,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AC00937F2EDADD2300589BB2 /* EqualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerView.swift; sourceTree = "<group>"; };
 		AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
@@ -109,6 +111,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AC0093832EDADD2300589BB2 /* Equalizer */ = {
+			isa = PBXGroup;
+			children = (
+				AC00937F2EDADD2300589BB2 /* EqualizerView.swift */,
+			);
+			path = Equalizer;
+			sourceTree = "<group>";
+		};
 		AC279E802E90325000E33715 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -173,6 +183,7 @@
 		AC6773F02EA2A22F0059C86C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AC0093832EDADD2300589BB2 /* Equalizer */,
 				AC8269A92EB678BD00722433 /* OnboardingView */,
 				AC6773F32EA2A27E0059C86C /* Player */,
 				AC6F41852E7FD13D00B5BE35 /* Songs */,
@@ -405,6 +416,7 @@
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,
 				AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */,
 				AC6773F92EA2A4200059C86C /* SongsViewModel.swift in Sources */,
+				AC0093872EDADD2300589BB2 /* EqualizerView.swift in Sources */,
 				AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */,
 				AC6774032EA2AF480059C86C /* PlayListCard.swift in Sources */,
 				CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */,
