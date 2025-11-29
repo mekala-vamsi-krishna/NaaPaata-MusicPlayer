@@ -94,6 +94,7 @@ struct AlbumsView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     
     @State private var selectedSort: AlbumsViewModel.SortKey = .name
+    @State private var showingOnboarding = false
     
     // MARK: - Search Bar
     private var searchBar: some View {
@@ -148,6 +149,36 @@ struct AlbumsView: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
                                 .scaleEffect(1.2)
                             Spacer()
+                        } else if viewModel.albums.isEmpty && !viewModel.isLoading {
+                            // Empty State
+                            Spacer()
+                            Image(systemName: "opticaldisc")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 150, height: 150)
+                                .foregroundColor(AppColors.primary).opacity(0.7)
+                                .padding(.top, 50)
+
+                            Text("Add MP3 files to the MyAppFiles folder in the Files app to enjoy playback anytime.")
+                                .font(.headline)
+                                .foregroundColor(AppColors.textPrimary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+
+                            Button(action: {
+                                showingOnboarding = true
+                            }) {
+                                Text("Learn More")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 30)
+                                    .padding(.vertical, 12)
+                                    .background(AppColors.primary)
+                                    .clipShape(Capsule())
+                            }
+                            .padding(.top, 20)
+
+                            Spacer()
                         } else if !viewModel.albums.isEmpty {
                             // Search Bar
                             searchBar
@@ -183,6 +214,9 @@ struct AlbumsView: View {
                 .navigationTitle("Albums")
                 .onAppear {
                     viewModel.loadAlbums()
+                }
+                .sheet(isPresented: $showingOnboarding) {
+                    OnboardingView()
                 }
             }
         }
