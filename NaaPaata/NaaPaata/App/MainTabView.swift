@@ -51,6 +51,13 @@ struct MainTabView: View {
                             Text("Lists")
                         }
                         .tag(2)
+                    
+                    EqualizerView()
+                        .tabItem {
+                            Image(systemName: "slider.horizontal.3")
+                            Text("Equalizer")
+                        }
+                        .tag(3)
                 }
                 .accentColor(AppColors.primary)
                 
