@@ -88,6 +88,7 @@ struct SongsView: View {
     @EnvironmentObject var viewModel: SongsViewModel
     @EnvironmentObject var playlistsViewModel: PlaylistsViewModel
     @EnvironmentObject var tabState: TabState
+    @State private var showingOnboarding = false
     
     // MARK: - Search Bar
     private var searchBar: some View {
@@ -154,6 +155,19 @@ struct SongsView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
+                        Button(action: {
+                            showingOnboarding = true
+                        }) {
+                            Text("Learn More")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 30)
+                                .padding(.vertical, 12)
+                                .background(AppColors.primary)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.top, 20)
+
                         Spacer()
                     } else {
                         // Top toolbar
@@ -181,6 +195,9 @@ struct SongsView: View {
             .navigationTitle("Naa Paata ♪")
             .onAppear {
                 // Songs are loaded in App entry point
+            }
+            .sheet(isPresented: $showingOnboarding) {
+                OnboardingView()
             }
         }
     }
