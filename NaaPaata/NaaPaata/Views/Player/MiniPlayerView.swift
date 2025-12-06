@@ -15,7 +15,7 @@ struct MiniPlayerView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Album Artwork - use optimized currentSongArtwork that handles fallbacks
-            if let artwork = musicPlayerManager.currentSongArtwork {
+            if let artwork = musicPlayerManager.artworkImage {
                 Image(uiImage: artwork)
                     .resizable()
                     .scaledToFill()

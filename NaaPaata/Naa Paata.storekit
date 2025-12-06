@@ -1,0 +1,135 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "998DC39D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6755621058",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "K4K55XNXA6",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 786642091.62494898,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21844448",
+      "localizations" : [
+
+      ],
+      "name" : "Naa Paata",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6755923736",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Thank you for supporting the development of this app.",
+              "displayName" : "6 Months",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "Naa_Paata_6M",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "Naa Paata - Half Yearly",
+          "subscriptionGroupID" : "21844448",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6755872216",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Equalizer Access",
+              "displayName" : "Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "Naa_Paata_1M",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Naa Paata - Monthly",
+          "subscriptionGroupID" : "21844448",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "79.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6755923741",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Thank you for supporting the development of this app.",
+              "displayName" : "Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "Naa_Paata_12M",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Naa Paata - Yearly",
+          "subscriptionGroupID" : "21844448",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

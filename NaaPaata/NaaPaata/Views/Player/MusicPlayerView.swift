@@ -32,7 +32,7 @@ struct MusicPlayerView: View {
             // Blurred artwork background
             ZStack {
                 // Background based on artwork
-                if let artwork = musicPlayerManager.currentSongArtwork {
+                if let artwork = musicPlayerManager.artworkImage {
                     GeometryReader { geometry in
                         Image(uiImage: artwork)
                             .resizable()
@@ -105,7 +105,7 @@ struct MusicPlayerView: View {
                     
                     VStack {
                         ZStack {
-                            if let artwork = musicPlayerManager.currentSongArtwork {
+                            if let artwork = musicPlayerManager.artworkImage {
                                 Image(uiImage: artwork)
                                     .resizable()
                                     .scaledToFill()
@@ -520,12 +520,15 @@ struct DraggableProgressBar: View {
                 Capsule()
                     .fill(LinearGradient(colors: [AppColors.primary, AppColors.primary.opacity(0.6)], startPoint: .leading, endPoint: .trailing))
                     .frame(width: progressWidth(totalWidth: geometry.size.width), height: 8)
+                    .animation(.linear(duration: 0.1), value: currentTime)
                 
                 // Draggable circle
                 Circle()
                     .fill(Color.white)
                     .frame(width: 16, height: 16)
-                    .offset(x: circleXPosition(geometry: geometry), y: 0) // -4 to center vertically
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .offset(x: circleXPosition(geometry: geometry), y: 0)
+                    .animation(isDragging ? nil : .linear(duration: 0.1), value: currentTime)
                     .highPriorityGesture(
                         DragGesture()
                             .onChanged { value in

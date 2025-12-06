@@ -38,6 +38,12 @@
 		ACAB2BA82EBFC7E4005F84D8 /* PlaybackStateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAB2BA72EBFC7D9005F84D8 /* PlaybackStateService.swift */; };
 		ACAB2BAA2EBFC80B005F84D8 /* PlaybackStateModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAB2BA92EBFC80B005F84D8 /* PlaybackStateModel.swift */; };
 		ACC27B4D2ED8B2F10037273C /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC27B4B2ED8B2F10037273C /* AdaptiveLayout.swift */; };
+		ACCBA9332EDB5FFE00531C3A /* EqualizerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCBA9322EDB5FFE00531C3A /* EqualizerViewModel.swift */; };
+		ACCBA9352EDB65AB00531C3A /* RotaryKnobView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCBA9342EDB65AB00531C3A /* RotaryKnobView.swift */; };
+		ACCBA9372EDB70AF00531C3A /* EqualizerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCBA9362EDB70AF00531C3A /* EqualizerSettings.swift */; };
+		ACCBA9392EDC1E5E00531C3A /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCBA9382EDC1E5800531C3A /* StoreManager.swift */; };
+		ACCBA9422EDC290D00531C3A /* SubscriptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCBA9402EDC290D00531C3A /* SubscriptionsView.swift */; };
+		ACCBA9482EDC2EAF00531C3A /* Naa Paata.storekit in Resources */ = {isa = PBXBuildFile; fileRef = ACCBA9472EDC2EAF00531C3A /* Naa Paata.storekit */; };
 		ACD23E1F2E927D580054344D /* PlaylistDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */; };
 		ACD23E232E9285F60054344D /* SongModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E222E9285F60054344D /* SongModel.swift */; };
 		ACD23E252E9286170054344D /* PlayListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E242E9286170054344D /* PlayListModel.swift */; };
@@ -47,12 +53,14 @@
 		ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */; };
 		ACD767E02EC6503D00895236 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD767DF2EC6503D00895236 /* SafariView.swift */; };
 		ACFFFD292ED75D5600A338D6 /* SongCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */; };
+		CD63CE544952496DAE492533 /* PurchaseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5663AB6C319A4DD894CFE9E3 /* PurchaseError.swift */; };
 		CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */; };
 		CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E12E92F01B006D517C /* PlaylistManager.swift */; };
 		CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E42E92F591006D517C /* PlaylistViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5663AB6C319A4DD894CFE9E3 /* PurchaseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseError.swift; sourceTree = "<group>"; };
 		AC00937F2EDADD2300589BB2 /* EqualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerView.swift; sourceTree = "<group>"; };
 		AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NaaPaata.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -86,6 +94,12 @@
 		ACAB2BA72EBFC7D9005F84D8 /* PlaybackStateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackStateService.swift; sourceTree = "<group>"; };
 		ACAB2BA92EBFC80B005F84D8 /* PlaybackStateModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackStateModel.swift; sourceTree = "<group>"; };
 		ACC27B4B2ED8B2F10037273C /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
+		ACCBA9322EDB5FFE00531C3A /* EqualizerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerViewModel.swift; sourceTree = "<group>"; };
+		ACCBA9342EDB65AB00531C3A /* RotaryKnobView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotaryKnobView.swift; sourceTree = "<group>"; };
+		ACCBA9362EDB70AF00531C3A /* EqualizerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualizerSettings.swift; sourceTree = "<group>"; };
+		ACCBA9382EDC1E5800531C3A /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		ACCBA9402EDC290D00531C3A /* SubscriptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsView.swift; sourceTree = "<group>"; };
+		ACCBA9472EDC2EAF00531C3A /* Naa Paata.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Naa Paata.storekit"; sourceTree = "<group>"; };
 		ACD23E1E2E927D580054344D /* PlaylistDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailsView.swift; sourceTree = "<group>"; };
 		ACD23E222E9285F60054344D /* SongModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongModel.swift; sourceTree = "<group>"; };
 		ACD23E242E9286170054344D /* PlayListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListModel.swift; sourceTree = "<group>"; };
@@ -115,6 +129,8 @@
 			isa = PBXGroup;
 			children = (
 				AC00937F2EDADD2300589BB2 /* EqualizerView.swift */,
+				ACCBA9322EDB5FFE00531C3A /* EqualizerViewModel.swift */,
+				ACCBA9342EDB65AB00531C3A /* RotaryKnobView.swift */,
 			);
 			path = Equalizer;
 			sourceTree = "<group>";
@@ -139,6 +155,7 @@
 		AC3A0F262E7538B9000CFC19 = {
 			isa = PBXGroup;
 			children = (
+				ACCBA9472EDC2EAF00531C3A /* Naa Paata.storekit */,
 				AC3A0F672E761869000CFC19 /* Launch Screen.storyboard */,
 				AC6F41782E7FD05F00B5BE35 /* NaaPaata */,
 				AC3A0F302E7538B9000CFC19 /* Products */,
@@ -176,6 +193,8 @@
 				ACD23E242E9286170054344D /* PlayListModel.swift */,
 				AC6774082EA2CAA70059C86C /* AlbumModel.swift */,
 				ACAB2BA92EBFC80B005F84D8 /* PlaybackStateModel.swift */,
+				ACCBA9362EDB70AF00531C3A /* EqualizerSettings.swift */,
+				5663AB6C319A4DD894CFE9E3 /* PurchaseError.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -183,6 +202,7 @@
 		AC6773F02EA2A22F0059C86C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				ACCBA9412EDC290D00531C3A /* Subscriptions */,
 				AC0093832EDADD2300589BB2 /* Equalizer */,
 				AC8269A92EB678BD00722433 /* OnboardingView */,
 				AC6773F32EA2A27E0059C86C /* Player */,
@@ -210,6 +230,7 @@
 		AC6773F22EA2A2400059C86C /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				ACCBA9382EDC1E5800531C3A /* StoreManager.swift */,
 				AC6F41882E7FD29A00B5BE35 /* MusicPlayerManager.swift */,
 				CE7907E12E92F01B006D517C /* PlaylistManager.swift */,
 				AC2CBA6F2ECA027B005DD432 /* HapticManager.swift */,
@@ -310,6 +331,14 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		ACCBA9412EDC290D00531C3A /* Subscriptions */ = {
+			isa = PBXGroup;
+			children = (
+				ACCBA9402EDC290D00531C3A /* SubscriptionsView.swift */,
+			);
+			path = Subscriptions;
+			sourceTree = "<group>";
+		};
 		ACD767DE2EC6502100895236 /* SafariView */ = {
 			isa = PBXGroup;
 			children = (
@@ -391,6 +420,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACCBA9482EDC2EAF00531C3A /* Naa Paata.storekit in Resources */,
 				AC6F41792E7FD05F00B5BE35 /* Preview Assets.xcassets in Resources */,
 				AC6F417A2E7FD05F00B5BE35 /* Assets.xcassets in Resources */,
 				AC3A0F682E761869000CFC19 /* Launch Screen.storyboard in Resources */,
@@ -428,12 +458,17 @@
 				AC5B4AB52E982764006190E4 /* VolumeControlView.swift in Sources */,
 				CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */,
 				AC6F41822E7FD05F00B5BE35 /* NaaPaataApp.swift in Sources */,
+				ACCBA9332EDB5FFE00531C3A /* EqualizerViewModel.swift in Sources */,
+				ACCBA9422EDC290D00531C3A /* SubscriptionsView.swift in Sources */,
+				ACCBA9392EDC1E5E00531C3A /* StoreManager.swift in Sources */,
 				AC8269AB2EB678D400722433 /* OnboardingView.swift in Sources */,
 				ACC27B4D2ED8B2F10037273C /* AdaptiveLayout.swift in Sources */,
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
 				ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */,
+				ACCBA9352EDB65AB00531C3A /* RotaryKnobView.swift in Sources */,
 				ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */,
 				ACAB2BAA2EBFC80B005F84D8 /* PlaybackStateModel.swift in Sources */,
+				ACCBA9372EDB70AF00531C3A /* EqualizerSettings.swift in Sources */,
 				AC6F41872E7FD26300B5BE35 /* MiniPlayerView.swift in Sources */,
 				ACD23E232E9285F60054344D /* SongModel.swift in Sources */,
 				ACD767E02EC6503D00895236 /* SafariView.swift in Sources */,
@@ -444,6 +479,7 @@
 				AC6F41842E7FD05F00B5BE35 /* SongsView.swift in Sources */,
 				ACAB2BA82EBFC7E4005F84D8 /* PlaybackStateService.swift in Sources */,
 				ACD23E252E9286170054344D /* PlayListModel.swift in Sources */,
+				CD63CE544952496DAE492533 /* PurchaseError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

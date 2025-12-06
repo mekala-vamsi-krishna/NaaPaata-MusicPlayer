@@ -10,7 +10,7 @@ import AVFoundation
 import MediaPlayer
 import Foundation
 
-final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
+final class MusicPlayerManager: NSObject, ObservableObject {
     static let shared = MusicPlayerManager()
     
     // MARK: - Published Properties
@@ -20,9 +20,21 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     @Published var duration: TimeInterval = 0
     @Published var currentSong: Song?
     
-    // MARK: - Private Properties
-    private var player: AVAudioPlayer?
+    // MARK: - Audio Engine Properties
+    private var engine: AVAudioEngine!
+    private var playerNode: AVAudioPlayerNode!
+    private var equalizer: AVAudioUnitEQ!
+    private var audioFile: AVAudioFile?
+    
     private var timer: Timer?
+    private var seekFrame: AVAudioFramePosition = 0
+    private var currentFrame: AVAudioFramePosition {
+        guard let lastRenderTime = playerNode.lastRenderTime,
+              let playerTime = playerNode.playerTime(forNodeTime: lastRenderTime) else {
+            return seekFrame
+        }
+        return seekFrame + playerTime.sampleTime
+    }
     
     // MARK: - Repeat Mode
     private var repeatMode: RepeatMode = .none
@@ -32,24 +44,92 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     
     // MARK: - Shuffle State
     private var isShuffleActive: Bool = false
-    private var originalAllSongs: [Song] = [] // Store original order when shuffle is toggled on
+    private var originalAllSongs: [Song] = []
     
-    var allSongs: [Song] = []  // This will be the current playlist or all songs
-    private var shuffledPlaylist: [Song] = [] // This will store the shuffled playlist when shuffle is active
+    var allSongs: [Song] = []
+    private var shuffledPlaylist: [Song] = []
     private var playQueue: [Song] = []
     private var currentIndex: Int = 0
-    private var currentPlaylistName: String? = nil // Track the source playlist
-    private var isPlayingFromPlaylist: Bool = false // Track if we're currently playing from a specific playlist
+    private var currentPlaylistName: String? = nil
+    private var isPlayingFromPlaylist: Bool = false
     
-    // Cache for artwork to improve scrolling performance
+    // Cache for artwork
     private let artworkCache = NSCache<NSString, UIImage>()
+    
+    // MARK: - Equalizer Frequencies
+    // 0: Bass (Low Shelf), 1-7: Sliders (Parametric), 8: Treble (High Shelf)
+    // Pre-Amp is handled by mainMixerNode.outputVolume or a separate gain node.
+    // Let's use a separate gain node for Pre-Amp to avoid messing with system volume.
+    // Actually, AVAudioUnitEQ has a globalGain property.
     
     override init() {
         super.init()
+        setupAudioEngine()
+        setupNotifications()
+    }
+    
+    private func setupAudioEngine() {
+        engine = AVAudioEngine()
+        playerNode = AVAudioPlayerNode()
+        
+        // Initialize EQ with 10 bands (Bass + 7 Sliders + Treble + Extra if needed)
+        // We need 9 bands:
+        // Band 0: Bass (Low Shelf)
+        // Band 1: 60Hz
+        // Band 2: 150Hz
+        // Band 3: 400Hz
+        // Band 4: 1kHz
+        // Band 5: 2.4kHz
+        // Band 6: 15kHz
+        // Band 7: 20kHz
+        // Band 8: Treble (High Shelf)
+        
+        equalizer = AVAudioUnitEQ(numberOfBands: 9)
+        
+        // Configure Bands
+        let frequencies: [Float] = [60, 150, 400, 1000, 2400, 15000, 20000]
+        
+        // Band 0: Bass Knob (Low Shelf at ~100Hz)
+        equalizer.bands[0].filterType = .lowShelf
+        equalizer.bands[0].frequency = 100
+        equalizer.bands[0].bypass = false
+        
+        // Bands 1-7: Sliders (Parametric)
+        for (index, freq) in frequencies.enumerated() {
+            let bandIndex = index + 1
+            equalizer.bands[bandIndex].filterType = .parametric
+            equalizer.bands[bandIndex].frequency = freq
+            equalizer.bands[bandIndex].bandwidth = 1.0 // Q factor
+            equalizer.bands[bandIndex].bypass = false
+        }
+        
+        // Band 8: Treble Knob (High Shelf at ~10kHz)
+        equalizer.bands[8].filterType = .highShelf
+        equalizer.bands[8].frequency = 10000
+        equalizer.bands[8].bypass = false
+        
+        engine.attach(playerNode)
+        engine.attach(equalizer)
+        
+        // Connect Nodes: Player -> EQ -> MainMixer
+        engine.connect(playerNode, to: equalizer, format: nil)
+        engine.connect(equalizer, to: engine.mainMixerNode, format: nil)
+        
+        // Setup Audio Session
+        setupAudioSession()
+    }
+    
+    private func setupNotifications() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleInterruption),
             name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleRouteChange),
+            name: AVAudioSession.routeChangeNotification,
             object: nil
         )
     }
@@ -60,69 +140,139 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
               let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
         
         if type == .began {
-            player?.pause()
-            isPlaying = false
+            if isPlaying {
+                playerNode.pause()
+                isPlaying = false
+            }
         } else if type == .ended {
-            player?.play()
-            isPlaying = true
-            updateNowPlayingInfo()
-        }
-    }
-    
-    // MARK: - Computed Properties
-    private var currentPlaylist: [Song] {
-        // When repeat mode is active (single or all), use original order 
-        // according to the requirement: "songs should be played one by one without shuffle"
-        if repeatMode != .none {
-            // Repeat is active, always use original order
-            if playQueue.isEmpty {
-                return allSongs
-            } else {
-                return playQueue
-            }
-        } else {
-            // No repeat, use shuffled playlist if shuffle is active
-            if playQueue.isEmpty {
-                return isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs
-            } else {
-                return playQueue
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    try? engine.start()
+                    playerNode.play()
+                    isPlaying = true
+                    updateNowPlayingInfo()
+                }
             }
         }
     }
     
-    var currentSongArtwork: UIImage? {
-        // Use already stored artwork from the song object to avoid repeated extraction
-        guard let song = currentSong else { return nil }
-        if let storedArtwork = song.artworkImage {
-            return storedArtwork
-        } else {
-            // Fallback to extracting artwork from URL if not stored
-            return getArtwork(for: song)
+    @objc private func handleRouteChange(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
+        
+        switch reason {
+        case .oldDeviceUnavailable:
+            // Headphones unplugged
+            if isPlaying {
+                playerNode.pause()
+                isPlaying = false
+                updateNowPlayingInfo()
+            }
+        default: break
         }
     }
+    
+    // MARK: - Equalizer Control Methods
+    
+    func updateEQ(settings: EqualizerSettings) {
+        // Global Bypass
+        equalizer.bypass = !settings.isEnabled
+        
+        if !settings.isEnabled { return }
+        
+        // Pre-Amp (Global Gain)
+        // AVAudioUnitEQ.globalGain is in dB
+        if settings.isPreAmpEnabled {
+            equalizer.globalGain = Float(settings.preAmpValue)
+        } else {
+            equalizer.globalGain = 0
+        }
+        
+        // Bass Knob (Band 0)
+        if settings.isBassEnabled {
+            equalizer.bands[0].gain = Float(settings.bassValue)
+            equalizer.bands[0].bypass = false
+        } else {
+            equalizer.bands[0].gain = 0
+            equalizer.bands[0].bypass = true
+        }
+        
+        // Sliders (Bands 1-7)
+        for (index, value) in settings.bands.enumerated() {
+            let bandIndex = index + 1
+            if bandIndex < equalizer.bands.count {
+                equalizer.bands[bandIndex].gain = Float(value)
+            }
+        }
+        
+        // Treble Knob (Band 8)
+        if settings.isTrebleEnabled {
+            equalizer.bands[8].gain = Float(settings.trebleValue)
+            equalizer.bands[8].bypass = false
+        } else {
+            equalizer.bands[8].gain = 0
+            equalizer.bands[8].bypass = true
+        }
+    }
+    
+    func setVolume(_ volume: Double) {
+        // Volume is typically 0.0 to 1.0
+        engine.mainMixerNode.outputVolume = Float(volume)
+    }
+    
+    // MARK: - Playback State
+    private var playbackToken: UUID?
     
     // MARK: - Playback Methods
     func playSong(_ song: Song) {
         currentSong = song
         
-        // ✅ 1️⃣ Setup audio session BEFORE player init
-        setupAudioSession()
+        // Ensure engine is running
+        if !engine.isRunning {
+            try? engine.start()
+        }
         
         do {
-            player = try AVAudioPlayer(contentsOf: song.url)
-            player?.delegate = self
+            // Use resolved URL with bookmark support
+            guard let fileURL = song.resolvedURL ?? song.url as URL? else {
+                print("Error: Unable to resolve song URL")
+                return
+            }
             
-            // ✅ 2️⃣ Setup lock screen controls BEFORE playback
+            audioFile = try AVAudioFile(forReading: fileURL)
+            guard let audioFile = audioFile else { return }
+            
+            // Stop previous playback and clear queue
+            playerNode.stop()
+            
+            // Generate new token for this playback session
+            let token = UUID()
+            playbackToken = token
+            
+            seekFrame = 0
+            playerNode.scheduleFile(audioFile, at: nil) { [weak self] in
+                // Completion handler
+                DispatchQueue.main.async {
+                    self?.handlePlaybackFinished(token: token)
+                }
+            }
+            
             setupRemoteTransportControls()
             
-            player?.prepareToPlay()
-            player?.play()
-            
+            playerNode.play()
             isPlaying = true
-            duration = player?.duration ?? 0
-            artworkImage = song.artworkImage  // ✅ before updating Now Playing
+            duration = Double(audioFile.length) / audioFile.processingFormat.sampleRate
             
-            updateNowPlayingInfo()            // ✅ after artwork assigned
+            // Fix: Ensure artwork is fetched even if not pre-loaded in Song object
+            if let artwork = song.artworkImage {
+                artworkImage = artwork
+            } else {
+                artworkImage = getArtwork(for: song)
+            }
+            
+            updateNowPlayingInfo()
             startTimer()
             
         } catch {
@@ -132,25 +282,40 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         updateNowPlayingInfo()
     }
     
+    private func handlePlaybackFinished(token: UUID) {
+        // Only proceed if this completion corresponds to the current playback session
+        guard token == playbackToken else { return }
+        
+        if isPlaying {
+             // Logic to play next song
+             switch repeatMode {
+             case .none:
+                 playNext()
+             case .one:
+                 if let current = currentSong {
+                     playSong(current)
+                 }
+             case .all:
+                 playNext()
+             }
+        }
+    }
+    
     func playFromAllSongs(_ songs: [Song], startAt song: Song? = nil, fromPlaylist playlistName: String? = nil) {
         allSongs = songs
-        originalAllSongs = songs  // Store original playlist
-        // When loading new playlist, reset shuffle state and shuffled playlist
+        originalAllSongs = songs
         shuffledPlaylist = []
         isShuffleActive = false
         playQueue = []
-        currentPlaylistName = playlistName // Track which playlist we're playing from
-        isPlayingFromPlaylist = (playlistName != nil) // Set flag based on whether playlist name is provided
+        currentPlaylistName = playlistName
+        isPlayingFromPlaylist = (playlistName != nil)
 
-        // Determine the starting song
         if let startSong = song {
             currentSong = startSong
-            // Use URL-based comparison instead of object identity since Song UUIDs are auto-generated
             if let index = songs.firstIndex(where: { $0.url == startSong.url }) {
                 currentIndex = index
                 playSong(startSong)
             } else {
-                // Song not in the list, fallback to first song
                 currentIndex = 0
                 if let first = songs.first {
                     currentSong = first
@@ -187,11 +352,8 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     }
     
     func playNext() {
-        // If there's a queue, play the first song in it
         if !playQueue.isEmpty {
             let nextSong = playQueue.removeFirst()
-            // Update currentIndex to match the song in the original list
-            // Use URL-based comparison instead of object identity
             if let originalIndex = allSongs.firstIndex(where: { $0.url == nextSong.url }) {
                 currentIndex = originalIndex
             } else {
@@ -199,97 +361,91 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
             }
             playSong(nextSong)
         } else if !allSongs.isEmpty {
-            // Use shuffled playlist if shuffle is active, otherwise use original order
-            // Repeat mode doesn't override shuffle - both can coexist
             let playlistToUse = isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs
+            
+            guard !playlistToUse.isEmpty else { return }
             
             switch repeatMode {
             case .all:
-                // For all repeat, go to next song and wrap around to the beginning
                 currentIndex = (currentIndex + 1) % playlistToUse.count
                 let nextSong = playlistToUse[currentIndex]
                 playSong(nextSong)
             case .one:
-                // For one repeat, play the same song again
                 if let current = currentSong {
                     playSong(current)
                 }
             case .none:
-                // For no repeat, go to next song but stop if at the end
                 if currentIndex < playlistToUse.count - 1 {
                     currentIndex += 1
                     let nextSong = playlistToUse[currentIndex]
                     playSong(nextSong)
+                } else {
+                    // End of playlist
+                    stop()
                 }
-                // If at the end, do nothing (the song will stop naturally)
             }
         }
     }
     
     func playPrevious() {
-        // Use shuffled playlist if shuffle is active, otherwise use original order
         let playlistToUse = isShuffleActive ? (shuffledPlaylist.isEmpty ? allSongs : shuffledPlaylist) : allSongs
         guard !playlistToUse.isEmpty else { return }
+        
+        // If we are more than 3 seconds into the song, restart it
+        if currentTime > 3 {
+            seek(to: 0)
+            return
+        }
+        
         if repeatMode == .one {
-            // For one repeat, restart current song instead of going to previous
             if let current = currentSong {
-                playSong(current) // This will restart the current song
+                playSong(current)
             }
         } else {
-            // For none and all repeat modes, go to previous song
             currentIndex = (currentIndex - 1 + playlistToUse.count) % playlistToUse.count
             playSong(playlistToUse[currentIndex])
         }
     }
     
     func togglePlayPause() {
-        guard let player = player else { return }
         if isPlaying {
-            player.pause()
+            playerNode.pause()
+            isPlaying = false
         } else {
-            player.play()
+            if !engine.isRunning {
+                try? engine.start()
+            }
+            playerNode.play()
+            isPlaying = true
         }
-        isPlaying.toggle()
-        
         updateNowPlayingInfo()
     }
     
     func stop() {
-        player?.stop()
+        playbackToken = nil // Invalidate token so completion handlers don't fire
+        playerNode.stop()
+        engine.stop()
         isPlaying = false
         currentSong = nil
         artworkImage = nil
         stopTimer()
-        // Clear the saved playback state when playback is stopped
         PlaybackStateService.shared.clearPlaybackState()
     }
     
     // MARK: - Shuffle
     func shufflePlay(playlist: [Song], fromPlaylist playlistName: String? = nil) {
-        // Store original playlist
+        // Simplified Shuffle Logic: Just shuffle the playlist and start playing
         allSongs = playlist
-        originalAllSongs = playlist  // Store original order
-        
-        // Enable shuffle mode
+        originalAllSongs = playlist
+        shuffledPlaylist = playlist.shuffled()
         isShuffleActive = true
         
-        // If there's a current song, put it at the beginning and shuffle the rest
-        if let currentSong = currentSong {
-            var songsToShuffle = playlist.filter { $0 != currentSong }
-            songsToShuffle = songsToShuffle.shuffled()
-            songsToShuffle.insert(currentSong, at: 0)
-            shuffledPlaylist = songsToShuffle
-            currentIndex = 0
-        } else {
-            // If no current song, just shuffle the playlist
-            shuffledPlaylist = playlist.shuffled()
-            currentIndex = 0
-        }
-        
-        currentPlaylistName = playlistName // Track which playlist we're playing from
-        isPlayingFromPlaylist = (playlistName != nil) // Set flag based on whether playlist name is provided
+        currentPlaylistName = playlistName
+        isPlayingFromPlaylist = (playlistName != nil)
         playQueue = []
-        if let songToPlay = isShuffleActive ? shuffledPlaylist.first : allSongs.first {
+        
+        currentIndex = 0
+        if let songToPlay = shuffledPlaylist.first {
             playSong(songToPlay)
         }
     }
@@ -297,16 +453,23 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     // MARK: - Timer
     private func startTimer() {
         stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            guard let player = self.player else { return }
-            self.currentTime = player.currentTime
-            self.duration = player.duration
-            self.updateNowPlayingProgress()
-                self.updateNowPlayingInfo()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             
-            // Update lock screen progress
-            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentTime
-
+            // Calculate current time manually since AVAudioPlayerNode doesn't have a simple .currentTime property
+            if let nodeTime = self.playerNode.lastRenderTime,
+               let playerTime = self.playerNode.playerTime(forNodeTime: nodeTime),
+               let file = self.audioFile {
+                
+                let sampleRate = file.processingFormat.sampleRate
+                let currentFrame = self.seekFrame + playerTime.sampleTime
+                let time = Double(currentFrame) / sampleRate
+                
+                self.currentTime = time
+                
+                // Update lock screen
+                MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = time
+            }
         }
     }
     
@@ -330,154 +493,72 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     func restoreLastPlaybackState() {
         guard let playbackState = PlaybackStateService.shared.loadPlaybackState() else { return }
         
-        // Check if the file still exists
         guard let songURL = URL(string: playbackState.songURL),
               FileManager.default.fileExists(atPath: songURL.path) else {
-            // If the file doesn't exist, clear the saved state
             PlaybackStateService.shared.clearPlaybackState()
             return
         }
         
-        // Create a song object with the restored state
         let restoredSong = Song(
             url: songURL,
             title: playbackState.songTitle,
             artist: playbackState.songArtist,
-            duration: 0, // Duration will be updated when loaded
+            duration: 0,
             artworkImage: playbackState.artworkData != nil ? UIImage(data: playbackState.artworkData!) : nil
         )
         
-        // Play the song and seek to the saved position
         playSong(restoredSong)
         
-        // Update playback position after a short delay to ensure player is ready
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if playbackState.playbackPosition > 0 {
                 self.seek(to: playbackState.playbackPosition)
             }
             
-            // Keep the song paused when app opens, regardless of previous state
-            // Only seek to the position but don't resume playback
             if self.isPlaying {
-                self.togglePlayPause()  // Pause if it starts playing automatically
+                self.togglePlayPause()
             }
         }
     }
     
-    // MARK: - AVAudioPlayerDelegate
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        guard flag else { return }
-        
-        switch repeatMode {
-        case .none:
-            playNext()
-        case .one:
-            // Replay the same song by playing it again through the manager
-            if let current = currentSong {
-                playSong(current)
-            }
-        case .all:
-            playNext()
-        }
-        
-        updateNowPlayingInfo()
-    }
-    
-    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        print("Audio player decode error: \(error?.localizedDescription ?? "Unknown error")")
-        // Clear the saved playback state if there's an error with the current song
-        PlaybackStateService.shared.clearPlaybackState()
-    }
-    
-    // MARK: - Repeat Mode
+    // MARK: - Repeat Mode Methods
     func toggleRepeatMode() {
-        // If shuffle is active, disable it when enabling repeat
-        if isShuffleActive {
-            isShuffleActive = false
-        }
-        
+        if isShuffleActive { isShuffleActive = false }
         switch repeatMode {
-        case .none:
-            // When enabling repeat, start with repeat one
-            repeatMode = .one
-        case .one:
-            // When switching from repeat one to repeat all
-            repeatMode = .all
-        case .all:
-            // When switching from repeat all to none (turn off)
-            repeatMode = .none
+        case .none: repeatMode = .one
+        case .one: repeatMode = .all
+        case .all: repeatMode = .none
         }
     }
     
-    // New method to specifically toggle repeat all mode
     func toggleRepeatAll() {
-        // If shuffle is active, disable it when enabling repeat
-        if isShuffleActive {
-            isShuffleActive = false
-        }
-        
+        if isShuffleActive { isShuffleActive = false }
         switch repeatMode {
-        case .none:
-            // When enabling repeat all, switch to all mode
-            repeatMode = .all
-        case .all:
-            // When disabling repeat all, turn off repeat
-            repeatMode = .none
-        case .one:
-            // When switching from repeat one to repeat all
-            repeatMode = .all
+        case .none: repeatMode = .all
+        case .all: repeatMode = .none
+        case .one: repeatMode = .all
         }
     }
     
-    // New method to specifically toggle repeat one mode
     func toggleRepeatOne() {
-        // If shuffle is active, disable it when enabling repeat
-        if isShuffleActive {
-            isShuffleActive = false
-        }
-        
+        if isShuffleActive { isShuffleActive = false }
         switch repeatMode {
-        case .none:
-            // When enabling repeat one, switch to one mode
-            repeatMode = .one
-        case .one:
-            // When disabling repeat one, turn off repeat
-            repeatMode = .none
-        case .all:
-            // When switching from repeat all to repeat one
-            repeatMode = .one
+        case .none: repeatMode = .one
+        case .one: repeatMode = .none
+        case .all: repeatMode = .one
         }
     }
     
-    // Helper function to disable shuffle while preserving the current song at its position
-    private func disableShufflePreservingCurrentSong() {
-        // Simply turn off shuffle flag, which will cause the player to use the original allSongs
-        isShuffleActive = false
-    }
+    var currentRepeatMode: RepeatMode { return repeatMode }
+    func setRepeatMode(_ mode: RepeatMode) { repeatMode = mode }
     
-    var currentRepeatMode: RepeatMode {
-        return repeatMode
-    }
-    
-    func setRepeatMode(_ mode: RepeatMode) {
-        repeatMode = mode
-    }
-    
-    var shuffleIsActive: Bool {
-        return isShuffleActive
-    }
+    var shuffleIsActive: Bool { return isShuffleActive }
     
     func toggleShuffle() {
-        // If any repeat mode is active, turn it off when shuffle is enabled
-        if repeatMode != .none {
-            repeatMode = .none
-        }
+        if repeatMode != .none { repeatMode = .none }
         
         if isShuffleActive {
-            // Turning shuffle OFF: just deactivate shuffle flag
             isShuffleActive = false
         } else {
-            // Turning shuffle ON: create shuffled playlist while keeping current song as first
             if let currentSong = currentSong, !allSongs.isEmpty {
                 var songsToShuffle = allSongs.filter { $0 != currentSong }
                 songsToShuffle = songsToShuffle.shuffled()
@@ -485,7 +566,6 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
                 shuffledPlaylist = songsToShuffle
                 currentIndex = 0
             } else if !allSongs.isEmpty {
-                // If no current song, shuffle the existing allSongs
                 shuffledPlaylist = allSongs.shuffled()
                 currentIndex = 0
             }
@@ -495,13 +575,11 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     
     // MARK: - Artwork Extraction
     func getArtwork(for song: Song) -> UIImage {
-        // Return the artwork if already available in the song object
-        if let artwork = song.artworkImage {
-            return artwork
+        if let artwork = song.artworkImage { return artwork }
+        guard let fileURL = song.resolvedURL ?? song.url as URL? else {
+            return generateDefaultArtwork()
         }
-        
-        // Otherwise, try to extract from metadata
-        let asset = AVAsset(url: song.url)
+        let asset = AVAsset(url: fileURL)
         for meta in asset.commonMetadata {
             if meta.commonKey?.rawValue == "artwork",
                let data = meta.value as? Data,
@@ -509,31 +587,23 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
                 return image
             }
         }
-        
-        // Fallback custom image
         return generateDefaultArtwork()
     }
     
     func loadArtworkAsync(for song: Song) async -> UIImage {
-        // Check cache first
         let key = song.url.absoluteString as NSString
-        if let cached = artworkCache.object(forKey: key) {
-            return cached
-        }
-        
-        // Check song object
+        if let cached = artworkCache.object(forKey: key) { return cached }
         if let artwork = song.artworkImage {
             artworkCache.setObject(artwork, forKey: key)
             return artwork
         }
-        
-        // Extract from file asynchronously
         return await Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return UIImage(systemName: "music.note")! }
-            
-            let asset = AVAsset(url: song.url)
+            guard let fileURL = song.resolvedURL ?? song.url as URL? else {
+                return self.generateDefaultArtwork()
+            }
+            let asset = AVAsset(url: fileURL)
             var image: UIImage?
-            
             let metadata = try? await asset.load(.commonMetadata)
             if let metadata = metadata {
                 for meta in metadata {
@@ -545,7 +615,6 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
                     }
                 }
             }
-            
             let result = image ?? self.generateDefaultArtwork()
             self.artworkCache.setObject(result, forKey: key)
             return result
@@ -555,29 +624,15 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
     private func generateDefaultArtwork() -> UIImage {
         let size = CGSize(width: 500, height: 500)
         let renderer = UIGraphicsImageRenderer(size: size)
-        
         return renderer.image { context in
             let rect = CGRect(origin: .zero, size: size)
-            
-            // Draw Gradient Background
             let colors = [UIColor(AppColors.primary).cgColor, UIColor(AppColors.primary).cgColor]
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             let gradient = CGGradient(colorsSpace: colorSpace, colors: colors as CFArray, locations: [0.0, 1.0])!
-            
-            context.cgContext.drawLinearGradient(
-                gradient,
-                start: CGPoint(x: 0, y: 0),
-                end: CGPoint(x: size.width, y: size.height),
-                options: []
-            )
-            
-            // Draw Music Note Symbol
+            context.cgContext.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 0), end: CGPoint(x: size.width, y: size.height), options: [])
             if let symbolImage = UIImage(systemName: "music.note")?.withTintColor(.white, renderingMode: .alwaysOriginal) {
                 let symbolSize = CGSize(width: size.width * 0.5, height: size.height * 0.5)
-                let symbolOrigin = CGPoint(
-                    x: (size.width - symbolSize.width) / 2,
-                    y: (size.height - symbolSize.height) / 2
-                )
+                let symbolOrigin = CGPoint(x: (size.width - symbolSize.width) / 2, y: (size.height - symbolSize.height) / 2)
                 symbolImage.draw(in: CGRect(origin: symbolOrigin, size: symbolSize))
             }
         }
@@ -588,78 +643,74 @@ final class MusicPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         var title = url.deletingPathExtension().lastPathComponent
         var artist = "Unknown Artist"
         var duration: TimeInterval = 0
-        var artwork: UIImage? = nil // Use UIImage directly
-
+        var artwork: UIImage? = nil
         duration = CMTimeGetSeconds(asset.duration)
-        
         for item in asset.commonMetadata {
             guard let key = item.commonKey else { continue }
             switch key {
-            case .commonKeyTitle:
-                if let value = item.stringValue { title = value }
-            case .commonKeyArtist:
-                if let value = item.stringValue { artist = value }
-            case .commonKeyArtwork:
-                if let data = item.dataValue, let image = UIImage(data: data) {
-                    artwork = image
-                }
+            case .commonKeyTitle: if let value = item.stringValue { title = value }
+            case .commonKeyArtist: if let value = item.stringValue { artist = value }
+            case .commonKeyArtwork: if let data = item.dataValue, let image = UIImage(data: data) { artwork = image }
             default: break
             }
         }
-
         return Song(url: url, title: title, artist: artist, duration: duration, artworkImage: artwork)
     }
     
     func delete(song: Song) {
-        // Stop playback if currently playing
         if currentSong == song {
             stop()
-            // Clear the saved playback state if this was the current song
             PlaybackStateService.shared.clearPlaybackState()
         }
-        
-        // Remove from allSongs and playQueue
         allSongs.removeAll { $0 == song }
         playQueue.removeAll { $0 == song }
-        
-        // Remove file from disk
         do {
             try FileManager.default.removeItem(at: song.url)
-            print("Deleted file at \(song.url.path)")
-            
-            // Notify listeners that a song has been deleted
-            NotificationCenter.default.post(
-                name: .songDeleted,
-                object: nil,
-                userInfo: ["song": song]
-            )
-            
-        } catch {
-            print("Failed to delete file: \(error.localizedDescription)")
-        }
-        
-        // If needed, play next song automatically
-        if !allSongs.isEmpty {
-            playNext()
-        }
+            NotificationCenter.default.post(name: .songDeleted, object: nil, userInfo: ["song": song])
+        } catch { print("Failed to delete file: \(error.localizedDescription)") }
+        if !allSongs.isEmpty { playNext() }
     }
     
     func seek(to time: TimeInterval) {
-        guard let player = player else { return }
-        player.currentTime = time
-        currentTime = time
-        updateNowPlayingInfo()
+        guard let audioFile = audioFile else { return }
+        
+        let sampleRate = audioFile.processingFormat.sampleRate
+        let newFrame = AVAudioFramePosition(time * sampleRate)
+        let frameCount = AVAudioFrameCount(audioFile.length - newFrame)
+        
+        if frameCount > 0 {
+            // Stop current playback (triggers old completion, which will be ignored due to token mismatch)
+            playerNode.stop()
+            
+            // Create new token for this segment
+            let token = UUID()
+            playbackToken = token
+            
+            if frameCount > 1000 { // Check if enough frames to play
+                playerNode.scheduleSegment(
+                    audioFile,
+                    startingFrame: newFrame,
+                    frameCount: frameCount,
+                    at: nil
+                ) { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.handlePlaybackFinished(token: token)
+                    }
+                }
+            }
+            
+            seekFrame = newFrame
+            
+            if isPlaying {
+                playerNode.play()
+            }
+            
+            currentTime = time
+            updateNowPlayingInfo()
+        }
     }
-
-}
-
-extension Notification.Name {
-    static let songDeleted = Notification.Name("songDeleted")
-}
-
-// MARK: - Lock Screen (Now Playing)
-extension MusicPlayerManager {
     
+    // MARK: - Lock Screen
     private func setupAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
@@ -668,38 +719,25 @@ extension MusicPlayerManager {
     }
     
     private func updateNowPlayingInfo() {
-        guard let song = currentSong, let player = player else { return }
-        
+        guard let song = currentSong else { return }
         var info: [String : Any] = [
             MPMediaItemPropertyTitle: song.title,
             MPMediaItemPropertyArtist: song.artist,
-            MPMediaItemPropertyPlaybackDuration: player.duration,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentTime,
+            MPMediaItemPropertyPlaybackDuration: duration,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
             MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
         ]
         if let img = currentSong?.artworkImage {
-            let artwork = MPMediaItemArtwork(boundsSize: CGSize(width: 600, height: 600)) { _ in img }
-            info[MPMediaItemPropertyArtwork] = artwork
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: img.size) { _ in img }
         } else {
             let fallback = UIImage(systemName: "music.note")!
-            let artwork = MPMediaItemArtwork(boundsSize: CGSize(width: 600, height: 600)) { _ in fallback }
-            info[MPMediaItemPropertyArtwork] = artwork
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: CGSize(width: 600, height: 600)) { _ in fallback }
         }
-
-        if let img = song.artworkImage {
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: img.size) { _ in img }
-        }
-        
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-    }
-    
-    private func updateNowPlayingProgress() {
-        MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
     }
     
     private func setupRemoteTransportControls() {
         let cc = MPRemoteCommandCenter.shared()
-        
         cc.playCommand.isEnabled = true
         cc.pauseCommand.isEnabled = true
         cc.nextTrackCommand.isEnabled = true
@@ -707,37 +745,29 @@ extension MusicPlayerManager {
         cc.changePlaybackPositionCommand.isEnabled = true
         
         cc.playCommand.addTarget { [weak self] _ in
-            self?.player?.play()
-            self?.isPlaying = true
-            self?.updateNowPlayingInfo()
+            self?.togglePlayPause()
             return .success
         }
-        
-        cc.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let self = self,
-                  let player = self.player,
-                  let positionEvent = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-            
-            player.currentTime = positionEvent.positionTime
-            self.updateNowPlayingInfo()
-            return .success
-        }
-        
         cc.pauseCommand.addTarget { [weak self] _ in
-            self?.player?.pause()
-            self?.isPlaying = false
-            self?.updateNowPlayingInfo()
+            self?.togglePlayPause()
             return .success
         }
-        
         cc.nextTrackCommand.addTarget { [weak self] _ in
             self?.playNext()
             return .success
         }
-        
         cc.previousTrackCommand.addTarget { [weak self] _ in
             self?.playPrevious()
             return .success
         }
+        cc.changePlaybackPositionCommand.addTarget { [weak self] event in
+            guard let self = self, let positionEvent = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            self.seek(to: positionEvent.positionTime)
+            return .success
+        }
     }
+}
+
+extension Notification.Name {
+    static let songDeleted = Notification.Name("songDeleted")
 }
