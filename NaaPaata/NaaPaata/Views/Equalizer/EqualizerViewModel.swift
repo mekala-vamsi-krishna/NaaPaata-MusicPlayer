@@ -55,10 +55,10 @@ class EqualizerViewModel: ObservableObject {
     @Published var bands: [Double] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] {
         didSet {
             // Only switch to Custom if the change wasn't triggered by a preset application
-            // This is tricky, but for now, any manual slider change makes it Custom
-            // We can check if the new values match the current preset, but that's expensive.
-            // Simple approach: If user touches slider, it becomes Custom.
-            // To avoid loop when applying preset, we can use a flag or check equality.
+            if !isApplyingPreset && selectedPreset != "Custom" {
+                selectedPreset = "Custom"
+            }
+            updateEQ()
         }
     }
     
@@ -132,8 +132,6 @@ class EqualizerViewModel: ObservableObject {
     // MARK: - Audio Engine Integration
     
     private func updateEQ() {
-        if isApplyingPreset { return }
-        
         let settings = EqualizerSettings(
             isEnabled: isEnabled,
             preAmpValue: preAmpValue,
