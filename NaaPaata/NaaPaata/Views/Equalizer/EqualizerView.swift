@@ -205,7 +205,7 @@ extension EqualizerView {
                                                         let height = 160.0
                                                         let y = min(max(0, 160 - value.location.y), height)
                                                         let normalized = (y / height) * 24 - 12 // -12 to +12 range
-                                                        viewModel.bands[index] = Double(normalized)
+                                                        viewModel.bandChanged(index: index, value: Double(normalized))
                                                     }
                                             )
                                             
