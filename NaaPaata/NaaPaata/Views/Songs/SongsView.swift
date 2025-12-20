@@ -193,6 +193,17 @@ struct SongsView: View {
                 }
             }
             .navigationTitle("Naa Paata ♪")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        //
+                    } label: {
+                        Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
+                            .foregroundStyle(AppColors.primary)
+                    }
+
+                }
+            }
             .onAppear {
                 // Songs are loaded in App entry point
             }

@@ -293,11 +293,11 @@ struct EqualizerView: View {
     
     var body: some View {
         Group {
-            if store.isSubscribed {
+//            if store.isSubscribed {
                 PremiumEqualizerContent
-            } else {
-                LockedView
-            }
+//            } else {
+//                LockedView
+//            }
         }
         .onAppear {
             Task { await store.updateSubscriptionStatus() }
