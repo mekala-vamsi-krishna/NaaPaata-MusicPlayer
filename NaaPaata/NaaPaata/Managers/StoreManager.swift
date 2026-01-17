@@ -12,7 +12,8 @@ class StoreManager: ObservableObject {
     @Published var subscriptions: [Product] = []
     @Published var purchasedSubscriptions: [Product] = []
     @Published var isSubscribed: Bool = false
-    
+    @AppStorage("isPremimumUser")  var isPremimumUser: Bool = false
+       
     // Error and success states for UI feedback
     @Published var purchaseError: PurchaseError? = nil
     @Published var purchaseSuccessMessage: String? = nil
@@ -69,6 +70,8 @@ class StoreManager: ObservableObject {
         
         purchasedSubscriptions = activeSubscriptions
         isSubscribed = !activeSubscriptions.isEmpty
+        /// Assign whatever value isSubcribed has to presistent AppStorage property to prevent the app showing again and again to unlock the primimum for the use who is already purchased it.
+        isPremimumUser = isSubscribed
     }
     
     /// Purchase a subscription
