@@ -143,7 +143,7 @@ struct SubscriptionsView: View {
                         Task {
                             await store.purchase(selectedProduct)
                             isProcessing = false
-                            if store.isSubscribed {
+                            if store.isPremimumUser {
                                 dismiss()
                             }
                         }
@@ -178,7 +178,7 @@ struct SubscriptionsView: View {
                     Button(action: {
                         Task {
                             await store.restorePurchases()
-                            if store.isSubscribed {
+                            if store.isPremimumUser {
                                 dismiss()
                             }
                         }
