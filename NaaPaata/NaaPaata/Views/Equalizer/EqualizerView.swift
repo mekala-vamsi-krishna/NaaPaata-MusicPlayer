@@ -295,9 +295,9 @@ struct EqualizerView: View {
         Group {
             if store.isPremimumUser {
                 PremiumEqualizerContent
-//            } else {
-//                LockedView
-//            }
+            } else {
+                LockedView
+            }
         }
         .onAppear {
             Task { await store.updateSubscriptionStatus() }

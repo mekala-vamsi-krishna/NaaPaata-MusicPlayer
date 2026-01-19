@@ -6,6 +6,7 @@
 //
 
 import StoreKit
+import SwiftUI
 
 @MainActor
 class StoreManager: ObservableObject {

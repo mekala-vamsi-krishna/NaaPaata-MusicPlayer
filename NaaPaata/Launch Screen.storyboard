@@ -21,7 +21,7 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Made in BHARAT 🇮🇳" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WKF-ax-gpR">
-                                <rect key="frame" x="0.0" y="792" width="393" height="22"/>
+                                <rect key="frame" x="0.0" y="722" width="393" height="22"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="18"/>
                                 <color key="textColor" systemColor="systemBackgroundColor"/>
                                 <nil key="highlightedColor"/>
@@ -30,8 +30,8 @@
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="WKF-ax-gpR" secondAttribute="bottom" constant="40" id="3V6-RA-wja"/>
                             <constraint firstItem="Z9j-hz-CuB" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="BLj-VM-T5H"/>
-                            <constraint firstItem="WKF-ax-gpR" firstAttribute="bottom" secondItem="Bcu-3y-fUS" secondAttribute="bottom" constant="30" id="lpd-Qp-jK9"/>
                             <constraint firstItem="WKF-ax-gpR" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="mnS-0d-66C"/>
                             <constraint firstAttribute="bottom" secondItem="Z9j-hz-CuB" secondAttribute="bottom" id="psu-bK-7vq"/>
                             <constraint firstItem="Z9j-hz-CuB" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="wry-CQ-T0o"/>
