@@ -17,7 +17,7 @@ final class SongsViewModel: ObservableObject {
     var totalSongs: Int { songs.count }
     
     enum SortKey: String, CaseIterable {
-        case title, artist, duration
+        case title, artist, duration, dateAddedAscending, dateAddedDescending
     }
     
     @AppStorage("songsSortOption") var currentSort: SortKey = .title
@@ -95,12 +95,17 @@ final class SongsViewModel: ObservableObject {
                     artwork = UIImage(data: data)
                 }
                 
+                // Extract file creation date for dateAdded
+                let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+                let dateAdded = attributes?[.creationDate] as? Date ?? Date()
+
                 return Song(
                     url: url,
                     title: title,
                     artist: artist,
                     duration: duration,
-                    artworkImage: artwork
+                    artworkImage: artwork,
+                    dateAdded: dateAdded
                 )
             }
             
@@ -135,6 +140,10 @@ final class SongsViewModel: ObservableObject {
         case .title: songs.sort { $0.title < $1.title }
         case .artist: songs.sort { $0.artist < $1.artist }
         case .duration: songs.sort { $0.duration < $1.duration }
+        case .dateAddedAscending:
+            songs.sort { ($0.dateAdded ?? Date.distantPast) < ($1.dateAdded ?? Date.distantPast) }
+        case .dateAddedDescending:
+            songs.sort { ($0.dateAdded ?? Date.distantPast) > ($1.dateAdded ?? Date.distantPast) }
         }
         // Update the current sort option
         currentSort = key
