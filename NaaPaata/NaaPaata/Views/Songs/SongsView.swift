@@ -194,6 +194,7 @@ struct SongsView: View {
             .navigationTitle("Naa Paata ♪")
             // Apply native search bar
             .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search songs...")
+            /*
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -205,6 +206,7 @@ struct SongsView: View {
 
                 }
             }
+             */
             .onAppear {
                 // Songs are loaded in App entry point
             }
