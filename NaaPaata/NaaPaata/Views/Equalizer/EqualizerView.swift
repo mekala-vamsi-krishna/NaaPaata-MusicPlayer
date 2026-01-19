@@ -293,7 +293,7 @@ struct EqualizerView: View {
     
     var body: some View {
         Group {
-//            if store.isSubscribed {
+            if store.isPremimumUser {
                 PremiumEqualizerContent
 //            } else {
 //                LockedView
@@ -306,7 +306,7 @@ struct EqualizerView: View {
             SubscriptionsView()
                 .environmentObject(store)
         }
-        .animation(.easeInOut, value: store.isSubscribed)
+        .animation(.easeInOut, value: store.isPremimumUser)
     }
 }
 
