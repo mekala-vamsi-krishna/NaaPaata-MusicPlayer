@@ -428,74 +428,49 @@ struct SmallControlButton: View {
     }
 }
 
+
+
+
 // MARK: - PlayPauseButton
 struct PlayPauseButton: View {
     let isPlaying: Bool
     let action: () -> Void
     
     @State private var isPressed = false
-    @State private var animateIcon = false
 
     var body: some View {
         Button {
             HapticManager.shared.light()
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                action()
-                animateIcon.toggle()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                isPressed = true
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    isPressed = false
+                }
+            }
+            action()
         } label: {
             ZStack {
-                // --- Neumorphic Background ---
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [Color.darkStart, Color.darkEnd],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 75, height: 75)
-                    .shadow(color: Color.black.opacity(0.4), radius: 10, x: 10, y: 10)
-                    .shadow(color: Color.white.opacity(0.08), radius: 10, x: -6, y: -6)
+                // --- Rounded Squircle Background ---
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 85, height: 85)
+                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
                     .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(colors: [Color.darkEnd, Color.darkStart],
-                                               startPoint: .topLeading,
-                                               endPoint: .bottomTrailing),
-                                lineWidth: 3
-                            )
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
                     )
-                    .scaleEffect(isPressed ? 0.96 : 1.0)
-                    .animation(.easeOut(duration: 0.1), value: isPressed)
-                
-                // Inner highlight (subtle emboss)
-                Circle()
-                    .stroke(Color.white.opacity(0.05), lineWidth: 2)
-                    .blur(radius: 2)
-                    .offset(x: -2, y: -2)
-                    .mask(
-                        Circle()
-                            .fill(LinearGradient(
-                                colors: [Color.white, .clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                    )
-                    .frame(width: 65, height: 65)
+                    .scaleEffect(isPressed ? 0.92 : 1.0)
                 
                 // --- Play/Pause Icon ---
-                ZStack {
-                    Image(systemName: "play.fill")
-                        .opacity(isPlaying ? 0 : 1)
-                    Image(systemName: "pause.fill")
-                        .opacity(isPlaying ? 1 : 0)
-                }
-                .font(.system(size: 38, weight: .bold))
-                .foregroundColor(.white)
-                .animation(.easeInOut(duration: 0.5), value: isPlaying)
-
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .contentTransition(.symbolEffect(.replace)) 
             }
         }
-        .buttonStyle(PlayPauseButtonStyle())
+        .buttonStyle(ScaleButtonStyle())
     }
 }
 

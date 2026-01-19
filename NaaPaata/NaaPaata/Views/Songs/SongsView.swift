@@ -70,6 +70,28 @@ struct SongsTopBar: View {
                             }
                         }
                     }
+                    Button(action: {
+                        onSort?(.dateAddedDescending)
+                    }) {
+                        HStack {
+                            Text("Date Added (Newest)")
+                            if viewModel.currentSort == .dateAddedDescending {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.dateAddedAscending)
+                    }) {
+                        HStack {
+                            Text("Date Added (Oldest)")
+                            if viewModel.currentSort == .dateAddedAscending {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
                         .font(.system(size: 18))
@@ -90,27 +112,7 @@ struct SongsView: View {
     @EnvironmentObject var tabState: TabState
     @State private var showingOnboarding = false
     
-    // MARK: - Search Bar
-    private var searchBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(AppColors.textSecondary)
-            
-            TextField("Search songs...", text: $viewModel.searchText)
-                .foregroundColor(.primary)
-            
-            if !viewModel.searchText.isEmpty {
-                Button { viewModel.searchText = "" } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(AppColors.textSecondary)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
+
 
     var body: some View {
         NavigationStack {
@@ -126,21 +128,12 @@ struct SongsView: View {
                 )
                 .ignoresSafeArea()
                 
-                VStack(spacing: 10) {
-                    // Search Bar (like PlayListsView)
-                    if viewModel.isLoading {
-                        Spacer()
-                        ProgressView("Loading Songs...")
-                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
-                            .scaleEffect(1.2)
-                        Spacer()
-                    } else if !viewModel.songs.isEmpty {
-                        searchBar
-                            .padding(.horizontal, 20)
-                            .padding(.top, 10)
-                    }
-                    
-                    if viewModel.songs.isEmpty {
+                if viewModel.isLoading {
+                    ProgressView("Loading Songs...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
+                        .scaleEffect(1.2)
+                } else if viewModel.songs.isEmpty {
+                    VStack {
                         Spacer()
                         Image(systemName: "music.note.list")
                             .resizable()
@@ -169,14 +162,18 @@ struct SongsView: View {
                         .padding(.top, 20)
 
                         Spacer()
-                    } else {
-                        // Top toolbar
+                    }
+                } else {
+                    List {
                         SongsTopBar(viewModel: viewModel) { key in
                             viewModel.currentSort = key
                             viewModel.sortSongs(by: key)
                         }
-                        
-                        List(viewModel.filteredSongs, id: \.self) { song in
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+
+                        ForEach(viewModel.filteredSongs, id: \.self) { song in
                             Button {
                                 if viewModel.searchText.isEmpty {
                                     viewModel.play(song)
@@ -186,13 +183,30 @@ struct SongsView: View {
                             } label: {
                                 MP3FileCell(song: song)
                             }
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
-                        .listStyle(.plain)
-
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden) // Allow ZStack background to show
                 }
             }
             .navigationTitle("Naa Paata ♪")
+            // Apply native search bar
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search songs...")
+            /*
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        //
+                    } label: {
+                        Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
+                            .foregroundStyle(AppColors.primary)
+                    }
+
+                }
+            }
+             */
             .onAppear {
                 // Songs are loaded in App entry point
             }
@@ -202,7 +216,6 @@ struct SongsView: View {
         }
     }
 }
-
 
 
 

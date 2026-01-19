@@ -40,11 +40,22 @@ struct AlbumsTopBar: View {
                         }
                     }
                     Button(action: {
-                        onSort?(.dateAdded)
+                        onSort?(.dateAddedDescending)
                     }) {
                         HStack {
-                            Text("Date Added")
-                            if viewModel.currentSort == .dateAdded {
+                            Text("Date Added (Newest)")
+                            if viewModel.currentSort == .dateAddedDescending {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppColors.primary)
+                            }
+                        }
+                    }
+                    Button(action: {
+                        onSort?(.dateAddedAscending)
+                    }) {
+                        HStack {
+                            Text("Date Added (Oldest)")
+                            if viewModel.currentSort == .dateAddedAscending {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(AppColors.primary)
                             }
@@ -96,27 +107,7 @@ struct AlbumsView: View {
     @State private var selectedSort: AlbumsViewModel.SortKey = .name
     @State private var showingOnboarding = false
     
-    // MARK: - Search Bar
-    private var searchBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(AppColors.textSecondary)
-            
-            TextField("Search albums...", text: $viewModel.searchText)
-                .foregroundColor(.primary)
-            
-            if !viewModel.searchText.isEmpty {
-                Button { viewModel.searchText = "" } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(AppColors.textSecondary)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
+
 
     var body: some View {
         GeometryReader { geometry in
@@ -142,15 +133,13 @@ struct AlbumsView: View {
                     )
                     .ignoresSafeArea()
                     
-                    VStack(spacing: layout.verticalSpacing) {
-                        if viewModel.isLoading {
-                            Spacer()
-                            ProgressView("Loading Albums...")
-                                .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
-                                .scaleEffect(1.2)
-                            Spacer()
-                        } else if viewModel.albums.isEmpty && !viewModel.isLoading {
-                            // Empty State
+                    if viewModel.isLoading {
+                        ProgressView("Loading Albums...")
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.primary))
+                            .scaleEffect(1.2)
+                    } else if viewModel.albums.isEmpty && !viewModel.isLoading {
+                        // Empty State
+                        VStack {
                             Spacer()
                             Image(systemName: "opticaldisc")
                                 .resizable()
@@ -179,20 +168,18 @@ struct AlbumsView: View {
                             .padding(.top, 20)
 
                             Spacer()
-                        } else if !viewModel.albums.isEmpty {
-                            // Search Bar
-                            searchBar
-                                .padding(.horizontal, layout.horizontalPadding)
-                                .padding(.top, 10)
-                            
-                            // Top toolbar with dynamic count
-                            AlbumsTopBar(viewModel: viewModel, filteredCount: viewModel.filteredAlbums.count) { key in
-                                viewModel.currentSort = key
-                                viewModel.sortAlbums(by: key)
-                            }
-
-                            ScrollView {
-                                LazyVGrid(columns: columns, spacing: layout.gridSpacing) {
+                        }
+                    } else if !viewModel.albums.isEmpty {
+                        ScrollView {
+                            LazyVGrid(columns: columns, spacing: layout.gridSpacing) {
+                                Section(header: 
+                                    AlbumsTopBar(viewModel: viewModel, filteredCount: viewModel.filteredAlbums.count) { key in
+                                        viewModel.currentSort = key
+                                        viewModel.sortAlbums(by: key)
+                                    }
+                                    .padding(.horizontal, -layout.horizontalPadding) // Extend background to edges if needed, or adjust padding
+                                    .padding(.bottom, 10)
+                                ) {
                                     ForEach(viewModel.filteredAlbums) { album in
                                         NavigationLink {
                                             AlbumDetailsView(
@@ -205,13 +192,16 @@ struct AlbumsView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal, layout.horizontalPadding)
-                                .padding(.bottom, 20)
                             }
+                            .padding(.horizontal, layout.horizontalPadding)
+                            .padding(.bottom, 20)
                         }
+                        // Use scrollContentBackground hidden to show gradient? No, ScrollView doesn't always need it, but let's check.
+                        // LazyVGrid inside ScrollView is standard.
                     }
                 }
                 .navigationTitle("Albums")
+                .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search albums...")
                 .onAppear {
                     viewModel.loadAlbums()
                 }
