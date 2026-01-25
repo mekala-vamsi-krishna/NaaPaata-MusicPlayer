@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 @main
 struct NaaPaataApp: App {
@@ -15,7 +16,10 @@ struct NaaPaataApp: App {
     @ObservedObject var tabState = TabState()
     @StateObject private var storeKitManager = StoreManager()
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
-  
+    init() {
+        MobileAds.shared.start(completionHandler: nil)
+       }
+
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
@@ -41,8 +45,11 @@ struct NaaPaataApp: App {
                 // Restore playback state when app becomes active
                 musicPlayerManager.restoreLastPlaybackState()
                 /// whenver app comes on forground after reaminings for long in background fetched the refresh status whether user has taken a subscription plan or not.
-               await storeKitManager.loadProducts()
-               await storeKitManager.updateSubscriptionStatus()
+                Task {
+                    await storeKitManager.loadProducts()
+                    await storeKitManager.updateSubscriptionStatus()
+                }
+             
                 
             }
         }

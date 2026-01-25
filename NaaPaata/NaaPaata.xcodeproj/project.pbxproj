@@ -54,6 +54,9 @@
 		ACD767E02EC6503D00895236 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD767DF2EC6503D00895236 /* SafariView.swift */; };
 		ACFFFD292ED75D5600A338D6 /* SongCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */; };
 		CD63CE544952496DAE492533 /* PurchaseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5663AB6C319A4DD894CFE9E3 /* PurchaseError.swift */; };
+		CE090E5A2F26365800B45930 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = CE090E592F26365800B45930 /* GoogleMobileAds */; };
+		CE090E5D2F26374900B45930 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE090E5C2F26374900B45930 /* BannerAdView.swift */; };
+		CE090E602F2637AD00B45930 /* AddsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE090E5F2F2637AD00B45930 /* AddsKeys.swift */; };
 		CE7907E02E92E5E9006D517C /* LoadAllSongsFromDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */; };
 		CE7907E22E92F01B006D517C /* PlaylistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E12E92F01B006D517C /* PlaylistManager.swift */; };
 		CE7907E52E92F591006D517C /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7907E42E92F591006D517C /* PlaylistViewModel.swift */; };
@@ -109,6 +112,8 @@
 		ACD23E2C2E92871D0054344D /* EditPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlaylistView.swift; sourceTree = "<group>"; };
 		ACD767DF2EC6503D00895236 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		ACFFFD282ED75D5600A338D6 /* SongCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongCacheService.swift; sourceTree = "<group>"; };
+		CE090E5C2F26374900B45930 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
+		CE090E5F2F2637AD00B45930 /* AddsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddsKeys.swift; sourceTree = "<group>"; };
 		CE7907DF2E92E5E9006D517C /* LoadAllSongsFromDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadAllSongsFromDocuments.swift; sourceTree = "<group>"; };
 		CE7907E12E92F01B006D517C /* PlaylistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistManager.swift; sourceTree = "<group>"; };
 		CE7907E42E92F591006D517C /* PlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewModel.swift; sourceTree = "<group>"; };
@@ -119,6 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE090E5A2F26365800B45930 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +279,7 @@
 			isa = PBXGroup;
 			children = (
 				AC279E802E90325000E33715 /* App */,
+				CE090E5B2F26373F00B45930 /* Shared */,
 				AC6773EF2EA2A2290059C86C /* Model */,
 				CE7907DE2E92E5CC006D517C /* Services */,
 				ACC27B4C2ED8B2F10037273C /* Utils */,
@@ -347,6 +354,23 @@
 			path = SafariView;
 			sourceTree = "<group>";
 		};
+		CE090E5B2F26373F00B45930 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CE090E5E2F26379C00B45930 /* Mob Adds */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		CE090E5E2F26379C00B45930 /* Mob Adds */ = {
+			isa = PBXGroup;
+			children = (
+				CE090E5C2F26374900B45930 /* BannerAdView.swift */,
+				CE090E5F2F2637AD00B45930 /* AddsKeys.swift */,
+			);
+			path = "Mob Adds";
+			sourceTree = "<group>";
+		};
 		CE7907DE2E92E5CC006D517C /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -376,6 +400,7 @@
 			);
 			name = NaaPaata;
 			packageProductDependencies = (
+				CE090E592F26365800B45930 /* GoogleMobileAds */,
 			);
 			productName = NaaPaata;
 			productReference = AC3A0F2F2E7538B9000CFC19 /* NaaPaata.app */;
@@ -405,6 +430,9 @@
 			);
 			mainGroup = AC3A0F262E7538B9000CFC19;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CE090E582F26365800B45930 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AC3A0F302E7538B9000CFC19 /* Products */;
 			projectDirPath = "";
@@ -445,6 +473,7 @@
 				ACD23E2B2E9286E70054344D /* AddSongsView.swift in Sources */,
 				ACD23E272E9286730054344D /* CreatePlaylistSheet.swift in Sources */,
 				AC6F418B2E7FE03700B5BE35 /* AlbumDetailsView.swift in Sources */,
+				CE090E5D2F26374900B45930 /* BannerAdView.swift in Sources */,
 				AC6773F92EA2A4200059C86C /* SongsViewModel.swift in Sources */,
 				AC0093872EDADD2300589BB2 /* EqualizerView.swift in Sources */,
 				AC6F417F2E7FD05F00B5BE35 /* MainTabView.swift in Sources */,
@@ -466,6 +495,7 @@
 				AC6F41832E7FD05F00B5BE35 /* PlayListsView.swift in Sources */,
 				ACD23E292E9286BB0054344D /* PlaylistSongRowView.swift in Sources */,
 				ACCBA9352EDB65AB00531C3A /* RotaryKnobView.swift in Sources */,
+				CE090E602F2637AD00B45930 /* AddsKeys.swift in Sources */,
 				ACD23E2D2E92871D0054344D /* EditPlaylistView.swift in Sources */,
 				ACAB2BAA2EBFC80B005F84D8 /* PlaybackStateModel.swift in Sources */,
 				ACCBA9372EDB70AF00531C3A /* EqualizerSettings.swift in Sources */,
@@ -619,6 +649,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NaaPaata/Info.plist;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -659,6 +690,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NaaPaata/Info.plist;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -706,6 +738,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE090E582F26365800B45930 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE090E592F26365800B45930 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE090E582F26365800B45930 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AC3A0F272E7538B9000CFC19 /* Project object */;
 }

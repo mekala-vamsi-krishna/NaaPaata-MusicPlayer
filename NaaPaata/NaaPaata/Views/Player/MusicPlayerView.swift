@@ -106,19 +106,39 @@ struct MusicPlayerView: View {
                     VStack {
                         ZStack {
                             if let artwork = musicPlayerManager.artworkImage {
-                                Image(uiImage: artwork)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: layout.albumArtSize, height: layout.albumArtSize)
-                                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                VStack {
+                                    Image(uiImage: artwork)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: layout.albumArtSize, height: layout.albumArtSize - 50 )
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                    
+                                    BannerAdView(adUnitID: AddsKeys.adUnitIds.rawValue)
+                                                   .frame(height: 50)
+                                                   .frame(width: layout.albumArtSize, height: layout.albumArtSize)
+                                                   .clipShape(RoundedRectangle(cornerRadius: 20))
+                                                   .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                }
+                              
+                                
                             } else {
-                                Image(systemName: "music.note")
-                                    .font(.system(size: layout.albumArtSize * 0.27))
-                                    .foregroundColor(AppColors.primary)
-                                    .frame(width: layout.albumArtSize, height: layout.albumArtSize)
-                                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                VStack {
+                                    Image(systemName: "music.note")
+                                        .font(.system(size: layout.albumArtSize * 0.27))
+                                        .foregroundColor(AppColors.primary)
+                                        .frame(width: layout.albumArtSize, height: layout.albumArtSize - 50 )
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                    
+                                    BannerAdView(adUnitID: AddsKeys.adUnitIds.rawValue)
+                                                   .frame(height: 50)
+                                                   .frame(width: layout.albumArtSize, height: layout.albumArtSize)
+                                                   .clipShape(RoundedRectangle(cornerRadius: 20))
+                                                   .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                    
+                                }
+                              
                             }
                         }
                         .frame(maxWidth: .infinity)
