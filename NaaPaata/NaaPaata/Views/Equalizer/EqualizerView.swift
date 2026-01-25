@@ -288,7 +288,7 @@ struct EqualizerView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.colorScheme) var colorScheme
     
-    @StateObject private var store = StoreManager()
+    @EnvironmentObject private var store : StoreManager
     @State private var showPaywall = false
     
     var body: some View {
