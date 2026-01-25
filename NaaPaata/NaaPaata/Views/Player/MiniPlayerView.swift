@@ -54,17 +54,11 @@ struct MiniPlayerView: View {
                         musicPlayerManager.togglePlayPause()
                     }
                 } label: {
-                    ZStack {
-                        Image(systemName: "play.fill")
-                            .opacity(musicPlayerManager.isPlaying ? 0 : 1)
-                        Image(systemName: "pause.fill")
-                            .opacity(musicPlayerManager.isPlaying ? 1 : 0)
-                    }
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .foregroundStyle(AppColors.primary)
-                    .foregroundColor(.white)
-                    .animation(.easeInOut(duration: 0.01), value: musicPlayerManager.isPlaying)
+                    Image(systemName: musicPlayerManager.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.title3)
+                        .frame(width: 44, height: 44)
+                        .contentTransition(.symbolEffect(.replace))
+                        .foregroundStyle(AppColors.primary)
                 }
                 .buttonStyle(.plain)
                 

@@ -13,7 +13,7 @@ class AlbumsViewModel: ObservableObject {
     @Published var searchText: String = ""
 
     enum SortKey: String, CaseIterable {
-        case name, artist, dateAdded, dateModified, size
+        case name, artist, dateAddedAscending, dateAddedDescending, dateModified, size
     }
     
     @AppStorage("albumsSortOption") var currentSort: SortKey = .name
@@ -126,8 +126,10 @@ class AlbumsViewModel: ObservableObject {
                 let artist2 = $1.songs.first?.artist ?? ""
                 return artist1.localizedCaseInsensitiveCompare(artist2) == .orderedAscending
             }
-        case .dateAdded:
+        case .dateAddedAscending:
             albums.sort { $0.dateAdded < $1.dateAdded }
+        case .dateAddedDescending:
+            albums.sort { $0.dateAdded > $1.dateAdded }
         case .dateModified:
             albums.sort { $0.dateModified < $1.dateModified }
         case .size:
