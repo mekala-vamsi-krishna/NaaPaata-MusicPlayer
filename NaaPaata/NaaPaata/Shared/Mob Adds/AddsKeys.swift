@@ -7,5 +7,6 @@
 
 import Foundation
 enum AddsKeys : String {
-    case adUnitIds = "ca-app-pub-1926766303321524~9539049175"
+    case adAppId = "ca-app-pub-1926766303321524~9539049175"
+    case addUnitId = "ca-app-pub-1926766303321524/7909739906"
 }

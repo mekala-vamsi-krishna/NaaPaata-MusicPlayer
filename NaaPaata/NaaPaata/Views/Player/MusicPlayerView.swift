@@ -114,11 +114,10 @@ struct MusicPlayerView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 20))
                                         .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                                     
-                                    BannerAdView(adUnitID: AddsKeys.adUnitIds.rawValue)
-                                                   .frame(height: 50)
-                                                   .frame(width: layout.albumArtSize, height: layout.albumArtSize)
-                                                   .clipShape(RoundedRectangle(cornerRadius: 20))
-                                                   .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                    BannerAdView(adUnitID: AddsKeys.addUnitId.rawValue)
+                                        .frame(width:layout.albumArtSize,height: 50)
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                                 }
                               
                                 
@@ -131,11 +130,11 @@ struct MusicPlayerView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 20))
                                         .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                                     
-                                    BannerAdView(adUnitID: AddsKeys.adUnitIds.rawValue)
-                                                   .frame(height: 50)
-                                                   .frame(width: layout.albumArtSize, height: layout.albumArtSize)
-                                                   .clipShape(RoundedRectangle(cornerRadius: 20))
-                                                   .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                    BannerAdView(adUnitID: AddsKeys.addUnitId.rawValue)
+                                        .frame(width:layout.albumArtSize,height: 50)
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+                                                   
                                     
                                 }
                               
