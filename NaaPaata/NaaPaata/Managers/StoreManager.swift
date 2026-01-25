@@ -6,8 +6,7 @@
 //
 
 import StoreKit
-import SwiftUI
-
+import SwiftUI 
 @MainActor
 class StoreManager: ObservableObject {
     @Published var subscriptions: [Product] = []

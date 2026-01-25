@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 @main
 struct NaaPaataApp: App {
@@ -13,8 +14,12 @@ struct NaaPaataApp: App {
     @StateObject var playlistsViewModel =  PlaylistsViewModel()
     @StateObject var songsViewModel = SongsViewModel() // Initialize here
     @ObservedObject var tabState = TabState()
+    @StateObject private var storeKitManager = StoreManager()
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
-  
+    init() {
+        MobileAds.shared.start(completionHandler: nil)
+       }
+
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
@@ -23,6 +28,7 @@ struct NaaPaataApp: App {
                     .environmentObject(playlistsViewModel)
                     .environmentObject(songsViewModel) // Inject into environment
                     .environmentObject(tabState)
+                    .environmentObject(storeKitManager)
                     .onAppear {
                         songsViewModel.loadSongs() // Load songs on app launch
                     }
@@ -38,6 +44,13 @@ struct NaaPaataApp: App {
             } else if newPhase == .active {
                 // Restore playback state when app becomes active
                 musicPlayerManager.restoreLastPlaybackState()
+                /// whenver app comes on forground after reaminings for long in background fetched the refresh status whether user has taken a subscription plan or not.
+                Task {
+                    await storeKitManager.loadProducts()
+                    await storeKitManager.updateSubscriptionStatus()
+                }
+             
+                
             }
         }
     }
