@@ -145,31 +145,25 @@ struct MusicPlayerView: View {
                         .frame(maxWidth: .infinity)
                     }
                 }
-                .frame(height: sizeClass == .regular ? 400 : 300)
-                
-                // Song info with normal text
-                VStack(spacing: 8) {
-                    Text(musicPlayerManager.currentSong?.title ?? "Unknown Title")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.horizontal, 20)
-                    
-                    Text(musicPlayerManager.currentSong?.artist ?? "Unknown Artist")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.white.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.horizontal, 20)
-                }
-                .padding(.top, 20)
+                .frame(height: sizeClass == .regular ? 520 : 360)
                 
                 Spacer()
                 
                 // Progress bar
                 VStack(spacing: 12) {
                     HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(musicPlayerManager.currentSong?.title ?? "Unknown Title")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            
+                            Text(musicPlayerManager.currentSong?.artist ?? "Unknown Artist")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.white.opacity(0.8))
+                                .lineLimit(1)
+                        }
+                        
                         Spacer()
                         
                         Button(action: {
@@ -525,30 +519,31 @@ struct DraggableProgressBar: View {
                     .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     .offset(x: circleXPosition(geometry: geometry), y: 0)
                     .animation(isDragging ? nil : .linear(duration: 0.1), value: currentTime)
-                    .highPriorityGesture(
-                        DragGesture()
-                            .onChanged { value in
-                                isDragging = true
-                                let newPosition = max(0, min(geometry.size.width, value.location.x))
-                                let progress = newPosition / geometry.size.width
-                                let newTime = progress * duration
-                                currentTime = newTime
-                                
-                                // Update the player position as user drags
-                                onDragChanged(newTime)
-                            }
-                            .onEnded { value in
-                                isDragging = false
-                                let newPosition = max(0, min(geometry.size.width, value.location.x))
-                                let progress = newPosition / geometry.size.width
-                                let newTime = progress * duration
-                                currentTime = newTime
-                                
-                                // Update the player position when drag ends
-                                onDragChanged(newTime)
-                            }
-                    )
             }
+            .contentShape(Rectangle()) // Ensure the entire area is tappable
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        isDragging = true
+                        let newPosition = max(0, min(geometry.size.width, value.location.x))
+                        let progress = newPosition / geometry.size.width
+                        let newTime = progress * duration
+                        currentTime = newTime
+                        
+                        // Update the player position as user drags
+                        onDragChanged(newTime)
+                    }
+                    .onEnded { value in
+                        isDragging = false
+                        let newPosition = max(0, min(geometry.size.width, value.location.x))
+                        let progress = newPosition / geometry.size.width
+                        let newTime = progress * duration
+                        currentTime = newTime
+                        
+                        // Update the player position when drag ends
+                        onDragChanged(newTime)
+                    }
+            )
         }
     }
     

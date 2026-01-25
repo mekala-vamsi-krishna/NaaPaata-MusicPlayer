@@ -68,9 +68,9 @@ struct AdaptiveLayout {
     /// Album artwork size in full music player view
     var albumArtSize: CGFloat {
         if horizontalSizeClass == .regular && screenWidth > 600 {
-            return min(screenWidth * 0.5, 400)  // iPad: 50% of width, max 400
+            return min(screenWidth * 0.6, 500)  // iPad: 60% of width, max 500
         }
-        return min(screenWidth * 0.8, 300)  // iPhone: 80% of width, max 300
+        return min(screenWidth * 0.85, 350)  // iPhone: 85% of width, max 350
     }
     
     /// Size for control buttons in music player
